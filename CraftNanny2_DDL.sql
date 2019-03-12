@@ -84,7 +84,16 @@ CREATE TABLE IF NOT EXISTS `redstone_controls` (
   PRIMARY KEY (`module_pk`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=27 ;
 
--- --------------------------------------------------------
+
+-- 
+--  Table structure for table `redstone_event`
+-- 
+
+CREATE TABLE IF NOT EXISTS `redstone_events` (
+
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=27;
+
+----------------------------------------------------------
 
 --
 -- Table structure for table `tanks`
