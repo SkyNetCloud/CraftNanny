@@ -1,18 +1,5 @@
 <?php
 
-
-// Enable error reporting to display all errors
-error_reporting(E_ALL);
-
-// Optionally, you can also display notices and warnings along with other error types
- error_reporting(E_ALL | E_NOTICE | E_WARNING);
-
-// If you want to display errors on the web page, you can set display_errors to On in php.ini
-ini_set('display_errors', 1);
-
-// If you want to log errors to a file, you can set log_errors to On in php.ini
-ini_set('log_errors', 1);
-
 require_once('connection.php');
 
 function dbEsc($theString) {
@@ -202,81 +189,6 @@ function getConnections($dbConn, $xmlDoc, $user_id, $type) {
     return $recordDataNode;
 }
 
-function getLogs($dbConn, $xmlDoc, $user_id) {
-    // Main XML element to return
-    $recordDataNode = $xmlDoc->createElement('recorddata');
-
-    // Get users tokens and scanner names
-    $query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = '1'";
-    $stmt = $dbConn->prepare($query);
-    $stmt->bind_param("s", $user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    while ($row = $result->fetch_assoc()) {
-        $theScannerNode = $xmlDoc->createElement('scanner');
-        $nameNode = $xmlDoc->createElement('name');
-        $nameNode->setAttribute('name', $row['computer_name']);
-        $nameNode->setAttribute('token', $row['token']);
-        $datetime1 = strtotime($row['last_seen']);
-        $datetime2 = time();
-        $diff = $datetime2 - $datetime1;
-        if ($diff > 200) {
-            $nameNode->setAttribute('active', false);
-        } else {
-            $nameNode->setAttribute('active', true);
-        }
-        $theScannerNode->appendChild($nameNode);
-
-        // For each scanner, get last 10 visitors
-        $query2 = "SELECT DISTINCT(ign) AS ign FROM logs WHERE token = ? ORDER BY timestamp DESC LIMIT 10";
-        $stmt2 = $dbConn->prepare($query2);
-        $stmt2->bind_param("s", $row['token']);
-        $stmt2->execute();
-        $result2 = $stmt2->get_result();
-
-        while ($row2 = $result2->fetch_assoc()) {
-            $visitorNode = $xmlDoc->createElement('visitor');
-            $visitorNode->setAttribute('ign', $row2['ign']);
-            $visitorNode->setAttribute('token', $row['token']);
-
-            $query3 = "SELECT timestamp FROM logs WHERE token = ? AND ign = ? ORDER BY timestamp DESC LIMIT 1";
-            $stmt3 = $dbConn->prepare($query3);
-            $stmt3->bind_param("ss", $row['token'], $row2['ign']);
-            $stmt3->execute();
-            $result3 = $stmt3->get_result();
-            $row3 = $result3->fetch_assoc();
-
-            $visitorNode->setAttribute('last_seen', $row3['timestamp']);
-            $theScannerNode->appendChild($visitorNode);
-        }
-        $recordDataNode->appendChild($theScannerNode);
-    }
-
-    return $recordDataNode;
-}
-
-function getPlayerData($dbConn, $xmlDoc, $ign, $token) {
-    $recordDataNode = $xmlDoc->createElement('recorddata');
-
-    $query = "SELECT * FROM logs WHERE token = ? AND ign = ? ORDER BY timestamp DESC LIMIT 50";
-    $stmt = $dbConn->prepare($query);
-    $stmt->bind_param("ss", $token, $ign);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    while ($row = $result->fetch_assoc()) {
-        $visitorNode = $xmlDoc->createElement('record');
-        $visitorNode->setAttribute('ign', $row['ign']);
-        $visitorNode->setAttribute('event', $row['event']);
-        $visitorNode->setAttribute('time', $row['timestamp']);
-        $visitorNode->setAttribute('discription', $row['discription']);
-        $recordDataNode->appendChild($visitorNode);
-    }
-
-    return $recordDataNode;
-}
-
 function getUser($dbConn, $xmlDoc, $user_id) {
     $recordDataNode = $xmlDoc->createElement('recorddata');
 
@@ -424,5 +336,4 @@ function removeEvent($dbConn, $xmlDoc, $event_id) {
 
 	return $recordDataNode;
 }
-
 ?>
