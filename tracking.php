@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CraftNanny</title>
-    <link rel="stylesheet" href="css/foundation.css" />
-    <script src="js/vendor/modernizr.js"></script>
+    <link rel="stylesheet" href="assets/css/foundation.css" />
+    <script src="assets/js/vendor/modernizr.js"></script>
     <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -17,13 +17,13 @@
 
 </script>
 
-    <script src="js/vendor/jquery.js"></script>
-    <script src="js/foundation.min.js"></script>
+    <script src="assets/js/vendor/jquery.js"></script>
+    <script src="assets/js/foundation.min.js"></script>
     <script>
       $(document).foundation();
     </script>
-    <script src="js/login_check.js"></script>
-    <script src="js/tracking.js"></script>
+    <script src="assets/js/login_check.js"></script>
+    <script src="assets/js/tracking.js"></script>
 
 
   </head>
@@ -124,11 +124,11 @@
          </div>
          <div class="row">
            <div class="large-6 columns">
-             <img src="img/mods/player.png">
+             <img src="assets/img/mods/player.png">
 
             </div>
            <div class="large-6 columns">
-             <img src="img/screenshots/tracking.PNG">
+             <img src="assets/img/screenshots/tracking.PNG">
             </div>
          </div>
 
@@ -152,12 +152,12 @@
         <div class="large-12 columns footer_middle">
           <div class="row">
             <div class="large-2 columns">
-              <img src="img/skin.PNG" style="height:200px;">
+              <img src="assets/img/skin.PNG" style="height:200px;">
             </div>
             <div class="large-4 columns" style="height:200px">
               <p><h2 style="font-weight:bold;color:#cccccc;">CraftNanny.org</h2>
               <p style="color:#cccccc;font-size:18px;">Contribute to this open-source project on GitHub!</p>
-              <a href="https://github.com/jaranvil/CraftNanny"><img src="img/git.png" style="width:100px;"></a>
+              <a href="https://github.com/jaranvil/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
             </div>
             <div class="large-6 columns">
 

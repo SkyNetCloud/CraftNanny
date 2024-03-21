@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CraftNanny</title>
-    <link rel="stylesheet" href="css/foundation.css" />
-    <script src="js/vendor/modernizr.js"></script>
+    <link rel="stylesheet" href="assets/css/foundation.css" />
+    <script src="assets/js/vendor/modernizr.js"></script>
     <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -57,7 +57,7 @@
 
         <div class="large-9 columns">
           <p>
-          <h4>For now, please contact us through <a href="https://github.com/jaranvil/CraftNanny/issues">our GitHub</a> or contact <a href="http://www.reddit.com/u/jaranvil">u/jaranvil</a><h4>
+          <h4>For now, please contact us through <a href="https://github.com/jaranvil/CraftNanny/issues">our GitHub</a> or contact <a href="https://www.reddit.com/u/jaranvil">u/jaranvil</a><h4>
         </div>
  
 
@@ -67,8 +67,8 @@
 
      
 
-    <script src="js/vendor/jquery.js"></script>
-    <script src="js/foundation.min.js"></script>
+    <script src="assets/js/vendor/jquery.js"></script>
+    <script src="assets/js/foundation.min.js"></script>
     <script>
       $(document).foundation();
     </script>

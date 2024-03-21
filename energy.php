@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CraftNanny</title>
-    <link rel="stylesheet" href="css/foundation.css" />
-    <script src="js/vendor/modernizr.js"></script>
+    <link rel="stylesheet" href="assets/css/foundation.css" />
+    <script src="assets/js/vendor/modernizr.js"></script>
     <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -17,14 +17,14 @@
 
 </script>
 
-  <script src="js/vendor/jquery.js"></script>
-  <script src="js/foundation.min.js"></script>
+  <script src="assets/js/vendor/jquery.js"></script>
+  <script src="assets/js/foundation.min.js"></script>
   <script>
     $(document).foundation();
   </script>
-  <script src="js/login_check.js"></script>
-  <script src="js/block.js"></script>
-  <script src="js/energy.js"></script>
+  <script src="assets/js/login_check.js"></script>
+  <script src="assets/js/block.js"></script>
+  <script src="assets/js/energy.js"></script>
 
   </head>
   <body>
@@ -58,12 +58,11 @@
           <div id='cssmenu'>
 
              <ul>
-               <li><a href='tracking.php'><span>Player Tracking</span></a></li>
                <li class='active'><a href='energy.php'><span>Energy Storage</span></a></li>
                <li><a href='fluid.php'><span>Fluid Storage</span></a></li>
                </ul>
           </div>
-          <soan id="menu_headers">Controls</span>
+          <!-- <soan id="menu_headers">Controls</span>
           <div id='cssmenu'>
 
              <ul>
@@ -79,7 +78,7 @@
                <li class='last'><a href='redstone_events.php'><span>Redstone Events</span></a></li>
                <li class='last'><a href='notifications.php'><span>Email Notifications</span></a></li>
             </ul>
-          </div>
+          </div> -->
 
       </div>
 
@@ -119,11 +118,11 @@
             </div>
             <div class="row">
               <div class="large-6 columns">
-                <img src="img/mods/energy.png">
+                <img src="assets/img/mods/energy.png">
 
             </div>
               <div class="large-6 columns">
-                <img src="img/screenshots/energy.PNG">
+                <img src="assets/img/screenshots/energy.PNG">
             </div>
             </div>
           </div>
@@ -145,12 +144,12 @@
         <div class="large-12 columns footer_middle">
           <div class="row">
             <div class="large-2 columns">
-              <img src="img/skin.PNG" style="height:200px;">
+              <img src="assets/img/skin.PNG" style="height:200px;">
             </div>
             <div class="large-4 columns" style="height:200px">
               <p><h2 style="font-weight:bold;color:#cccccc;">CraftNanny.org</h2>
               <p style="color:#cccccc;font-size:18px;">Contribute to this open-source project on GitHub!</p>
-              <a href="https://github.com/jaranvil/CraftNanny"><img src="img/git.png" style="width:100px;"></a>
+              <a href="https://github.com/jaranvil/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
             </div>
             <div class="large-6 columns">
 
