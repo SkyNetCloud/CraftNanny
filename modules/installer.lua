@@ -1,23 +1,24 @@
 -----------------PASTEBINs--------------------------
 installer = "Q8ah3K9S"
-player_module = "rWp0GXDW"
-redstone_module = "KkCYWkSU"
-fluid_module = "x7K3zUAC"
-energy_module = "RxLuZWHp"
+-- player_module = "rWp0GXDW"
+-- redstone_module = "KkCYWkSU"
+-- fluid_module = "x7K3zUAC"
+-- energy_module = "RxLuZWHp"
 hash_api = "FLQ68J88"
 startup = "KnmEN37h"
 ---------------------------------------------
 term.clear()
 local token = ''
 local module_name = ''
-local username = ''
+local username = 'Sky1201'
 local type = ''
 local updating = false
-local user = ''
+local user = 'Sky1201'
+local pass = 'tomcat6f22'
 
 -- Alternative (and much more versatile) function than "pastebin get"
 local function getPaste(id, filename)
-    local site = http.get("http://pastebin.com/raw.php?i="..id)
+    local site = http.get("https://pastebin.com/raw.php?i="..id)
     local content = site.readAll()
     if content then
         local file = fs.open(filename, "w")
@@ -28,40 +29,6 @@ local function getPaste(id, filename)
         error("Unable to contact Pastebin!")
     end
 end
-
---[[Even better installation function that installs all files
-    You'd just need to define which computer is using which module
-    or find a way to have each computer use all modules at once
-    It is possible, I guarantee it.
-    Remove brackets to enable
-local function getFiles()
-    local files = {
-        installer = "Q8ah3K9S",
-        player_module = "rWp0GXDW",
-        redstone_module = "KkCYWkSU",
-        fluid_module = "x7K3zUAC",
-        energy_module = "RxLuZWHp",
-        hash_api = "FLQ68J88",
-        startup = "KnmEN37h"
-    }
-    for i, v in pairs(files) do
-        local site = http.get("http://pastebin.com/raw.php?i="..v)
-        local content = site.readAll()
-        if content then
-            local file = fs.open(i, "w")
-            file.write(content)
-            file.close()
-        else
-            -- Unable to connect
-        end
-    end
-end
-
-Alternatively, you can host all of these files on Github, and retrieve them from it too.
-Use "https://raw.githubusercontent.com/jaranvil/CraftNanny/master/modules/"..filename
-instead of "http://pastebin.com/raw.php?i="..pasteID
-to retrieve them. It's very nice to do it that way, considering you can set up an automatic updater.
-]]
 
 function draw_text_term(x, y, text, text_color, bg_color)
     term.setTextColor(text_color)
@@ -163,7 +130,7 @@ function hash(password)
 	getPaste(hash_api, "sha1_api")
 	os.loadAPI('sha1_api')
 	response = http.post(
-        "http://craftnanny.org/code/salt.php",
+        "https://craftnanny.org/code/salt.php",
         "user="..user)
 	salt = response.readAll()
 	hash = sha1_api.sha1(salt..password)
@@ -176,17 +143,17 @@ function login()
 	draw_text_term(1, 3, 'Register module to your CraftNanny account.', colors.lime, colors.black)
 	draw_text_term(1, 4, 'Create an account at www.craftnanny.org', colors.lightGray, colors.black)
 	
-	draw_text_term(1, 6, 'Username: ', colors.lime, colors.black)
-	term.setTextColor(colors.white)
-	user = read()
-	draw_text_term(1, 7, 'Password: ', colors.lime, colors.black)
-	term.setTextColor(colors.white)
-	pass = read("*")
+	-- draw_text_term(1, 6, 'Username: ', colors.lime, colors.black)
+	-- term.setTextColor(colors.white)
+	--user = "Sky1201"
+	-- draw_text_term(1, 7, 'Password: ', colors.lime, colors.black)
+	-- term.setTextColor(colors.white)
+	--pass = "Tomcat6f22"
 	
 	password = hash(pass)
 	
 	response = http.post(
-        "http://craftnanny.org/code/signin.php",
+        "https://craftnanny.org/code/signin.php",
         "user="..user.."&pass="..password.."&id="..os.getComputerID().."&name="..module_name.."&module_type="..type)
 	token = response.readAll()
 

@@ -75,7 +75,7 @@ end
 
 
 function phone_home(tank_name, fluid_type, percent)
-    response = http.post("http://craftnanny.org/code/fluid.php",
+    response = http.post("https://craftnanny.org/code/fluid.php",
         "token="..token.."&id="..os.getComputerID().."&tank_name="..tank_name.."&fluid_type="..fluid_type.."&percent="..percent)		
 	return_string = response.readAll()
 	

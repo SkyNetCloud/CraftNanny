@@ -76,7 +76,7 @@ end
 
 
 function phone_home(bat_name, energy_type, percent)
-    response = http.post("http://craftnanny.org/code/energy.php",
+    response = http.post("https://craftnanny.org/code/energy.php",
         "token="..token.."&id="..os.getComputerID().."&bat_name="..bat_name.."&energy_type="..energy_type.."&percent="..percent)
     return_string = response.readAll()
 
