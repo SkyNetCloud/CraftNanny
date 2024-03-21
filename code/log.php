@@ -1,53 +1,56 @@
 <?php
 
+$version = 1;
+
 require_once('connection.php');
 
-$token = $_POST['token'];
-$ign = $_POST['ign'];
-$event = $_POST['event'];
-$discription = $_POST['description'];
-$id = $_POST['id'];
+$token = $_POST['token'] ?? '';
+$ign = $_POST['ign'] ?? '';
+$event = $_POST['event'] ?? '';
+$description = $_POST['description'] ?? '';
+$id = $_POST['id'] ?? '';
 
 $user_id = validateToken($token, $id);
 $event = htmlspecialchars($event);
 $ign = htmlspecialchars($ign);
-$discription = htmlspecialchars($discription);
+$description = htmlspecialchars($description);
 
 if ($user_id) {
-	enterRecord($ign, $event, $discription, $user_id, $token);
+    enterRecord($ign, $event, $description, $user_id, $token);
 } else {
-	echo 'error';
+    echo 'error';
 }
 
-function enterRecord($ign, $event, $discription, $user_id, $token) {
-	$query = "INSERT INTO logs (user_id, ign, event, discription, timestamp, token) VALUES ('".$user_id."', '".dbEsc($ign)."', ".$event.", '".dbEsc($discription)."', NOW(), '".dbEsc($token)."')";
-	$result = mysql_query($query);
-	if ($result) {
-		echo 'sucess';
-	} else {
-		echo 'error';
-	}
+function enterRecord($ign, $event, $description, $user_id, $token) {
+    global $dbConn;
+
+    $query = "INSERT INTO logs (user_id, ign, event, description, timestamp, token) VALUES (?, ?, ?, ?, NOW(), ?)";
+    $stmt = $dbConn->prepare($query);
+    $stmt->bind_param("isiss", $user_id, $ign, $event, $description, $token);
+    $result = $stmt->execute();
+
+    if ($result) {
+        echo 'success';
+    } else {
+        echo 'error';
+    }
 }
 
 function validateToken($token, $id) {
-	$query = "select user_id from tokens where token = '".dbEsc($token). "' AND computer_id = ".dbEsc($id). ";";
-	$result = mysql_query($query);
-	$row = mysql_fetch_array($result, MYSQL_ASSOC);
-	return $row['user_id'];
+    global $dbConn;
+
+    $query = "SELECT user_id FROM tokens WHERE token = ? AND computer_id = ?";
+    $stmt = $dbConn->prepare($query);
+    $stmt->bind_param("si", $token, $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        return $row['user_id'];
+    } else {
+        return false;
+    }
 }
-
-function dbEsc($theString) {
-	$theString = mysql_real_escape_string($theString);
-	return $theString;
-}
-
-function dbError(&$xmlDoc, &$xmlNode, $theMessage) {
-	$errorNode = $xmlDoc->createElement('mysqlError', $theMessage);
-	$xmlNode->appendChild($errorNode);
-}
-
-
-
-
 
 ?>

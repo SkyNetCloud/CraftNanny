@@ -1,8 +1,16 @@
 <?php
-// disable error display
-error_reporting(E_ALL ^ E_DEPRECATED);
-error_reporting(E_ALL | E_NOTICE | E_WARNING);
-ini_set('log_errors', 'Off'); 
+
+// Enable error reporting to display all errors
+error_reporting(E_ALL);
+
+// Optionally, you can also display notices and warnings along with other error types
+ error_reporting(E_ALL | E_NOTICE | E_WARNING);
+
+// If you want to display errors on the web page, you can set display_errors to On in php.ini
+ini_set('display_errors', 1);
+
+// If you want to log errors to a file, you can set log_errors to On in php.ini
+ini_set('log_errors', 1);
 
 require_once('main_functions.php');
 
@@ -66,7 +74,7 @@ if ($debugMode) {
 foreach ($actionArray as $action) {
 	switch ($action) {
 		case "setuprecord":
-			$xmlRoot->appendChild(setUpRecord($dbconn, $ldapConfig, $xmlDoc, $_REQUEST['username']));
+			$xmlRoot->appendChild(setUpRecord($dbConn, $ldapConfig, $xmlDoc, $_REQUEST['username']));
 			
 			break;
 		case "getPosts":
@@ -78,107 +86,107 @@ foreach ($actionArray as $action) {
 			
 			break;
 		case "doesUserExist":
-			$xmlRoot->appendChild(doesUserExist($dbconn, $xmlDoc, $_REQUEST['id'], $_REQUEST['user_type']));
+			$xmlRoot->appendChild(doesUserExist($dbConn, $xmlDoc, $_REQUEST['id'], $_REQUEST['user_type']));
 			
 			break;
 		case "addGoogleUser":
-			$xmlRoot->appendChild(addGoogleUser($dbconn, $xmlDoc, $_REQUEST['id'], $_REQUEST['name'], $_REQUEST['email'], $_REQUEST['url']));
+			$xmlRoot->appendChild(addGoogleUser($dbConn, $xmlDoc, $_REQUEST['id'], $_REQUEST['name'], $_REQUEST['email'], $_REQUEST['url']));
 			
 			break;
 		case "addPost":
-			$xmlRoot->appendChild(addPost($dbconn, $xmlDoc, $_REQUEST['id'], $_REQUEST['title'], $_REQUEST['text'], $_REQUEST['url'], $_REQUEST['sub']));
+			$xmlRoot->appendChild(addPost($dbConn, $xmlDoc, $_REQUEST['id'], $_REQUEST['title'], $_REQUEST['text'], $_REQUEST['url'], $_REQUEST['sub']));
 			
 			break;
 		case "userInfo":
-			$xmlRoot->appendChild(userInfo($dbconn, $xmlDoc, $_REQUEST['id']));
+			$xmlRoot->appendChild(userInfo($dbConn, $xmlDoc, $_REQUEST['id']));
 			
 			break;
 		case "editUsername":
-			$xmlRoot->appendChild(editUsername($dbconn, $xmlDoc, $_REQUEST['id'], $_REQUEST['username']));
+			$xmlRoot->appendChild(editUsername($dbConn, $xmlDoc, $_REQUEST['id'], $_REQUEST['username']));
 			
 			break;
 		case "castVote":
-			$xmlRoot->appendChild(castVote($dbconn, $xmlDoc, $_REQUEST['user_id'], $_REQUEST['post_id'], $_REQUEST['vote']));
+			$xmlRoot->appendChild(castVote($dbConn, $xmlDoc, $_REQUEST['user_id'], $_REQUEST['post_id'], $_REQUEST['vote']));
 			
 			break;
 		case "tallyVotes":
-			$xmlRoot->appendChild(tallyVotes($dbconn, $xmlDoc, $_REQUEST['post_id']));
+			$xmlRoot->appendChild(tallyVotes($dbConn, $xmlDoc, $_REQUEST['post_id']));
 			
 			break;
 		case "checkForUserVote":
-			$xmlRoot->appendChild(checkForUserVote($dbconn, $xmlDoc, $_REQUEST['post_id'], $_REQUEST['user_id']));
+			$xmlRoot->appendChild(checkForUserVote($dbConn, $xmlDoc, $_REQUEST['post_id'], $_REQUEST['user_id']));
 			
 			break;
 		case "addComment":
-			$xmlRoot->appendChild(addComment($dbconn, $xmlDoc, $_REQUEST['user_id'], $_REQUEST['post_id'], $_REQUEST['comment']));
+			$xmlRoot->appendChild(addComment($dbConn, $xmlDoc, $_REQUEST['user_id'], $_REQUEST['post_id'], $_REQUEST['comment']));
 			
 			break;
 		case "getComments":
-			$xmlRoot->appendChild(getComments($dbconn, $xmlDoc, $_REQUEST['post_id']));
+			$xmlRoot->appendChild(getComments($dbConn, $xmlDoc, $_REQUEST['post_id']));
 			
 			break;
 		case "addNewUser":
-			$xmlRoot->appendChild(addNewUser($dbconn, $xmlDoc, $_REQUEST['username'], $_REQUEST['password'], $_REQUEST['email']));
+			$xmlRoot->appendChild(addNewUser($dbConn, $xmlDoc, $_REQUEST['username'], $_REQUEST['password'], $_REQUEST['email']));
 			
 			break;
 		case "signIn":
-			$xmlRoot->appendChild(signIn($dbconn, $xmlDoc, $_REQUEST['username'], $_REQUEST['password']));
+			$xmlRoot->appendChild(signIn($dbConn, $xmlDoc, $_REQUEST['username'], $_REQUEST['password']));
 			
 			break;
 		case "getConnections":
-			$xmlRoot->appendChild(getConnections($dbconn, $xmlDoc, $_REQUEST['user_id'], $_REQUEST['module_type']));
+			$xmlRoot->appendChild(getConnections($dbConn, $xmlDoc, $_REQUEST['user_id'], $_REQUEST['module_type']));
 			
 			break;
 		case "logs":
-			$xmlRoot->appendChild(getLogs($dbconn, $xmlDoc, $_REQUEST['user_id']));
+			$xmlRoot->appendChild(getLogs($dbConn, $xmlDoc, $_REQUEST['user_id']));
 			
 			break;
 		case "getPlayerData":
-			$xmlRoot->appendChild(getPlayerData($dbconn, $xmlDoc, $_REQUEST['ign'], $_REQUEST['token']));
+			$xmlRoot->appendChild(getPlayerData($dbConn, $xmlDoc, $_REQUEST['ign'], $_REQUEST['token']));
 			
 			break;
 		case "getUser":
-			$xmlRoot->appendChild(getUser($dbconn, $xmlDoc, $_REQUEST['user_id']));
+			$xmlRoot->appendChild(getUser($dbConn, $xmlDoc, $_REQUEST['user_id']));
 			
 			break;
 		case "load_redstone_controls":
-			$xmlRoot->appendChild(loadRedstoneControls($dbconn, $xmlDoc, $_REQUEST['user_id']));
+			$xmlRoot->appendChild(loadRedstoneControls($dbConn, $xmlDoc, $_REQUEST['user_id']));
 			
 			break;
 		case "setRedstoneOutput":
-			$xmlRoot->appendChild(setRedstoneOutput($dbconn, $xmlDoc, $_REQUEST['token'], $_REQUEST['side'], $_REQUEST['value'], $_REQUEST['val_type']));
+			$xmlRoot->appendChild(setRedstoneOutput($dbConn, $xmlDoc, $_REQUEST['token'], $_REQUEST['side'], $_REQUEST['value'], $_REQUEST['val_type']));
 			
 			break;
 		case "load_fluid_modules":
-			$xmlRoot->appendChild(getFluidLevels($dbconn, $xmlDoc, $_REQUEST['user_id']));
+			$xmlRoot->appendChild(getFluidLevels($dbConn, $xmlDoc, $_REQUEST['user_id']));
 			
 			break;
 		case "load_energy_modules":
-			$xmlRoot->appendChild(getEnergyLevels($dbconn, $xmlDoc, $_REQUEST['user_id']));
+			$xmlRoot->appendChild(getEnergyLevels($dbConn, $xmlDoc, $_REQUEST['user_id']));
 			
 			break;
 		case "remove_module":
-			$xmlRoot->appendChild(removeModule($dbconn, $xmlDoc, $_REQUEST['token']));
+			$xmlRoot->appendChild(removeModule($dbConn, $xmlDoc, $_REQUEST['token']));
 			
 			break;
 		case "redstone_event_dropdowns":
-			$xmlRoot->appendChild(redstoneEventDropdowns($dbconn, $xmlDoc, $_REQUEST['user_id']));
+			$xmlRoot->appendChild(redstoneEventDropdowns($dbConn, $xmlDoc, $_REQUEST['user_id']));
 			
 			break;
 		case "get_redstone_sides":
-			$xmlRoot->appendChild(getRedstoneSides($dbconn, $xmlDoc, $_REQUEST['token']));
+			$xmlRoot->appendChild(getRedstoneSides($dbConn, $xmlDoc, $_REQUEST['token']));
 			
 			break;
 		case "create_redstone_event":
-			$xmlRoot->appendChild(createRedstoneEvent($dbconn, $xmlDoc, $_REQUEST['storage_token'], $_REQUEST['redstone_token'], $_REQUEST['trigger_value'], $_REQUEST['side'], $_REQUEST['output_value'], $_REQUEST['event_type'], $_REQUEST['user_id']));
+			$xmlRoot->appendChild(createRedstoneEvent($dbConn, $xmlDoc, $_REQUEST['storage_token'], $_REQUEST['redstone_token'], $_REQUEST['trigger_value'], $_REQUEST['side'], $_REQUEST['output_value'], $_REQUEST['event_type'], $_REQUEST['user_id']));
 			
 			break;
 		case "load_redstone_events":
-			$xmlRoot->appendChild(loadRedstoneEvents($dbconn, $xmlDoc, $_REQUEST['user_id']));
+			$xmlRoot->appendChild(loadRedstoneEvents($dbConn, $xmlDoc, $_REQUEST['user_id']));
 			
 			break;
 		case "remove_event":
-			$xmlRoot->appendChild(removeEvent($dbconn, $xmlDoc, $_REQUEST['event_id']));
+			$xmlRoot->appendChild(removeEvent($dbConn, $xmlDoc, $_REQUEST['event_id']));
 			
 			break;
 		default:
@@ -198,7 +206,7 @@ function sendxhtmlheader($usexml) {
 }
 
 function sendpage($page, $usexml) {
-    //$xhtmldtd="\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n";
+    //$xhtmldtd="\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"https://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n";
     //$bar=preg_replace('/\n/',$xhtmldtd,$page,1);
     sendxhtmlheader($usexml);
     //print($bar);
@@ -208,9 +216,6 @@ function sendpage($page, $usexml) {
 		print(trim($page));
 	}
 }
-
-// close database connection
-mysql_close($dbConn);
 
 // save/send the XML document
 $xmlString = $xmlDoc->saveXML();

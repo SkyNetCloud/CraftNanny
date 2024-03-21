@@ -1,36 +1,28 @@
 <?php
 
-$version = 2;
+$version = 1;
 
 require_once('connection.php');
 
-$token = $_POST['token'];
-$id = $_POST['id'];
+$token = $_POST['token'] ?? '';
+$id = $_POST['id'] ?? '';
 
 logPing($token, $id, $version);
 
 function logPing($token, $id, $version) {
-	$query = "UPDATE tokens SET last_seen = NOW() WHERE token = '".dbEsc($token)."' AND computer_id = ".dbEsc($id);
-	$result = mysql_query($query);
-	if ($result) {
-		echo $version;
-	} else {
-		echo $version;
-	}
+    global $dbConn; // Access the database connection inside the function
+
+    // Update last_seen timestamp
+    $query = "UPDATE tokens SET last_seen = NOW() WHERE token = ? AND computer_id = ?";
+    $stmt = $dbConn->prepare($query);
+    $stmt->bind_param("si", $token, $id);
+    $stmt->execute();
+
+    if ($stmt->affected_rows > 0) {
+        echo $version;
+    } else {
+        echo $version;
+    }
 }
-
-function dbEsc($theString) {
-	$theString = mysql_real_escape_string($theString);
-	return $theString;
-}
-
-function dbError(&$xmlDoc, &$xmlNode, $theMessage) {
-	$errorNode = $xmlDoc->createElement('mysqlError', $theMessage);
-	$xmlNode->appendChild($errorNode);
-}
-
-
-
-
 
 ?>

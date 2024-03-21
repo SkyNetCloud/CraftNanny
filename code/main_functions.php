@@ -1,5 +1,20 @@
 <?php
 
+
+// Enable error reporting to display all errors
+error_reporting(E_ALL);
+
+// Optionally, you can also display notices and warnings along with other error types
+ error_reporting(E_ALL | E_NOTICE | E_WARNING);
+
+// If you want to display errors on the web page, you can set display_errors to On in php.ini
+ini_set('display_errors', 1);
+
+// If you want to log errors to a file, you can set log_errors to On in php.ini
+ini_set('log_errors', 1);
+
+require_once('connection.php');
+
 function dbEsc($theString) {
 	$theString = mysql_real_escape_string($theString);
 	return $theString;
@@ -10,45 +25,51 @@ function dbError(&$xmlDoc, &$xmlNode, $theMessage) {
 	$xmlNode->appendChild($errorNode);
 }
 
-function doesUserExist($dbconn, $xmlDoc, $id, $type) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function doesUserExist($dbConn, $xmlDoc, $id, $type) {
+    $recordDataNode = $xmlDoc->createElement('recorddata');
 
-	if($type == 'google') {
-		$query = "select * from google_users where google_id = " . $id;
-	} else if ($type == 'main') {
-		$query = "select * from users where username = '" . dbEsc($id) . "';";
-	}
+    if ($type == 'google') {
+        // Prepare and execute the query to check existence of Google user using parameterized query
+        $query = "SELECT * FROM google_users WHERE google_id = ?";
+        $stmt = $dbConn->prepare($query);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    } else if ($type == 'main') {
+        // Prepare and execute the query to check existence of main user using parameterized query
+        $query = "SELECT * FROM users WHERE username = ?";
+        $stmt = $dbConn->prepare($query);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    }
 
+    if (!$result) {
+        // Handle database error
+        $statusNode = $xmlDoc->createElement('status', 'Error executing query: ' . $query);
+        dbError($xmlDoc, $recordDataNode, mysqli_error($dbConn));
+    } else {
+        // Query executed successfully
+        $statusNode = $xmlDoc->createElement('status', 'success');
 
-	$result = mysql_query($query);
+        // Count the number of records returned
+        $counter = mysqli_num_rows($result);
+        $recordsNode = $xmlDoc->createElement('records', $counter);
+        $recordDataNode->appendChild($recordsNode);
+    }
 
-	if (!($result)) {
-		$statusNode = $xmlDoc->createElement('status', $query);
+    $recordDataNode->appendChild($statusNode);
 
-		dbError($xmlDoc, $recordDataNode, mysql_error());
-	} else {
-		$statusNode = $xmlDoc->createElement('status', 'success');
-	}
-
-	$counter = 0;
-	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
-		$counter = $counter + 1;
-	}
-	$statusNode = $xmlDoc->createElement('records', $counter);
-
-
-	$recordDataNode->appendChild($statusNode);
-
-	return $recordDataNode;
+    return $recordDataNode;
 }
 
-function addGoogleUser($dbconn, $xmlDoc, $google_id, $name, $email, $image_url) {
+function addGoogleUser($dbConn, $xmlDoc, $google_id, $name, $email, $image_url) {
 	$recordDataNode = $xmlDoc->createElement('recorddata');
 
 	$query = "INSERT INTO google_users (google_id, username, name, email, img_url) " .
 				"VALUES ('".$google_id."', '" . $name ."', '" . $name . "', '" . $email . "', '" . $image_url . "')";
 
-	$result = mysql_query($query);
+	$result = mysqli_query($query);
 
 	if (!($result)) {
 		$statusNode = $xmlDoc->createElement('status', $query);
@@ -63,272 +84,228 @@ function addGoogleUser($dbconn, $xmlDoc, $google_id, $name, $email, $image_url) 
 	return $recordDataNode;
 }
 
-function signIn($dbconn, $xmlDoc, $username, $password) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function signIn($dbConn, $xmlDoc, $username, $password) {
+    $recordDataNode = $xmlDoc->createElement('recorddata');
 
-	$username = htmlspecialchars($username);
-	$password = htmlspecialchars($password);
+    $username = htmlspecialchars($username);
+    $password = htmlspecialchars($password);
 
-	$salt = '';
-	$query = "select salt from users where username = '".dbEsc($username). "';";
-	$result = mysql_query($query);
-	$row = mysql_fetch_array($result, MYSQL_ASSOC);
-	$salt = $row['salt'];
+    $salt = '';
+    // Prepare and execute the query to retrieve salt using parameterized query
+    $query = "SELECT salt FROM users WHERE username = ?";
+    $stmt = $dbConn->prepare($query);
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
+    if ($row = $result->fetch_assoc()) {
+        $salt = $row['salt'];
+    }
+
+    // Generate hash with salt and password
 	$hash = sha1($salt.$password);
 
-	$query2 = "select user_id from users where username = '" . dbEsc($username) . "' AND password = '" . $hash . "';";
 
-	$result2 = mysql_query($query2);
+    // Prepare and execute the query to verify username and password using parameterized query
+    $query2 = "SELECT user_id FROM users WHERE username = ? AND password = ?";
+    $stmt2 = $dbConn->prepare($query2);
+    $stmt2->bind_param("ss", $username, $hash);
+    $stmt2->execute();
+    $result2 = $stmt2->get_result();
 
-	if (!($result2)) {
-		$statusNode = $xmlDoc->createElement('status', $query2);
+    if (!$result2) {
+        // Handle database error
+        dbError($xmlDoc, $recordDataNode, mysqli_error($dbConn));
+    } else {
+        // If user is authenticated, return user_id as token
+        if ($row2 = $result2->fetch_assoc()) {
+            $statusNode = $xmlDoc->createElement('token', $row2['user_id']);
+            $recordDataNode->appendChild($statusNode);
+        } else {
+            // Handle invalid credentials
+            $statusNode = $xmlDoc->createElement('status', 'Invalid username or password');
+            $recordDataNode->appendChild($statusNode);
+        }
+    }
 
-		dbError($xmlDoc, $recordDataNode, mysql_error());
-	} else {
-		$statusNode = $xmlDoc->createElement('status', '');
-	}
-
-	$row2 = mysql_fetch_array($result2, MYSQL_ASSOC);
-	$statusNode = $xmlDoc->createElement('token', $row2['user_id']);
-
-	$recordDataNode->appendChild($statusNode);
-
-	return $recordDataNode;
+    return $recordDataNode;
 }
 
-function addNewUser($dbconn, $xmlDoc, $username, $password, $email) {
-	$recordDataNode = $xmlDoc->createElement('userdata');
+function addNewUser($dbConn, $xmlDoc, $username, $password, $email) {
+    $recordDataNode = $xmlDoc->createElement('userdata');
 
-	$username = htmlspecialchars($username);
-	$password = htmlspecialchars($password);
-	$email = htmlspecialchars($email);
+    // Sanitize input
+    $username = htmlspecialchars($username);
+    $email = htmlspecialchars($email);
 
+    // Generate salt and hash password
 	$salt = rand().rand().rand().rand();
 	$hash = sha1($salt.$password);
 
+    // Generate a unique user ID
 	$user_id = rand().rand().rand().rand();
 
-	$query = "INSERT INTO users (user_id, username, password, salt, email) " .
-				"VALUES ('".$user_id."', '" . dbEsc($username) ."', '" . $hash . "', '" . $salt . "', '".dbEsc($email)."')";
+    // Prepare and execute the query using prepared statements
+    $query = "INSERT INTO users (user_id, username, password, salt, email) VALUES (?, ?, ?, ?, ?)";
+    $stmt = $dbConn->prepare($query);
+    $stmt->bind_param("sssss", $user_id, $username, $hash, $salt, $email);
+    $result = $stmt->execute();
+    $stmt->close();
 
-	$result = mysql_query($query);
+    // Check if the query was successful
+    if (!$result) {
+        // Handle database error
+        dbError($xmlDoc, $recordDataNode, "Error inserting user into the database.");
+    } else {
+        // User successfully added, return user ID as token
+        $statusNode = $xmlDoc->createElement('token', $user_id);
+        $recordDataNode->appendChild($statusNode);
+    }
 
-	if (!($result)) {
-		$statusNode = $xmlDoc->createElement('status', $query);
-
-		dbError($xmlDoc, $recordDataNode, mysql_error());
-	} else {
-		$statusNode = $xmlDoc->createElement('token', $user_id);
-	}
-
-	$recordDataNode->appendChild($statusNode);
-
-	return $recordDataNode;
+    return $recordDataNode;
 }
 
-function getConnections($dbconn, $xmlDoc, $user_id, $type) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function getConnections($dbConn, $xmlDoc, $user_id, $type) {
+    $recordDataNode = $xmlDoc->createElement('recorddata');
 
-  $query = "SELECT * FROM tokens WHERE user_id = '".dbEsc($user_id)."' AND module_type = '".dbEsc($type)."'";
+    $query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = ?";
+    $stmt = $dbConn->prepare($query);
+    $stmt->bind_param("ss", $user_id, $type);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-	$result = mysql_query($query);
+    if (!$result) {
+        $statusNode = $xmlDoc->createElement('status', 'Error occurred while fetching connections');
+        dbError($xmlDoc, $recordDataNode, mysqli_error($dbConn));
+    } else {
+        $statusNode = $xmlDoc->createElement('status', 'success');
+    }
 
-	if (!($result)) {
-		$statusNode = $xmlDoc->createElement('status', $query);
+    while ($row = $result->fetch_assoc()) {
+        $theChildNode = $xmlDoc->createElement('connection');
+        $theChildNode->setAttribute('name', $row['computer_name']);
+        $theChildNode->setAttribute('token', $row['token']);
 
-		dbError($xmlDoc, $recordDataNode, mysql_error());
-	} else {
-		$statusNode = $xmlDoc->createElement('status', 'success');
-	}
+        $datetime1 = strtotime($row['last_seen']);
+        $datetime2 = time();
+        $diff = $datetime2 - $datetime1;
+        if ($diff > 200) {
+            $theChildNode->setAttribute('active', false);
+        } else {
+            $theChildNode->setAttribute('active', true);
+        }
 
+        $recordDataNode->appendChild($theChildNode);
+    }
+    $recordDataNode->appendChild($statusNode);
 
-  while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
-	$theChildNode = $xmlDoc->createElement('connection');
-	$theChildNode->setAttribute('name', $row['computer_name']);
-	$theChildNode->setAttribute('token', $row['token']);
-
-	$datetime1 = strtotime($row['last_seen']);
-	$datetime2 = time();
-	$diff = $datetime2-$datetime1;
-	if ($diff > 200) {
-		$theChildNode->setAttribute('active', false);
-	} else {
-		$theChildNode->setAttribute('active', true);
-	}
-
-	$recordDataNode->appendChild($theChildNode);
-  }
-  	$recordDataNode->appendChild($statusNode);
-	return $recordDataNode;
+    return $recordDataNode;
 }
 
-function getLogs($dbconn, $xmlDoc, $user_id) {
-	//main XML element to return
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function getLogs($dbConn, $xmlDoc, $user_id) {
+    // Main XML element to return
+    $recordDataNode = $xmlDoc->createElement('recorddata');
 
-	//get users tokens and scanner names
-	$query = "SELECT * from tokens where user_id = '".dbEsc($user_id)."' AND module_type = '1'";
-	$result = mysql_query($query);
-	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
-		$theScannerNode = $xmlDoc->createElement('scanner');
-			$nameNode = $xmlDoc->createElement('name');
-			$nameNode->setAttribute('name', $row['computer_name']);
-			$nameNode->setAttribute('token', $row['token']);
-			$datetime1 = strtotime($row['last_seen']);
-			$datetime2 = time();
-			$diff = $datetime2-$datetime1;
-			if ($diff > 200) {
-				$nameNode->setAttribute('active', false);
-			} else {
-				$nameNode->setAttribute('active', true);
-			}
-		$theScannerNode->appendChild($nameNode);
-		//for each scanncer, get last 10 visitors
-		$query2 = "SELECT DISTINCT(ign) AS ign from logs where token = '".dbEsc($row['token'])."' ORDER BY timestamp DESC LIMIT 10";
-		$result2 = mysql_query($query2);
-		while ($row2 = mysql_fetch_array($result2, MYSQL_ASSOC)) {
-			$VistorNode = $xmlDoc->createElement('visitor');
-			$VistorNode->setAttribute('ign', $row2['ign']);
-			$VistorNode->setAttribute('token', $row['token']);
-			
-			$query3 = "SELECT timestamp FROM logs WHERE token = '".$row['token']."' AND ign = '".$row2['ign']."' ORDER BY timestamp DESC LIMIT 1";
-			$result3 = mysql_query($query3);
-			$row3 = mysql_fetch_array($result3, MYSQL_ASSOC);
-			$VistorNode->setAttribute('last_seen', $row3['timestamp']);
-			$theScannerNode->appendChild($VistorNode);
+    // Get users tokens and scanner names
+    $query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = '1'";
+    $stmt = $dbConn->prepare($query);
+    $stmt->bind_param("s", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-		}
-		$recordDataNode->appendChild($theScannerNode);
-	}
+    while ($row = $result->fetch_assoc()) {
+        $theScannerNode = $xmlDoc->createElement('scanner');
+        $nameNode = $xmlDoc->createElement('name');
+        $nameNode->setAttribute('name', $row['computer_name']);
+        $nameNode->setAttribute('token', $row['token']);
+        $datetime1 = strtotime($row['last_seen']);
+        $datetime2 = time();
+        $diff = $datetime2 - $datetime1;
+        if ($diff > 200) {
+            $nameNode->setAttribute('active', false);
+        } else {
+            $nameNode->setAttribute('active', true);
+        }
+        $theScannerNode->appendChild($nameNode);
 
-	return $recordDataNode;
+        // For each scanner, get last 10 visitors
+        $query2 = "SELECT DISTINCT(ign) AS ign FROM logs WHERE token = ? ORDER BY timestamp DESC LIMIT 10";
+        $stmt2 = $dbConn->prepare($query2);
+        $stmt2->bind_param("s", $row['token']);
+        $stmt2->execute();
+        $result2 = $stmt2->get_result();
+
+        while ($row2 = $result2->fetch_assoc()) {
+            $visitorNode = $xmlDoc->createElement('visitor');
+            $visitorNode->setAttribute('ign', $row2['ign']);
+            $visitorNode->setAttribute('token', $row['token']);
+
+            $query3 = "SELECT timestamp FROM logs WHERE token = ? AND ign = ? ORDER BY timestamp DESC LIMIT 1";
+            $stmt3 = $dbConn->prepare($query3);
+            $stmt3->bind_param("ss", $row['token'], $row2['ign']);
+            $stmt3->execute();
+            $result3 = $stmt3->get_result();
+            $row3 = $result3->fetch_assoc();
+
+            $visitorNode->setAttribute('last_seen', $row3['timestamp']);
+            $theScannerNode->appendChild($visitorNode);
+        }
+        $recordDataNode->appendChild($theScannerNode);
+    }
+
+    return $recordDataNode;
 }
 
-function getPlayerData($dbconn, $xmlDoc, $ign, $token) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function getPlayerData($dbConn, $xmlDoc, $ign, $token) {
+    $recordDataNode = $xmlDoc->createElement('recorddata');
 
-	$query = "SELECT * from logs where token = '".dbEsc($token)."' AND ign = '".dbEsc($ign)."' ORDER BY timestamp DESC LIMIT 50";
-	$result = mysql_query($query);
-	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
-		$VistorNode = $xmlDoc->createElement('record');
-		$VistorNode->setAttribute('ign', $row['ign']);
-		$VistorNode->setAttribute('event', $row['event']);
-		$VistorNode->setAttribute('time', $row['timestamp']);
-		$VistorNode->setAttribute('discription', $row['discription']);
-		$recordDataNode->appendChild($VistorNode);
-	}
-	return $recordDataNode;
+    $query = "SELECT * FROM logs WHERE token = ? AND ign = ? ORDER BY timestamp DESC LIMIT 50";
+    $stmt = $dbConn->prepare($query);
+    $stmt->bind_param("ss", $token, $ign);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    while ($row = $result->fetch_assoc()) {
+        $visitorNode = $xmlDoc->createElement('record');
+        $visitorNode->setAttribute('ign', $row['ign']);
+        $visitorNode->setAttribute('event', $row['event']);
+        $visitorNode->setAttribute('time', $row['timestamp']);
+        $visitorNode->setAttribute('discription', $row['discription']);
+        $recordDataNode->appendChild($visitorNode);
+    }
+
+    return $recordDataNode;
 }
 
-function getUser($dbconn, $xmlDoc, $user_id) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function getUser($dbConn, $xmlDoc, $user_id) {
+    $recordDataNode = $xmlDoc->createElement('recorddata');
 
-	$query2 = "SELECT username from users where user_id = '".dbEsc($user_id)."'";
-	$result2 = mysql_query($query2);
-	$row2 = mysql_fetch_array($result2, MYSQL_ASSOC);
-	$userNode = $xmlDoc->createElement('user');
-	$userNode->setAttribute('username', $row2['username']);
+    $query = "SELECT username FROM users WHERE user_id = ?";
+    $stmt = $dbConn->prepare($query);
+    $stmt->bind_param("s", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
 
-	$recordDataNode->appendChild($userNode);
+    $userNode = $xmlDoc->createElement('user');
+    $userNode->setAttribute('username', $row['username']);
+    $recordDataNode->appendChild($userNode);
 
-	$query3 = "UPDATE users SET last_seen = NOW() WHERE user_id = '".dbEsc($user_id)."'";
-	$result3 = mysql_query($query3);
+    $query = "UPDATE users SET last_seen = NOW() WHERE user_id = ?";
+    $stmt = $dbConn->prepare($query);
+    $stmt->bind_param("s", $user_id);
+    $stmt->execute();
 
-	return $recordDataNode;
+    return $recordDataNode;
 }
 
-function loadRedstoneControls($dbconn, $xmlDoc, $user_id) {
+function getFluidLevels($dbConn, $xmlDoc, $user_id) {
 	$recordDataNode = $xmlDoc->createElement('recorddata');
 
-	$query = "SELECT * from tokens where user_id = '".dbEsc($user_id)."' AND module_type = '4'";
-	$result = mysql_query($query);
+	$query = "SELECT * FROM tokens WHERE user_id = '".dbEsc($user_id)."' AND module_type = '3'";
+	$result = mysqli_query($query);
 
-	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
-		$controlNode = $xmlDoc->createElement('controls');
-		$controlNode->setAttribute('name', $row['computer_name']);
-		$controlNode->setAttribute('token', $row['token']);
-
-		$datetime1 = strtotime($row['last_seen']);
-		$datetime2 = time();
-		$diff = $datetime2-$datetime1;
-		if ($diff > 200) {
-			$controlNode->setAttribute('active', false);
-		} else {
-			$controlNode->setAttribute('active', true);
-		}
-
-		$query2 = "SELECT * from redstone_controls where token = '".$row['token']."'";
-		$result2 = mysql_query($query2);
-
-		if (!($result2)) {
-			$statusNode = $xmlDoc->createElement('status', $query);
-
-			dbError($xmlDoc, $recordDataNode, mysql_error());
-		} else {
-			$statusNode = $xmlDoc->createElement('status', 'success');
-		}
-
-		$row2 = mysql_fetch_array($result2, MYSQL_ASSOC);
-
-		$controlNode->setAttribute('top', $row2['top']);
-		$controlNode->setAttribute('bottom', $row2['bottom']);
-		$controlNode->setAttribute('front', $row2['front']);
-		$controlNode->setAttribute('back', $row2['back']);
-		$controlNode->setAttribute('left', $row2['left_side']);
-		$controlNode->setAttribute('right', $row2['right_side']);
-
-		$controlNode->setAttribute('top_name', $row2['top_name']);
-		$controlNode->setAttribute('bottom_name', $row2['bottom_name']);
-		$controlNode->setAttribute('front_name', $row2['front_name']);
-		$controlNode->setAttribute('back_name', $row2['back_name']);
-		$controlNode->setAttribute('left_name', $row2['left_name']);
-		$controlNode->setAttribute('right_name', $row2['right_name']);
-
-		$controlNode->setAttribute('top_input', $row2['top_input']);
-		$controlNode->setAttribute('bottom_input', $row2['bottom_input']);
-		$controlNode->setAttribute('front_input', $row2['front_input']);
-		$controlNode->setAttribute('back_input', $row2['back_input']);
-		$controlNode->setAttribute('left_input', $row2['left_input']);
-		$controlNode->setAttribute('right_input', $row2['right_input']);
-
-		$recordDataNode->appendChild($controlNode);
-
-	}
-	$recordDataNode->appendChild($statusNode);
-	return $recordDataNode;
-}
-
-function setRedstoneOutput($dbconn, $xmlDoc, $token, $side, $value, $type) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
-
-	if ($type == 'string') {
-		$value = htmlspecialchars($value);
-		$query = "UPDATE redstone_controls SET ".dbEsc($side)." = '".dbEsc($value)."' WHERE token = '".dbEsc($token)."'";
-	} else {
-		$query = "UPDATE redstone_controls SET ".dbEsc($side)." = ".dbEsc($value)." WHERE token = '".dbEsc($token)."'";
-	}
-
-	$result = mysql_query($query);
-
-	if (!($result)) {
-		$statusNode = $xmlDoc->createElement('status', $query);
-
-		dbError($xmlDoc, $recordDataNode, mysql_error());
-	} else {
-		$statusNode = $xmlDoc->createElement('status', 'success');
-	}
-	$recordDataNode->appendChild($statusNode);
-	return $recordDataNode;
-}
-
-function getFluidLevels($dbconn, $xmlDoc, $user_id) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
-
-	$query = "SELECT * from tokens where user_id = '".dbEsc($user_id)."' AND module_type = '3'";
-	$result = mysql_query($query);
-
-	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
+	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
 		$controlNode = $xmlDoc->createElement('modules');
 		$controlNode->setAttribute('name', $row['computer_name']);
 		$controlNode->setAttribute('token', $row['token']);
@@ -342,8 +319,8 @@ function getFluidLevels($dbconn, $xmlDoc, $user_id) {
 			$controlNode->setAttribute('active', true);
 		}
 
-		$query2 = "SELECT * from tanks where token = '".$row['token']."'";
-		$result2 = mysql_query($query2);
+		$query2 = "SELECT * FROM tanks WHERE token = '".$row['token']."'";
+		$result2 = mysqli_query($query2);
 
 		if (!($result2)) {
 			$statusNode = $xmlDoc->createElement('status', $query);
@@ -353,7 +330,7 @@ function getFluidLevels($dbconn, $xmlDoc, $user_id) {
 			$statusNode = $xmlDoc->createElement('status', 'success');
 		}
 
-		$row2 = mysql_fetch_array($result2, MYSQL_ASSOC);
+		$row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
 
 		$controlNode->setAttribute('tank_name', $row2['tank_name']);
 		$controlNode->setAttribute('fluid_type', $row2['fluid_type']);
@@ -366,14 +343,13 @@ function getFluidLevels($dbconn, $xmlDoc, $user_id) {
 	return $recordDataNode;
 }
 
-
-function getEnergyLevels($dbconn, $xmlDoc, $user_id) {
+function getEnergyLevels($dbConn, $xmlDoc, $user_id) {
 	$recordDataNode = $xmlDoc->createElement('recorddata');
 
-	$query = "SELECT * from tokens where user_id = '".dbEsc($user_id)."' AND module_type = '2'";
-	$result = mysql_query($query);
+	$query = "SELECT * FROM tokens WHERE user_id = '".dbEsc($user_id)."' AND module_type = '2'";
+	$result = mysqli_query($query);
 
-	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
+	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
 		$controlNode = $xmlDoc->createElement('modules');
 		$controlNode->setAttribute('name', $row['computer_name']);
 		$controlNode->setAttribute('token', $row['token']);
@@ -387,8 +363,8 @@ function getEnergyLevels($dbconn, $xmlDoc, $user_id) {
 			$controlNode->setAttribute('active', true);
 		}
 
-		$query2 = "SELECT * from energy_storage where token = '".$row['token']."'";
-		$result2 = mysql_query($query2);
+		$query2 = "SELECT * FROM energy_storage WHERE token = '".$row['token']."'";
+		$result2 = mysqli_query($query2);
 
 		if (!($result2)) {
 			$statusNode = $xmlDoc->createElement('status', $query);
@@ -398,7 +374,7 @@ function getEnergyLevels($dbconn, $xmlDoc, $user_id) {
 			$statusNode = $xmlDoc->createElement('status', 'success');
 		}
 
-		$row2 = mysql_fetch_array($result2, MYSQL_ASSOC);
+		$row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
 
 		$controlNode->setAttribute('bat_name', $row2['bat_name']);
 		$controlNode->setAttribute('energy_type', $row2['energy_type']);
@@ -411,11 +387,11 @@ function getEnergyLevels($dbconn, $xmlDoc, $user_id) {
 	return $recordDataNode;
 }
 
-function removeModule($dbconn, $xmlDoc, $token) {
+function removeModule($dbConn, $xmlDoc, $token) {
 	$recordDataNode = $xmlDoc->createElement('recorddata');
 
 	$query2 = "DELETE FROM tokens WHERE token = '".dbEsc($token)."'";
-	$result2 = mysql_query($query2);
+	$result2 = mysqli_query($query2);
 
 	if (!($result2)) {
 			$statusNode = $xmlDoc->createElement('status', $query);
@@ -430,123 +406,11 @@ function removeModule($dbconn, $xmlDoc, $token) {
 	return $recordDataNode;
 }
 
-function redstoneEventDropdowns($dbconn, $xmlDoc, $user_id) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
-
-	$query = "SELECT * from tokens where user_id = '".dbEsc($user_id)."' AND (module_type = '2' OR module_type = '3')";
-	$result = mysql_query($query);
-
-	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
-		$controlNode = $xmlDoc->createElement('storage_modules');
-		$controlNode->setAttribute('name', $row['computer_name']);
-		$controlNode->setAttribute('token', $row['token']);
-		$recordDataNode->appendChild($controlNode);
-	}
-
-	$query = "SELECT * from tokens where user_id = '".dbEsc($user_id)."' AND module_type = '4'";
-	$result = mysql_query($query);
-
-	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
-		$controlNode = $xmlDoc->createElement('redstone_modules');
-		$controlNode->setAttribute('name', $row['computer_name']);
-		$controlNode->setAttribute('token', $row['token']);
-		$recordDataNode->appendChild($controlNode);
-	}
-
-	return $recordDataNode;
-}
-
-function getRedstoneSides($dbconn, $xmlDoc, $token) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
-
-	$query = "SELECT * from redstone_controls where token = '".dbEsc($token)."'";
-	$result = mysql_query($query);
-
-	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
-		$controlNode = $xmlDoc->createElement('modules');
-		$controlNode->setAttribute('top_name', $row['top_name']);
-		$controlNode->setAttribute('bottom_name', $row['bottom_name']);
-		$controlNode->setAttribute('front_name', $row['front_name']);
-		$controlNode->setAttribute('back_name', $row['back_name']);
-		$controlNode->setAttribute('left_name', $row['left_name']);
-		$controlNode->setAttribute('right_name', $row['right_name']);
-		$recordDataNode->appendChild($controlNode);
-	}
-
-	return $recordDataNode;
-}
-
-function createRedstoneEvent($dbconn, $xmlDoc, $storageToken, $redstoneToken, $triggerValue, $side, $outputValue, $eventType, $user_id) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
-
-	$query = "INSERT INTO redstone_events (redstone_token, storage_token, event_type, trigger_value, side, output, user_id) VALUES " .
-				"('".dbEsc($redstoneToken)."', '".dbEsC($storageToken)."', ".dbEsc($eventType).", ".dbEsc($triggerValue).", '".dbEsc($side)."', ".dbEsc($outputValue).", '".dbEsc($user_id)."')";
-	$result = mysql_query($query);
-
-	if (!($result)) {
-		$statusNode = $xmlDoc->createElement('status', $query);
-
-		dbError($xmlDoc, $recordDataNode, mysql_error());
-	} else {
-		$statusNode = $xmlDoc->createElement('status', 'success');
-	}
-
-	$recordDataNode->appendChild($statusNode);
-
-	return $recordDataNode;
-}
-
-function loadRedstoneEvents($dbconn, $xmlDoc, $user_id) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
-
-	$query = "SELECT * from redstone_events where user_id = '".dbEsc($user_id)."'";
-	$result = mysql_query($query);
-
-	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
-		$controlNode = $xmlDoc->createElement('events');
-
-		$query2 = "SELECT computer_name, last_seen FROM tokens WHERE token = '".dbEsc($row['redstone_token'])."'";
-		$result2 = mysql_query($query2);
-		$row2 = mysql_fetch_array($result2, MYSQL_ASSOC);
-		$controlNode->setAttribute('redstone_module', $row2['computer_name']);
-		$datetime1 = strtotime($row2['last_seen']);
-		$datetime2 = time();
-		$diff = $datetime2-$datetime1;
-		if ($diff > 200) {
-			$controlNode->setAttribute('redstone_active', false);
-		} else {
-			$controlNode->setAttribute('redstone_active', true);
-		}
-
-		$query3 = "SELECT computer_name, last_seen FROM tokens WHERE token = '".dbEsc($row['storage_token'])."'";
-		$result3 = mysql_query($query3);
-		$row3 = mysql_fetch_array($result3, MYSQL_ASSOC);
-		$controlNode->setAttribute('storage_module', $row3['computer_name']);
-		$datetime1 = strtotime($row3['last_seen']);
-		$datetime2 = time();
-		$diff = $datetime2-$datetime1;
-		if ($diff > 200) {
-			$controlNode->setAttribute('storage_active', false);
-		} else {
-			$controlNode->setAttribute('storage_active', true);
-		}
-
-		$controlNode->setAttribute('event_type', $row['event_type']);
-		$controlNode->setAttribute('trigger_value', $row['trigger_value']);
-		$controlNode->setAttribute('side', $row['side']);
-		$controlNode->setAttribute('output', $row['output']);
-		$controlNode->setAttribute('event_id', $row['event_id']);
-		$recordDataNode->appendChild($controlNode);
-	}
-
-	return $recordDataNode;
-}
-
-function removeEvent($dbconn, $xmlDoc, $event_id) {
+function removeEvent($dbConn, $xmlDoc, $event_id) {
 	$recordDataNode = $xmlDoc->createElement('recorddata');
 
 	$query2 = "DELETE FROM redstone_events WHERE event_id = '".dbEsc($event_id)."'";
-	$result2 = mysql_query($query2);
+	$result2 = mysqli_query($query2);
 
 	if (!($result2)) {
 			$statusNode = $xmlDoc->createElement('status', $query);

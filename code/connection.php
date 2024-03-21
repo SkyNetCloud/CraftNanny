@@ -1,8 +1,17 @@
 <?php
 
-//open database connection
-$dbConn = mysql_connect('', '', '')
-	or die(print_r(mysql_error()));
-mysql_select_db('') or die(print_r(mysql_error()));
+// Database configuration
+$servername = "old";
+$username = "old";
+$password = "old";
+$database = "old";
+
+// Create connection
+$dbConn = mysqli_connect($servername, $username, $password, $database);
+
+// Check connection
+if (!$dbConn) {
+    die("Connection failed: " . mysqli_connect_error());
+}
 
 ?>

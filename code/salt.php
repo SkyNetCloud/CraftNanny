@@ -1,36 +1,41 @@
 <?php
 
-$username = $_POST['user'];
+$version = 1;
 
-$username = htmlspecialchars($username);
-
+$username = $_POST['user'] ?? '';
 require_once('connection.php');
-$salt = '';
-$query = "select salt from users where username = '".dbEsc($username). "';";	
-$result = mysql_query($query);
 
-
-
-if ($result) {
-	$row = mysql_fetch_array($result, MYSQL_ASSOC);
-	$salt = $row['salt'];
-	echo $salt;
+// Check if username is provided
+if (!empty($username)) {
+    // Prepare the SQL query with a placeholder for username
+    $query = "SELECT salt FROM users WHERE username = ?";
+    
+    // Prepare the statement
+    $stmt = $dbConn->prepare($query);
+    
+    // Bind the parameter
+    $stmt->bind_param("s", $username);
+    
+    // Execute the statement
+    $stmt->execute();
+    
+    // Get the result
+    $result = $stmt->get_result();
+    
+    // Check if the query was successful
+    if ($result->num_rows > 0) {
+        // Fetch the row
+        $row = $result->fetch_assoc();
+        $salt = $row['salt'];
+        echo $salt;
+    } else {
+        echo 'error';
+    }
 } else {
-	echo 'error';
+    echo 'error: Username not provided';
 }
 
-function dbEsc($theString) {
-	$theString = mysql_real_escape_string($theString);
-	return $theString;
-}
-
-function dbError(&$xmlDoc, &$xmlNode, $theMessage) {
-	$errorNode = $xmlDoc->createElement('mysqlError', $theMessage);
-	$xmlNode->appendChild($errorNode);
-}
-
-
-
-
+// Close the database connection (optional)
+//$dbConn->close();
 
 ?>
