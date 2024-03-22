@@ -47,10 +47,10 @@ function loadModules(template) {
 					$(newModule).find('#status_img').attr('src', 'assets/img/online.png');
 					active = true;
 				}
-				$(newModule).find('#level_meter').attr('value', $(this).attr('per```````````````````````````````````````````````````````````````````````````cent'));
+				$(newModule).find('#level_meter').attr('value', $(this).attr('percent'));
 
-				if ($(this).attr('energy_type') == 'RF') {
-					$(newModule).find('#energy_type').text("Redstone Flux (RF)");
+				if ($(this).attr('energy_type') == 'FE') {
+					$(newModule).find('#energy_type').text("Forge Energy (FE)");
 				} else if ($(this).attr('energy_type') == 'EU') {
 					$(newModule).find('#energy_type').text("Energy Unit (EU)");
 				} else {

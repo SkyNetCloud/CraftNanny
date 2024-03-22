@@ -121,11 +121,11 @@ end
 
 function getTankInformation(t,tankName)
 				tnk=peripheral.wrap(t)
-				okLiquid,msg = pcall(tnk.getTankInfo)
+				okLiquid,msg = pcall(tnk.getStored())
 				if okLiquid then 
-					tankTbl=tnk.getTankInfo()
-					capacity=tankTbl[1].capacity
-					contentsTbl=tankTbl[1].contents or {["rawName"]="nothing",["amount"]=0}
+					tankTbl=tnk.getStored()
+					capacity=tnk.getCapacity()
+					
 					tankContentName=contentsTbl.rawName
 					tankContentAmount=contentsTbl.amount
 					percent=round((tankContentAmount/capacity*100),2)

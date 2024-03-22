@@ -6195,7 +6195,7 @@ th.hide-for-touch {
   border-style: solid;
   border-width: 1px;
   padding-top: 8px;
-  background-color: #eeeeee;
+  background-color: #31363F;
   height: auto;
 }
 
@@ -6621,4 +6621,98 @@ box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
 -moz-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
 box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
   
+}
+
+.discord-invite {
+  background-color: rgb(47, 49, 54);
+  border-radius: 4px;
+  box-sizing: border-box;
+  height: 110px;
+  padding: 16px;
+  width: 432px;
+  font-family: Whitney, Helvetica Neue, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  margin: auto
+}
+.discord-invite-text {
+  block-size: 16px;
+  font-size: 12px;
+  height: 16px;
+  margin-bottom: 12px;
+  margin-top: 0px;
+  text-transform: uppercase;
+  color: rgb(185, 187, 190);
+}
+.discord-invite-body {
+  display: flex;
+  justify-content: center;
+  width: 400px;
+}
+.discord-invite-image {
+  background-image: url("https://cdn.discordapp.com/icons/SERVER-ID/SERVER-ICON-HASH.png?size=128");
+  background-position: 50% 50%;
+  background-size: 100% 100%;
+  border-radius: 15px;
+  margin-right: 16px;
+  width: 50px;
+}
+.discord-invite-details {
+  block-size: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 246.2px;
+}
+.discord-invite-name {
+  margin: 0px;
+  color: white;
+ display: flex;
+}
+.discord-invite-verified {
+  color: rgb(114, 137, 218);
+  display: flex;
+  margin-right: 8px;
+}
+.discord-invite-verified-tick {
+  display: flex;
+  position: absolute;
+}
+.discord-invite-verified-tick-svg {
+  color: white;
+}
+.discord-invite-counts {
+  margin: 0px;
+  align-items: center;
+  display: flex;
+  color: rgb(185, 187, 190);
+}
+.discord-invite-status-icon {
+  block-size: 8px;
+  border-radius: 50%;
+  inline-size: 8px;
+  margin-right: 4px;
+}
+.discord-invite-online-icon {
+  background-color: rgb(67, 181, 129);
+}
+.discord-invite-offline-icon {
+  background-color: rgb(116, 127, 141);
+}
+.discord-invite-join-button {
+  border-radius: 3px;
+  align-items: center;
+  background-color: rgb(67, 181, 129);
+  block-size: 40px;
+  box-sizing: border-box;
+  color: white;
+  display: flex;
+  inline-size: 77.8px;
+  justify-content: center;
+  margin-left: 10px;
+  padding: 2px 20px;
+  text-decoration: none;
+}
+.discord-invite-count {
+  font-size: 12px;
+  margin-right: 8px;
 }

@@ -145,12 +145,12 @@
         <div class="large-12 columns footer_middle">
           <div class="row">
             <div class="large-2 columns">
-              <img src="assets/img/skin.PNG" style="height:200px;">
+              <img src="https://crafatar.com/renders/body/283502a2-4134-454c-bb47-39c3875b0dd4" style="height:200px;">
             </div>
             <div class="large-4 columns" style="height:200px">
               <p><h2 style="font-weight:bold;color:#cccccc;">CraftNanny.org</h2>
               <p style="color:#cccccc;font-size:18px;">Contribute to this open-source project on GitHub!</p>
-              <a href="https://github.com/jaranvil/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
+              <a href="https://github.com/skynetcloud/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
             </div>
             <div class="large-6 columns">
 
@@ -167,7 +167,7 @@
                 <li><a href="home.php" style="color:#cccccc">My Dashboard</a>  </li>
                 <li><a href="setup.php" style="color:#cccccc">Setup Instructions</a>  </li>
                 <li><a href="modules.php" style="color:#cccccc">Modules</a> </li>
-                <li><a href="https://github.com/jaranvil/CraftNanny/issues" style="color:#cccccc">Report Issues </a></li>
+                <li><a href="https://github.com/skynetcloud/CraftNanny/issues" style="color:#cccccc">Report Issues </a></li>
               </ul>
             </div>
           </div>

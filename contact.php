@@ -57,7 +57,7 @@
 
         <div class="large-9 columns">
           <p>
-          <h4>For now, please contact us through <a href="https://github.com/jaranvil/CraftNanny/issues">our GitHub</a> or contact <a href="https://www.reddit.com/u/jaranvil">u/jaranvil</a><h4>
+          <h4>For now, please contact us through <a href="https://github.com/skynetcloud/CraftNanny/issues">our GitHub</a> or contact <a href="https://www.reddit.com/u/jaranvil">u/jaranvil</a><h4>
         </div>
  
 

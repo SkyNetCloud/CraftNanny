@@ -1,28 +1,30 @@
 function createUser() {
-	var usernameInput = $('#username').val(),
-		passwordInput = $('#password').val(),
-		passwordInput2 = $('#password2').val(),
-		email = $('#email').val();
-		
-	if (confirmEmail(email)) {
-		if (usernameInput.length > 3) {
-			if (passwordInput.length > 2 && passwordInput2.length > 2) {
-				if (passwordInput == passwordInput2) {
-					if (checkForUser(usernameInput)) {
-						alert('User already exists');
-					} else {
-						addNewUser(usernameInput, passwordInput, email);
-					}
-				} else {
-					alert('Passwords did not match!');
-				}
-			} else {
-				alert('Password is too short.');
-			}
-		} else {
-			alert('Username is too short');
-		}
-	}
+    var usernameInput = $('#username').val(),
+        passwordInput = $('#password').val(),
+        passwordInput2 = $('#password2').val(),
+        email = $('#email').val();
+        
+    if (confirmEmail(email)) {
+        if (usernameInput.length > 3) {
+            if (passwordInput.length > 2 && passwordInput2.length > 2) {
+                if (passwordInput == passwordInput2) {
+                    checkForUser(usernameInput, function(userExists) {
+                        if (userExists) {
+                            alert('User already exists');
+                        } else {
+                            addNewUser(usernameInput, passwordInput, email);
+                        }
+                    });
+                } else {
+                    alert('Passwords did not match!');
+                }
+            } else {
+                alert('Password is too short.');
+            }
+        } else {
+            alert('Username is too short');
+        }
+    }
 }
 
 function confirmEmail(email) {
@@ -119,36 +121,32 @@ function signOut() {
 
 }
 
-function checkForUser(username) {
-	var result;
-	
-	theParams = {
-		a: 'doesUserExist',
-		id: username,
-		user_type: 'main'
-	}
-	
-	$.ajax({
-		type: "POST",
-		url: "code/main.php",
-		data: theParams, 
-		dataType: 'xml', 
-		async: false,
-		success: function(xml) {		
-			//alert((new XMLSerializer()).serializeToString(xml));	
-			
-			if($(xml).find('records').text() == '0') {
-				result = false;
-			} else {
-				result = true;
-			}
-		},
-		error: function(xhr) {
-			
-		  alert(xhr.responseText);
-		}
-	});
-	return result;
+function checkForUser(username, callback) {
+    var result;
+    
+    theParams = {
+        a: 'doesUserExist',
+        id: username,
+        user_type: 'main'
+    }
+    
+    $.ajax({
+        type: "POST",
+        url: "code/main.php",
+        data: theParams, 
+        dataType: 'xml', 
+        success: function(xml) {       
+            if($(xml).find('records').text() == '0') {
+                result = false;
+            } else {
+                result = true;
+            }
+            callback(result);
+        },
+        error: function(xhr) {     
+          alert(xhr.responseText);
+        }
+    });
 }
 
 

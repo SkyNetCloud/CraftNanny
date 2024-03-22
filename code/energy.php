@@ -4,37 +4,46 @@ $version = 1;
 
 require_once('connection.php');
 
-$token = $_POST['token'] ?? '';
-$id = $_POST['id'] ?? '';
-$bat_name = $_POST['bat_name'] ?? '';
-$energy_type = $_POST['energy_type'] ?? '';
-$percent = $_POST['percent'] ?? '';
+$token = $_POST['token'];
+$id = $_POST['id'];
+$bat_name = $_POST['bat_name'];
+$energy_type = $_POST['energy_type'];
+$percent = $_POST['percent'];
 
-// Sanitize input
+// Sanitize input using htmlspecialchars to prevent XSS attacks
 $energy_type = htmlspecialchars($energy_type);
 $bat_name = htmlspecialchars($bat_name);
 $percent = htmlspecialchars($percent);
 
-// Update last_seen timestamp
+// Prepare the first update query
 $query = "UPDATE tokens SET last_seen = NOW() WHERE token = ? AND computer_id = ?";
-$stmt = $dbConn->prepare($query);
-$stmt->bind_param("si", $token, $id);
-$stmt->execute();
+$stmt = mysqli_prepare($dbConn, $query);
+mysqli_stmt_bind_param($stmt, "si", $token, $id);
+mysqli_stmt_execute($stmt);
 
-if ($stmt->affected_rows > 0) {
-    // Update energy storage information
+// Check if the first query was successful
+if (mysqli_stmt_affected_rows($stmt) > 0) {
+    // Prepare the second update query
     $query2 = "UPDATE energy_storage SET bat_name = ?, energy_type = ?, percent = ? WHERE token = ?";
-    $stmt2 = $dbConn->prepare($query2);
-    $stmt2->bind_param("ssds", $bat_name, $energy_type, $percent, $token);
-    $stmt2->execute();
+    $stmt2 = mysqli_prepare($dbConn, $query2);
+    mysqli_stmt_bind_param($stmt2, "ssss", $bat_name, $energy_type, $percent, $token);
+    mysqli_stmt_execute($stmt2);
 
-    if ($stmt2->affected_rows > 0) {
-        echo $version;
+    // Check if the second query was successful
+    if (mysqli_stmt_affected_rows($stmt2) > 0) {
+        echo $token;
     } else {
-        echo 'error: energy storage update query failed.';
+        echo 'error: energy_storage update query failed.';
     }
 } else {
     echo 'error: token update query failed.';
 }
+
+// Close prepared statements
+mysqli_stmt_close($stmt);
+mysqli_stmt_close($stmt2);
+
+// Close database connection
+mysqli_close($dbConn);
 
 ?>

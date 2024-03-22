@@ -281,20 +281,20 @@ function getEnergyModules(template) {
 		async: true,
 		success: function(xml) {	
 			
-			//alert((new XMLSerializer()).serializeToString(xml));	
+			alert((new XMLSerializer()).serializeToString(xml));	
 			var counter = 0;
 			$(xml).find('connection').each(function() {
 				var newModule = template.clone(true);
 							
 				if ($(this).attr('active') == '1') {
-					//$(newModule).find('#status_img').attr('src', 'assets/img/online.png');	
+					$(newModule).find('#status_img').attr('src', 'assets/img/online.png');	
 					$('#energy_modules').append("<li><img src='assets/img/online.png' style='width:10px'>"+" "+$(this).attr('name')+"</li>");
 				} else {
 					//$(newModule).find('#status_img').attr('src', 'assets/img/offine.png');
 					$('#energy_modules').append("<li><img src='assets/img/offline.png' style='width:10px'>"+" "+$(this).attr('name')+"</li>");
 				}
-				//$(newModule).find('#module_title').text($(this).attr('name'));
-				//$('#fluid_modules').append($(newModule));
+				$(newModule).find('#module_title').text($(this).attr('name'));
+				$('#fluid_modules').append($(newModule));
 				counter = counter + 1;
 			});
 			if (counter != 0) {
