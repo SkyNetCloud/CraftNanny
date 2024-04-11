@@ -6,14 +6,15 @@ local type = ''
 local updating = false
 
 local githubRepo = "SkyNetCloud/CraftNanny"
-local branch = "main"
+local branch = "master"
+local folder = "modules"
 local files = {
-    player_module = "modules/player.lua",
-    redstone_module = "modules/redstone.lua",
-    fluid_module = "modules/fluid.lua",
-    energy_module = "modules/energy.lua",
-    hash_api = "modules/hash_api.lua",
-    startup = "modules/startup.lua"
+    player_module = "player.lua",
+    redstone_module = "redstone.lua",
+    fluid_module = "fluid.lua",
+    energy_module = "energy.lua",
+    hash_api = "hash_api.lua",
+    startup = "startup.lua"
 }
 
 
@@ -62,7 +63,7 @@ end
 
 
 function downloadFromGitHub(file)
-  local url = "https://raw.githubusercontent.com/" .. githubRepo .. "/" .. branch .. "/" .. file
+  local url = "https://raw.githubusercontent.com/" .. githubRepo .. "/" .. branch .. "/".. folder .."/".. file
   local localPath = fs.combine(shell.dir(), file)
   local response = http.get(url)
   if response then

@@ -181,46 +181,49 @@ function getConnections($dbConn, $xmlDoc, $user_id, $type) {
 	return $recordDataNode;
 }
 
-function getLogs($dbConn, $xmlDoc, $user_id) {
-	//main XML element to return
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function getLogs($dbConn, $xmlDoc, $user_id, $lastUpdateTime) {
+    // main XML element to return
+    $recordDataNode = $xmlDoc->createElement('recorddata');
 
-	//get users tokens and scanner names
-	$query = "SELECT * from tokens where user_id = '".dbEsc($dbConn, $user_id)."' AND module_type = '1'";
-	$result = mysqli_query($dbConn, $query);
-	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC )) {
-		$theScannerNode = $xmlDoc->createElement('scanner');
-			$nameNode = $xmlDoc->createElement('name');
-			$nameNode->setAttribute('name', $row['computer_name']);
-			$nameNode->setAttribute('token', $row['token']);
-			$datetime1 = strtotime($row['last_seen']);
-			$datetime2 = time();
-			$diff = $datetime2-$datetime1;
-			if ($diff > 200) {
-				$nameNode->setAttribute('active', false);
-			} else {
-				$nameNode->setAttribute('active', true);
-			}
-		$theScannerNode->appendChild($nameNode);
-		//for each scanncer, get last 10 visitors
-		$query2 = "SELECT DISTINCT(ign) AS ign from logs where token = '".dbEsc($dbConn, $row['token'])."' ORDER BY timestamp DESC LIMIT 10";
-		$result2 = mysqli_query($dbConn, $query2);
-		while ($row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC )) {
-			$VistorNode = $xmlDoc->createElement('visitor');
-			$VistorNode->setAttribute('ign', $row2['ign']);
-			$VistorNode->setAttribute('token', $row['token']);
-			
-			$query3 = "SELECT timestamp FROM logs WHERE token = '".$row['token']."' AND ign = '".$row2['ign']."' ORDER BY timestamp DESC LIMIT 1";
-			$result3 = mysqli_query($dbConn, $query3);
-			$row3 = mysqli_fetch_array($result3, MYSQLI_ASSOC );
-			$VistorNode->setAttribute('last_seen', $row3['timestamp']);
-			$theScannerNode->appendChild($VistorNode);
+    // get users tokens and scanner names
+    $query = "SELECT * from tokens where user_id = '".dbEsc($dbConn, $user_id)."' AND module_type = '1'";
+    $result = mysqli_query($dbConn, $query);
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC )) {
+        // Check if the scanner's last update time is after the lastUpdateTime
+        $lastSeenTime = strtotime($row['last_seen']);
+        if ($lastSeenTime > $lastUpdateTime) {
+            $theScannerNode = $xmlDoc->createElement('scanner');
+            $nameNode = $xmlDoc->createElement('name');
+            $nameNode->setAttribute('name', $row['computer_name']);
+            $nameNode->setAttribute('token', $row['token']);
+            $datetime1 = strtotime($row['last_seen']);
+            $datetime2 = time();
+            $diff = $datetime2 - $datetime1;
+            if ($diff > 200) {
+                $nameNode->setAttribute('active', false);
+            } else {
+                $nameNode->setAttribute('active', true);
+            }
+            $theScannerNode->appendChild($nameNode);
+            // for each scanner, get last 10 visitors
+            $query2 = "SELECT DISTINCT(ign) AS ign from logs where token = '".dbEsc($dbConn, $row['token'])."' ORDER BY timestamp DESC LIMIT 10";
+            $result2 = mysqli_query($dbConn, $query2);
+            while ($row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC )) {
+                $VistorNode = $xmlDoc->createElement('visitor');
+                $VistorNode->setAttribute('ign', $row2['ign']);
+                $VistorNode->setAttribute('token', $row['token']);
 
-		}
-		$recordDataNode->appendChild($theScannerNode);
-	}
+                $query3 = "SELECT timestamp FROM logs WHERE token = '".$row['token']."' AND ign = '".$row2['ign']."' ORDER BY timestamp DESC LIMIT 1";
+                $result3 = mysqli_query($dbConn, $query3);
+                $row3 = mysqli_fetch_array($result3, MYSQLI_ASSOC );
+                $VistorNode->setAttribute('last_seen', $row3['timestamp']);
+                $theScannerNode->appendChild($VistorNode);
+            }
+            $recordDataNode->appendChild($theScannerNode);
+        }
+    }
 
-	return $recordDataNode;
+    return $recordDataNode;
 }
 
 function getPlayerData($dbConn, $xmlDoc, $ign, $token) {

@@ -1,7 +1,7 @@
 local bat={}
 local version = 2
 
-local installer = "P324jv87"
+local installer = "installer.lua"
 local token = '0'
 local module_name = ''
 local username = ''

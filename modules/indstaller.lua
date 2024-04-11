@@ -1,4 +1,4 @@
-local githubRepo = "SkyNetCloud/"
+local githubRepo = "SkyNetCloud/CraftNanny"
 local branch = "main"
 local files = {
     installer = "installer.lua",
