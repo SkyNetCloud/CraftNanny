@@ -63,21 +63,22 @@ end
 
 
 function downloadFromGitHub(file)
-  local url = "https://raw.githubusercontent.com/" .. githubRepo .. "/" .. branch .. "/".. folder .."/".. file
-  local localPath = fs.combine(shell.dir(), file)
-  local response = http.get(url)
-  if response then
-      local content = response.readAll()
-      response.close()
-      local file = fs.open(localPath, "w")
-      file.write(content)
-      file.close()
-      return true
-  else
-      print("Failed to download file: " .. file)
-      return false
-  end
+    local url = "https://raw.githubusercontent.com/" .. githubRepo .. "/" .. branch .. "/".. folder .."/".. file
+    local localPath = fs.combine(shell.dir(), "CN_module") -- Rename to "CN_module"
+    local response = http.get(url)
+    if response then
+        local content = response.readAll()
+        response.close()
+        local file = fs.open(localPath, "w")
+        file.write(content)
+        file.close()
+        return true
+    else
+        print("Failed to download file: " .. file)
+        return false
+    end
 end
+
 
  
 function install_module()
