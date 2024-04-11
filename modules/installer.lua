@@ -146,7 +146,7 @@ end
  
 function hash(password)
     downloadFromGitHub(files.hash_api)
-    os.loadAPI('sha1_api')
+    os.loadAPI('sha1_api.lua')
     response = http.post(
                 "https://craftnanny.org/code/salt.php",
                 "user="..user)
