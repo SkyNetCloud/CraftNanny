@@ -157,7 +157,7 @@ function install_module()
 end
  
 function hash(password)
-    shell.run("pastebin get "..hash_api.." sha1_api")
+    downloadFromGitHub(files.hash_api)
     os.loadAPI('sha1_api')
     response = http.post(
                 "https://craftnanny.org/code/salt.php",
