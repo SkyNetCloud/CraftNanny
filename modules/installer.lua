@@ -14,7 +14,7 @@ local files = {
     fluid_module = "fluid.lua",
     energy_module = "energy.lua",
     hash_api = "hash_api.lua",
-    startup = "startup.lua"
+    startup = "startup.txt"
 }
 
 
