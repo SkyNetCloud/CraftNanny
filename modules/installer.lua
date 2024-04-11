@@ -1,6 +1,3 @@
- 
- 
- 
 term.clear()
 local token = ''
 local module_name = ''
@@ -11,12 +8,12 @@ local updating = false
 local githubRepo = "SkyNetCloud/CraftNanny"
 local branch = "main"
 local files = {
-    player_module = "player.lua",
-    redstone_module = "redstone.lua",
-    fluid_module = "fluid.lua",
-    energy_module = "energy.lua",
-    hash_api = "hash_api.lua",
-    startup = "startup.lua"
+    player_module = "modules/player.lua",
+    redstone_module = "modules/redstone.lua",
+    fluid_module = "modules/fluid.lua",
+    energy_module = "modules/energy.lua",
+    hash_api = "modules/hash_api.lua",
+    startup = "modules/startup.lua"
 }
 
 
