@@ -66,7 +66,7 @@ function ping_home()
     response = http.post("https://craftnanny.org/code/ping.php",
         "token="..token.."&id="..os.getComputerID())
     current_version = response.readAll()
- 
+    
     if tonumber(current_version) > version then
       run_installer()
     end

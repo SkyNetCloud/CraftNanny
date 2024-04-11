@@ -22,12 +22,12 @@ local updating = false
 local githubRepo = "SkyNetCloud/CraftNanny"
 local branch = "main"
 local files = {
-    player_module = "9p9qJPBv.lua",
-    redstone_module = "H9TyYyJu.lua",
-    fluid_module = "tQGEMC1P.lua",
-    energy_module = "3dKYE2zR.lua",
-    hash_api = "JtPRVspj.lua",
-    startup = "KnmEN37h.lua"
+    player_module = "player.lua",
+    redstone_module = "redstone.lua",
+    fluid_module = "fluid.lua",
+    energy_module = "energy.lua",
+    hash_api = "hash_api.lua",
+    startup = "startup.lua"
 }
 
 
