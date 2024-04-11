@@ -1,17 +1,6 @@
  
  
  
------------------PASTEBINs--------------------------
-installer = "P324jv87"
- 
-player_module = "9p9qJPBv"
-redstone_module = "H9TyYyJu"
-fluid_module = "tQGEMC1P"
-energy_module = "3dKYE2zR"
- 
-hash_api = "JtPRVspj"
-startup = "KnmEN37h"
----------------------------------------------
 term.clear()
 local token = ''
 local module_name = ''
