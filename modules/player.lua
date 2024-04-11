@@ -2,7 +2,7 @@
 --allowedPlayerArray={["Topher"]=true,["nunley21"]=true,["Demethan"]=true,["waerloga"]=true}
 
 -- pastebin for installer
-local installer = "P324jv87"
+local installer = "installer.lua"
 -- players ignored by senors
 local allowedPlayerArray={}
 -- inventory arrays to compare
@@ -19,7 +19,7 @@ local scanner = ''
 -- oweners username on website
 local username = ''
 -- currently installed version
-local version = 2
+local version = 3
 
 -- write text to the terminal screen
 function draw_text_term(x, y, text, text_color, bg_color)
@@ -64,7 +64,7 @@ function scanner_screen()
 end
 
 function downloadFromGitHub(file)
-	local url = "https://raw.githubusercontent.com/" .. githubRepo .. "/" .. branch .. "/".. folder .."/".. file
+	local url = "https://raw.githubusercontent.com/SkyNetCloud/CraftNanny/master/modules".. file
 	local localPath = fs.combine(shell.dir(), file)
 	local response = http.get(url)
 	if response then
@@ -93,12 +93,12 @@ end
 
 -- called for new installations and when the scanner needs to be updated
 function run_installer()
-    if fs.exists("install") then
-        fs.delete("install")
+    if fs.exists("installer.lua") then
+        fs.delete("installer.lua")
     end
     downloadFromGitHub(files)
     sleep(1)
-    shell.run("install")
+    shell.run("installer.lua")
 end
 
 -- called every 30 seconds when scanner is running

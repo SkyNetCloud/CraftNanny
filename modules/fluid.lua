@@ -12,9 +12,9 @@
 -- variables
 
 local containers={}
-local version = 2
+local version = 3
 
-local installer = "Q8ah3K9S"
+local installer = ""
 local token = '0'
 local module_name = ''
 local username = ''
