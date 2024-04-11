@@ -2,12 +2,17 @@
 --	Tank module for caftNanny
 --	by demethan
 --	www.breakfastcraft.com
+--  www.craftnanny.org
+--  2015 08 12  demethan: 
+--		-fixed modem support
+--		-did some error magement
+-- 		-added visual bar	
 ---------------------------------------------
 
 -- variables
 
 local containers={}
-local version = 1
+local version = 2
 
 local installer = "Q8ah3K9S"
 local token = '0'
@@ -17,10 +22,10 @@ local type = ''
 
 -- write text to the terminal screen
 function draw_text_term(x, y, text, text_color, bg_color)
-    term.setTextColor(text_color)
-    term.setBackgroundColor(bg_color)
-    term.setCursorPos(x,y)
-    write(text)
+  term.setTextColor(text_color)
+  term.setBackgroundColor(bg_color)
+  term.setCursorPos(x,y)
+  write(text)
 end
 
 -- draw a line on the terminal screen
@@ -47,27 +52,27 @@ function terminal_screen()
 	draw_text_term(8, 3, username, colors.white, colors.black)
 	draw_text_term(1, 4 , string.rep("-", 51), colors.lime, colors.black)
 	
-	draw_text_term(2, 8, "I dont know what to put here...", colors.white, colors.black)
+	--draw_text_term(2, 8, "I dont know what to put here...", colors.white, colors.black)
 end
 
 -- retrieves token from local text file
 function load_config()
-    sr = fs.open("config.txt", "r")
+  sr = fs.open("config.txt", "r")
     token = sr.readLine()
 	module_name = sr.readLine()
 	username = sr.readLine()
 	type = sr.readLine()
-    sr.close()
+  sr.close()
 end
 
 -- called for new installations and when the scanner needs to be updated
 function run_installer()
-    if fs.exists("install") then
-        fs.delete("install")
-    end
-    shell.run("pastebin get "..installer.." install")
-    sleep(1)
-    shell.run("install")
+	if fs.exists("install") then
+	    fs.delete("install")
+	  end
+	  shell.run("pastebin get "..installer.." install")
+	  sleep(1)
+	  shell.run("install")
 end
 
 
@@ -76,103 +81,136 @@ end
 
 function phone_home(tank_name, fluid_type, percent)
     response = http.post("https://craftnanny.org/code/fluid.php",
-        "token="..token.."&id="..os.getComputerID().."&tank_name="..tank_name.."&fluid_type="..fluid_type.."&percent="..percent)		
+    			"token="..token.."&id="..os.getComputerID().."&tank_name="..tank_name.."&fluid_type="..fluid_type.."&percent="..percent)		
 	return_string = response.readAll()
 	
 	if tonumber(return_string) > version then
-        run_installer()
+			run_installer()
 	end
 end
 
 
---functions
-function findSide()
-	local face
-	if peripheral.isPresent("left") then 
-		face="left"
-		return true, face
-	elseif peripheral.isPresent("right") then 
-		face="right"
-		return true, face
-	elseif peripheral.isPresent("bottom") then 
-		face="bottom"
-		return true, face
-	elseif peripheral.isPresent("top") then 
-		face="top"
-		return true, face
-	elseif peripheral.isPresent("back") then 
-		face="back"
-		return true,face
-	else
-		face=""
-		return false,face
-	end
-end
+-- function findPeripheralSide()
+--     -- Define the list of faces to check
+--     local faces = {"left", "right", "bottom", "top", "back"}
 
-function round(num, idp)
-    local mult = 10^(idp or 0)
+--     -- Iterate through each face
+--     for _, face in ipairs(faces) do
+--         if peripheral.isPresent(face) then
+--             return true, face  -- Return if a peripheral is found on this face
+--         end
+--     end
+
+--     return false, ""  -- Return false if no peripheral is found
+-- end
+
+function round(num, decimals)
+    local mult = 10^(decimals or 0)
     return math.floor(num * mult + 0.5) / mult
 end
 
-function getTankInformation(t,tankName)
-    tnk=peripheral.wrap(t)
-    tankTbl=tnk.getTankInfo()
-    capacity=tankTbl[1].capacity
-    contentsTbl=tankTbl[1].contents or {["rawName"]="nothing",["amount"]=0}
-    tankContentName=contentsTbl.rawName
-    tankContentAmount=contentsTbl.amount
-    percent=round((tankContentAmount/capacity*100),2)
-    
-    --print(tankName," ",tankContentName," ",percent," %        ")
-    phone_home(tankName, tankContentName, percent)
+function capitalizeAndRemoveUnderscores(str)
+    return str:gsub("([^_]+)([^_]*)", function(first, rest)
+        first = first:gsub("^%l", string.upper) -- Capitalize the first letter of the first word
+        rest = rest:gsub("^%l", string.upper)   -- Capitalize the first letter of the second word
+        return first:gsub("_", "") .. rest:gsub("_", "") -- Concatenate the words after removing underscores
+    end)
 end
 
-function notanks()
-	-- relevent error msg
+
+
+function getTankInformation(t, tankName)
+    local tnk = peripheral.wrap(t)
+    local okLiquid, msg = pcall(tnk.getInfo)
+
+    if okLiquid then 
+        local amount = msg.amount
+        local capacity = msg.capacity
+        local fluid = tostring(msg.fluid):gsub("^[^:]*:", "")  -- Remove anything before the first colon
+        fluid = capitalizeAndRemoveUnderscores(fluid) -- Capitalize the first letter 
+        local percent = round((amount / capacity * 100), 2)
+
+        
+        phone_home(tankName, fluid, percent)
+        
+        print(fluid, ":")
+        local graphBar = round(((term.getSize() * percent) / 100), 0)
+        if graphBar < 50 then 
+            draw_line_term(6, 7, graphBar , colors.green)
+            draw_line_term(6 + graphBar, 7, term.getSize() - graphBar - 6, colors.red)
+            draw_text_term(1, 7, percent .. " % ", colors.lime, colors.black)
+            term.setBackgroundColor(colors.black)
+        else
+            draw_line_term(6, 7, graphBar - 6 , colors.green)
+            draw_text_term(1, 7, percent .. " % ", colors.lime, colors.black)
+            term.setBackgroundColor(colors.black)
+        end
+        return true
+    else
+        return false
+    end
 end
 
 
 function start_loop()
-	ok,side=findSide ()
-	if not ok then 
-		notanks()
-	end
-	
-	tanks = peripheral.getNames()
+    local side
+    local tanks = peripheral.getNames()
+    local faces = {"left", "right", "bottom", "top", "back"}
 
-	while true do
-		terminal_screen()
-		
-		-- I'm not use yet how to record multible tanks from one token in the db
-		-- just recording the first one it connects to for now
-		
-		--if #tanks >1 then
-			-- for tankNo,tank in pairs(tanks) do
-			-- 	if tank~=side then
-			-- 	getTank(tank,tank)			
-			-- 	end
-	
-			-- end
-			
-		--else
-			getTankInformation(side,tanks[1])
-		--end
-		
-		-- main active status with server
-		sleep(30)
-	end
+    -- Find the side where a peripheral is present
+    for _, face in ipairs(faces) do
+        if peripheral.isPresent(face) then
+            side = face
+            break
+        end
+    end
+
+    -- -- If no peripheral is found, exit the loop
+    -- if not side then
+    --     print("No tank storage found")
+    --     print("Please check your modems")
+    --     return
+    -- end
+
+    while true do
+        terminal_screen()
+
+        if #tanks > 2 then
+            print("Only one device is supported")
+            break
+        elseif #tanks == 2 then
+            for _, tank in pairs(tanks) do
+                if tank ~= side then
+                    ok = getTankInformation(tank, tank)          
+                end
+            end
+        else
+            ok = getTankInformation(side, "Tank"..os.getComputerID())
+        end
+
+        if not ok then 
+            print("No tank storage found")
+            print("Do you have the right module?")
+            print("Please check your modems")
+            break
+        end
+
+        -- Main active status with server
+        sleep(30)
+    end
 end
+
 
 function start()
 	term.clear()
 	term.setCursorPos(1,1)
 	
-    if fs.exists("config.txt") then
-        load_config()
-        start_loop()
-    else
-        run_installer()
-    end
+  if fs.exists("config.txt") then
+      load_config()
+	  start_loop()
+  else
+  	  run_installer()
+  end
 end
 
 start()

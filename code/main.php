@@ -1,14 +1,10 @@
 <?php
-// disable error display
-error_reporting(E_ALL ^ E_DEPRECATED);
-error_reporting(E_ALL | E_NOTICE | E_WARNING);
-ini_set('log_errors', 'Off'); 
 
 require_once('main_functions.php');
 
 // toggle document type xml/html
 $usexml = 1;
-$debugMode = true;
+$debugMode = false;
 
 if (!isset($usexml)) {
     $usexml = 0;

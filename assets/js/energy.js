@@ -49,7 +49,9 @@ function loadModules(template) {
 				}
 				$(newModule).find('#level_meter').attr('value', $(this).attr('percent'));
 
-				if ($(this).attr('energy_type') == 'FE') {
+				if ($(this).attr('energy_type') == 'RF') {
+					$(newModule).find('#energy_type').text("Redstone Flux (RF)");
+			    } else if ($(this).attr('energy_type') == 'FE') {
 					$(newModule).find('#energy_type').text("Forge Energy (FE)");
 				} else if ($(this).attr('energy_type') == 'EU') {
 					$(newModule).find('#energy_type').text("Energy Unit (EU)");
@@ -105,11 +107,11 @@ function removeModule(token) {
 			dataType: 'xml',
 			async: false,
 			success: function(xml) {
-				//alert((new XMLSerializer()).serializeToString(xml));
+				alert((new XMLSerializer()).serializeToString(xml));
 				result = true;
 			},
 			error: function(xhr) {
-			 // alert(xhr.responseText);
+			 alert(xhr.responseText);
 
 			}
 		});

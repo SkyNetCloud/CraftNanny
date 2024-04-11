@@ -1,53 +1,90 @@
 <?php
 
+// Enable error reporting to display all errors
+error_reporting(E_ALL);
+
+// Optionally, you can also display notices and warnings along with other error types
+ error_reporting(E_ALL | E_NOTICE | E_WARNING);
+
+// If you want to display errors on the web page, you can set display_errors to On in php.ini
+ini_set('display_errors', 1);
+
+// If you want to log errors to a file, you can set log_errors to On in php.ini
+ini_set('log_errors', 1);
+
+$version = 1;
+
 require_once('connection.php');
 
 $token = $_POST['token'];
 $ign = $_POST['ign'];
 $event = $_POST['event'];
-$discription = $_POST['description'];
+$description = $_POST['description'];
 $id = $_POST['id'];
 
-$user_id = validateToken($token, $id);
-$event = htmlspecialchars($event);
-$ign = htmlspecialchars($ign);
-$discription = htmlspecialchars($discription);
-
+$user_id = validateToken($token, $id, $dbConn);
 if ($user_id) {
-	enterRecord($ign, $event, $discription, $user_id, $token);
+    enterRecord($ign, $event, $description, $user_id, $token, $dbConn);
 } else {
-	echo 'error';
+    echo 'error';
 }
 
-function enterRecord($ign, $event, $discription, $user_id, $token) {
-	$query = "INSERT INTO logs (user_id, ign, event, discription, timestamp, token) VALUES ('".$user_id."', '".dbEsc($ign)."', ".$event.", '".dbEsc($discription)."', NOW(), '".dbEsc($token)."')";
-	$result = mysql_query($query);
-	if ($result) {
-		echo 'sucess';
-	} else {
-		echo 'error';
-	}
+function enterRecord($ign, $event, $description, $user_id, $token, $dbConn) {
+    // Prepare SQL statement with placeholders
+    $query = "INSERT INTO logs (user_id, ign, event, description, timestamp, token) VALUES (?, ?, ?, ?, NOW(), ?)";
+    
+    // Prepare statement
+    $stmt = mysqli_prepare($dbConn, $query);
+    if (!$stmt) {
+        echo 'Error: Failed to prepare statement: ' . mysqli_error($dbConn);
+        return;
+    }
+    
+    // Bind parameters to the statement
+    mysqli_stmt_bind_param($stmt, 'ssiss', $user_id, $ign, $event, $description, $token);
+    
+    // Execute the statement
+    $success = mysqli_stmt_execute($stmt);
+    
+    if ($success) {
+        echo 'success';
+    } else {
+        echo 'Error: ' . mysqli_error($dbConn);
+    }
 }
 
-function validateToken($token, $id) {
-	$query = "select user_id from tokens where token = '".dbEsc($token). "' AND computer_id = ".dbEsc($id). ";";
-	$result = mysql_query($query);
-	$row = mysqli_fetch_array($result, MYSQL_ASSOC);
-	return $row['user_id'];
+function validateToken($token, $id, $dbConn) {
+    // Prepare SQL statement with placeholders
+    $query = "SELECT user_id FROM tokens WHERE token = ? AND computer_id = ?";
+    
+    // Prepare statement
+    $stmt = mysqli_prepare($dbConn, $query);
+    if (!$stmt) {
+        echo 'Error: Failed to prepare statement: ' . mysqli_error($dbConn);
+        return false;
+    }
+    
+    // Bind parameters to the statement
+    mysqli_stmt_bind_param($stmt, 'si', $token, $id);
+    
+    // Execute the statement
+    $success = mysqli_stmt_execute($stmt);
+    
+    if ($success) {
+        // Bind result variables
+        mysqli_stmt_bind_result($stmt, $user_id);
+        
+        // Fetch result
+        mysqli_stmt_fetch($stmt);
+        
+        // Close statement
+        mysqli_stmt_close($stmt);
+        
+        return $user_id;
+    } else {
+        echo 'Error: ' . mysqli_error($dbConn);
+        return false;
+    }
 }
-
-function dbEsc($theString) {
-	$theString = mysql_real_escape_string($theString);
-	return $theString;
-}
-
-function dbError(&$xmlDoc, &$xmlNode, $theMessage) {
-	$errorNode = $xmlDoc->createElement('mysqlError', $theMessage);
-	$xmlNode->appendChild($errorNode);
-}
-
-
-
-
 
 ?>

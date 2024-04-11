@@ -19,7 +19,7 @@ function loginUser() {
 		dataType: 'xml', 
 		async: false,
 		success: function(xml) {		
-			//alert((new XMLSerializer()).serializeToString(xml));	
+			//
 			var token = $(xml).find('token').text();
 			if (token.length > 0) {
 				signIn(token);

@@ -55,7 +55,7 @@ function addNewUser(name, pwd, email) {
 		async: true,
 		success: function(xml) {		
 			$('#sidebar_create').hide();
-			//alert((new XMLSerializer()).serializeToString(xml));	
+			//
 			signIn($(xml).find('token').text());
 			
 		},
@@ -85,7 +85,7 @@ function loginUser() {
 		dataType: 'xml', 
 		async: true,
 		success: function(xml) {		
-			//alert((new XMLSerializer()).serializeToString(xml));	
+			//
 			var token = $(xml).find('token').text();
 			if (token.length > 0) {
 				signIn(token);

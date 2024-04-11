@@ -1,5 +1,3 @@
-/// <reference path="../typings/jquery/jquery.d.ts"/>
-
 var $moduleTemplate,
 	$blankEvent;
 
@@ -54,7 +52,7 @@ function getUser() {
 		async: false,
 		success: function(xml) {	
 			
-			//alert((new XMLSerializer()).serializeToString(xml));	
+			//
 			
 			$(xml).find('user').each(function() {
 				$('#username').text($(this).attr('username'));
@@ -84,7 +82,7 @@ function loadEvents(template) {
 		async: false,
 		success: function(xml) {	
 			
-			//alert((new XMLSerializer()).serializeToString(xml));	
+			//
 			
 			$(xml).find('events').each(function() {
 				var newModule = template.clone(true);
@@ -139,7 +137,7 @@ function removeEvent(event) {
 			dataType: 'xml', 
 			async: false,
 			success: function(xml) {	
-				//alert((new XMLSerializer()).serializeToString(xml));	
+				//
 				result = true;
 			},
 			error: function(xhr) {
@@ -167,7 +165,7 @@ function getPlayerModules() {
 		async: true,
 		success: function(xml) {	
 			
-			//alert((new XMLSerializer()).serializeToString(xml));	
+			//
 			var counter = 0;
 			$(xml).find('connection').each(function() {
 				if ($(this).attr('active') == '1') {
@@ -203,7 +201,7 @@ function getRedstoneModules() {
 		async: true,
 		success: function(xml) {	
 			
-			//alert((new XMLSerializer()).serializeToString(xml));	
+			//
 			var counter = 0;
 			$(xml).find('connection').each(function() {
 				if ($(this).attr('active') == '1') {
@@ -239,7 +237,7 @@ function gerFluidModules(template) {
 		async: true,
 		success: function(xml) {	
 			
-			//alert((new XMLSerializer()).serializeToString(xml));	
+			//
 			var counter = 0;
 			$(xml).find('connection').each(function() {
 				var newModule = template.clone(true);
@@ -281,7 +279,7 @@ function getEnergyModules(template) {
 		async: true,
 		success: function(xml) {	
 			
-			alert((new XMLSerializer()).serializeToString(xml));	
+			
 			var counter = 0;
 			$(xml).find('connection').each(function() {
 				var newModule = template.clone(true);
@@ -293,8 +291,8 @@ function getEnergyModules(template) {
 					//$(newModule).find('#status_img').attr('src', 'assets/img/offine.png');
 					$('#energy_modules').append("<li><img src='assets/img/offline.png' style='width:10px'>"+" "+$(this).attr('name')+"</li>");
 				}
-				$(newModule).find('#module_title').text($(this).attr('name'));
-				$('#fluid_modules').append($(newModule));
+				//$(newModule).find('#module_title').text($(this).attr('name'));
+				//$('#fluid_modules').append($(newModule));
 				counter = counter + 1;
 			});
 			if (counter != 0) {

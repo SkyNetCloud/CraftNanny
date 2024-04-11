@@ -1,19 +1,7 @@
----------------------------------------------
---      Power module for caftNanny
---      by demethan
---      www.breakfastcraft.com
---		www.craftnanny.org
---  	2015-08-11: added storage block detection
---					added visual storage bar
---					fixed modem support
----------------------------------------------
-
--- variables
-
 local bat={}
-local version = 1
+local version = 2
 
-local installer = "Q8ah3K9S"
+local installer = "P324jv87"
 local token = '0'
 local module_name = ''
 local username = ''
@@ -38,7 +26,7 @@ function bars()
 	draw_line_term(1, 1, 51, colors.lime)
 	draw_line_term(1, 19, 51, colors.lime)
 	draw_text_term(15, 1, 'CraftNanny Energy Module', colors.gray, colors.lime)
-	draw_text_term(10, 19, 'www.craftnanny.org', colors.gray, colors.lime)
+	draw_text_term(10, 19, 'craftnanny.org', colors.gray, colors.lime)
 end
 
 function terminal_screen()
@@ -74,39 +62,35 @@ end
 
 ------  Start module specific code ---------
 
+function ping_home()
+    response = http.post("https://craftnanny.org/code/ping.php",
+        "token="..token.."&id="..os.getComputerID())
+    current_version = response.readAll()
+ 
+    if tonumber(current_version) > version then
+      run_installer()
+    end
+end
 
 function phone_home(bat_name, energy_type, percent)
     response = http.post("https://craftnanny.org/code/energy.php",
         "token="..token.."&id="..os.getComputerID().."&bat_name="..bat_name.."&energy_type="..energy_type.."&percent="..percent)
-    return_string = response.readAll()
-
-    if tonumber(return_string) > version then
-        run_installer()
-    end
+    --return_string = response.readAll()
 end
 
 function findSide()
-    local face
-    if peripheral.isPresent("left") then
-        face="left"
-        return true, face
-    elseif peripheral.isPresent("right") then
-        face="right"
-        return true, face
-    elseif peripheral.isPresent("bottom") then
-        face="bottom"
-        return true, face
-    elseif peripheral.isPresent("top") then
-        face="top"
-        return true, face
-    elseif peripheral.isPresent("back") then
-        face="back"
-        return true,face
-    else
-        face=""
-        return false,face
+    local faces = {"left", "right", "bottom", "top", "back"}
+    for _, face in ipairs(faces) do
+        if peripheral.isPresent(face) then
+            local peripheralType = peripheral.getType(face)
+            if peripheralType == "advancedEnergyCude" then
+                return true, face
+            end
+        end
     end
+    return false, ""
 end
+
 
 function round(num, idp)
     local mult = 10^(idp or 0)
@@ -116,17 +100,23 @@ end
 function getBat(t,batName)
     bt=peripheral.wrap(t)
 
-    okEU,msg = pcall(bt.getEUCapacity)
-    okRF,msg = pcall(bt.getMaxEnergyStored)
+    okFE,msg = pcall(bt.getMaxEnergy)
+    okRF,msg = pcall(bt.getEnergyCapacity)
+    okIM,msg = pcall(bt.getMaxEnergyStored)
 
-    if okEU then
-        capacity=bt.getEUCapacity()
-        batAmount=bt.getEUStored()
-        batContentName="EU"
-    elseif okRF then
+
+    if okIM then 
         capacity=bt.getMaxEnergyStored()
         batAmount=bt.getEnergyStored()
+        batContentName="FE"
+    elseif okRF then 
+        capacity=bt.getEnergyCapacity()
+        batAmount=bt.getEnergy()
         batContentName="RF"
+    elseif okFE then
+        capacity=bt.getMaxEnergy()
+        batAmount=bt.getEnergy()
+        batContentName="FE"
     else
         return false
     end
@@ -135,6 +125,7 @@ function getBat(t,batName)
 
     phone_home(batName, batContentName, percent)
     print(batName," ",batContentName," :")
+    powerBar = round(((term.getSize()*percent)/100),0)
     if powerBar < 50 then
         draw_line_term(6, 7, powerBar , colors.green)
         draw_line_term(6+powerBar,7,term.getSize()-powerBar-6,colors.red)
@@ -161,7 +152,7 @@ function start_loop()
     bats = peripheral.getNames()
     while true do
         terminal_screen()
-
+		ping_home()
         if #bats >2 then
             print("Only one device is supported")
             break

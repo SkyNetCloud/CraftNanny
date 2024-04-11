@@ -6,17 +6,6 @@
     <title>CraftNanny</title>
     <link rel="stylesheet" href="assets/css/foundation.css" />
     <script src="assets/js/vendor/modernizr.js"></script>
-    <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-66224425-1', 'auto');
-  ga('send', 'pageview');
-
-  </script>
-  
   <script src="assets/js/vendor/jquery.js"></script>
   <script src="assets/js/foundation.min.js"></script>
   <script>
@@ -55,33 +44,24 @@
              </ul>
           </div>
 
-          <soan id="menu_headers">Monitoring</span>
+         <soan id="menu_headers">Monitoring</span>
           <div id='cssmenu'>
 
              <ul>
-               <!--<li><a href='tracking.php'><span>Player Tracking</span></a></li>-->
+               <li><a href='tracking.php'><span>Player Tracking</span></a></li>
                <li><a href='energy.php'><span>Energy Storage</span></a></li>
                <li class='active'><a href='fluid.php'><span>Fluid Storage</span></a></li>
                </ul>
           </div>
-          <!-- <soan id="menu_headers">Controls</span>
+          <soan id="menu_headers">Controls</span>
           <div id='cssmenu'>
 
              <ul>
                <li><a href='redstone.php'><span>Redstone Controls</span></a></li>
-               <li><a href='rednet.php'><span>Rednet Controls</span></a></li>
-               <li><a href='bigreactors.php'><span>BigReactors Control</span></a></li>
+               <!-- <li><a href='rednet.php'><span>Rednet Controls</span></a></li>
+               <li><a href='bigreactors.php'><span>BigReactors Control</span></a></li> -->
                </ul>
           </div>
-          <soan id="menu_headers">Events</span>
-          <div id='cssmenu'>
-
-             <ul>
-               <li class='last'><a href='redstone_events.php'><span>Redstone Events</span></a></li>
-               <li class='last'><a href='notifications.php'><span>Email Notifications</span></a></li>
-            </ul>
-          </div> -->
-
       </div>
 
         <div class="large-9 columns">
@@ -146,12 +126,12 @@
         <div class="large-12 columns footer_middle">
           <div class="row">
             <div class="large-2 columns">
-              <img src="https://crafatar.com/renders/body/283502a2-4134-454c-bb47-39c3875b0dd4" style="height:200px;">
+              <img src="https://mc-heads.net/body/SkyNetCloud" style="height:200px;">
             </div>
             <div class="large-4 columns" style="height:200px">
               <p><h2 style="font-weight:bold;color:#cccccc;">CraftNanny.org</h2>
               <p style="color:#cccccc;font-size:18px;">Contribute to this open-source project on GitHub!</p>
-              <a href="https://github.com/SkyNetCloud/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
+              <a href="https://github.com/jaranvil/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
             </div>
             <div class="large-6 columns">
 
@@ -174,7 +154,5 @@
           </div>
         </div>
       </footer>
-
-
   </body>
 </html>

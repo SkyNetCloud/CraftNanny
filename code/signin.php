@@ -39,7 +39,6 @@ function signIn($username, $password, $name, $dbConn, $id, $module_type) {
 			} elseif ($module_type == '2') {
 				createEnergyEntry($dbConn, $token, $id);
 			} else {
-				echo 'error: Invalid module type'; // Display error for invalid module type
 			}
 			
 			echo $token;

@@ -1,4 +1,4 @@
-/// <reference path="../typings/jquery/jquery.d.ts"/>
+
 
 var token = "";
 

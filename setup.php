@@ -6,16 +6,7 @@
     <title>CraftNanny</title>
     <link rel="stylesheet" href="assets/css/foundation.css" />
     <script src="assets/js/vendor/modernizr.js"></script>
-    <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-66224425-1', 'auto');
-  ga('send', 'pageview');
-
-</script>
+   
   </head>
   <body>
     
@@ -62,8 +53,8 @@
               <h4>1. <a href="signup.php">Create an account</a></h4>
               <h4>2. Choose what module you want to setup <a href="modules.php">from this list</a></h4>
               <h4>3. On an in-game advanced computer run:</h4>
-              <div style="border-style:solid;border-width:1px;background-color:#cccccc;padding:15px;width:225px;margin-left:30px;">
-                  pastebin run Q8ah3K9S
+              <div style="padding:15px;width:225px;margin-left:30px;">
+                  pastebin run P324jv87
               </div> 
               <h4>4. Select a module from the on-screen list</h4>
               <img src="assets/img/setup/select_module.png"/><p>
@@ -95,12 +86,12 @@
         <div class="large-12 columns footer_middle">
           <div class="row">
             <div class="large-2 columns">
-              <img src="https://crafatar.com/renders/body/283502a2-4134-454c-bb47-39c3875b0dd4" style="height:200px;">
+              <img src="https://mc-heads.net/body/SkyNetCloud" style="height:200px;">
             </div>
             <div class="large-4 columns" style="height:200px">
               <p><h2 style="font-weight:bold;color:#cccccc;">CraftNanny.org</h2>
               <p style="color:#cccccc;font-size:18px;">Contribute to this open-source project on GitHub!</p>
-              <a href="https://github.com/skynetcloud/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
+              <a href="https://github.com/jaranvil/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
             </div>
             <div class="large-6 columns">
 

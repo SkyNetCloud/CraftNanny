@@ -6,16 +6,7 @@
     <title>CraftNanny</title>
     <link rel="stylesheet" href="assets/css/foundation.css" />
     <script src="assets/js/vendor/modernizr.js"></script>
-    <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-66224425-1', 'auto');
-  ga('send', 'pageview');
-
-</script>
+   
   </head>
   <body>
     
@@ -57,7 +48,7 @@
 
         <div class="large-9 columns">
           <p>
-          <h4>For now, please contact us through <a href="https://github.com/skynetcloud/CraftNanny/issues">our GitHub</a> or contact <a href="https://www.reddit.com/u/jaranvil">u/jaranvil</a><h4>
+          <h4>For now, please contact us through <a href="https://github.com/skynetcloud/CraftNanny/issues">our GitHub</a> or contact <a href="http://www.reddit.com/u/jaranvil">u/jaranvil</a><h4>
         </div>
  
 

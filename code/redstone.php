@@ -1,17 +1,4 @@
 <?php
-
-// Enable error reporting to display all errors
-error_reporting(E_ALL);
-
-// Optionally, you can also display notices and warnings along with other error types
- error_reporting(E_ALL | E_NOTICE | E_WARNING);
-
-// If you want to display errors on the web page, you can set display_errors to On in php.ini
-ini_set('display_errors', 1);
-
-// If you want to log errors to a file, you can set log_errors to On in php.ini
-ini_set('log_errors', 1);
-
 $version = 2;
 
 require_once('connection.php');

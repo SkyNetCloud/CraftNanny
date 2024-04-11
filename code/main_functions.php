@@ -1,4 +1,15 @@
 <?php
+// // Enable error reporting to display all errors
+// error_reporting(E_ALL);
+
+// // Optionally, you can also display notices and warnings along with other error types
+//  error_reporting(E_ALL | E_NOTICE | E_WARNING);
+
+// // If you want to display errors on the web page, you can set display_errors to On in php.ini
+// ini_set('display_errors', 1);
+
+// // If you want to log errors to a file, you can set log_errors to On in php.ini
+// ini_set('log_errors', 1);
 
 require_once('connection.php');
 
@@ -119,6 +130,7 @@ function addNewUser($dbConn, $xmlDoc, $username, $password, $email) {
 				"VALUES ('".$user_id."', '" . dbEsc($dbConn, $username) ."', '" . $hash . "', '" . $salt . "', '".dbEsc($dbConn, $email)."')";
 
 	$result = mysqli_query($dbConn, $query);
+	
 
 	if (!($result)) {
 		$statusNode = $xmlDoc->createElement('status', $query);
@@ -221,7 +233,7 @@ function getPlayerData($dbConn, $xmlDoc, $ign, $token) {
 		$VistorNode->setAttribute('ign', $row['ign']);
 		$VistorNode->setAttribute('event', $row['event']);
 		$VistorNode->setAttribute('time', $row['timestamp']);
-		$VistorNode->setAttribute('discription', $row['discription']);
+		$VistorNode->setAttribute('description', $row['description']);
 		$recordDataNode->appendChild($VistorNode);
 	}
 	return $recordDataNode;
@@ -329,92 +341,126 @@ function setRedstoneOutput($dbConn, $xmlDoc, $token, $side, $value, $type) {
 }
 
 function getFluidLevels($dbConn, $xmlDoc, $user_id) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+    $recordDataNode = $xmlDoc->createElement('recorddata');
+    $statusNode = $xmlDoc->createElement('status'); // Initialize status node outside the loop
 
-	$query = "SELECT * from tokens where user_id = '".dbEsc($dbConn, $user_id)."' AND module_type = '3'";
-	$result = mysqli_query($dbConn, $query);
+    $query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = '3'";
+    $stmt = mysqli_prepare($dbConn, $query);
 
-	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC )) {
-		$controlNode = $xmlDoc->createElement('modules');
-		$controlNode->setAttribute('name', $row['computer_name']);
-		$controlNode->setAttribute('token', $row['token']);
+    // Check if the statement preparation failed
+    if (!$stmt) {
+        dbError($xmlDoc, $recordDataNode, mysqli_error($dbConn));
+        return $recordDataNode;
+    }
 
-		$datetime1 = strtotime($row['last_seen']);
-		$datetime2 = time();
-		$diff = $datetime2-$datetime1;
-		if ($diff > 200) {
-			$controlNode->setAttribute('active', false);
-		} else {
-			$controlNode->setAttribute('active', true);
-		}
+    // Bind the user_id parameter
+    mysqli_stmt_bind_param($stmt, "s", $user_id);
 
-		$query2 = "SELECT * from tanks where token = '".$row['token']."'";
-		$result2 = mysqli_query($dbConn, $query2);
+    // Execute the statement
+    mysqli_stmt_execute($stmt);
 
-		if (!($result2)) {
-			$statusNode = $xmlDoc->createElement('status', $query);
+    // Get the result set
+    $result = mysqli_stmt_get_result($stmt);
 
-			dbError($xmlDoc, $recordDataNode, mysqli_error());
-		} else {
-			$statusNode = $xmlDoc->createElement('status', 'success');
-		}
+    while ($row = mysqli_fetch_assoc($result)) {
+        $controlNode = $xmlDoc->createElement('modules');
+        $controlNode->setAttribute('name', $row['computer_name']);
+        $controlNode->setAttribute('token', $row['token']);
 
-		$row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC );
+        $datetime1 = strtotime($row['last_seen']);
+        $datetime2 = time();
+        $diff = $datetime2 - $datetime1;
+        $controlNode->setAttribute('active', ($diff <= 200) ? 'true' : 'false');
 
-		$controlNode->setAttribute('tank_name', $row2['tank_name']);
-		$controlNode->setAttribute('fluid_type', $row2['fluid_type']);
-		$controlNode->setAttribute('percent', $row2['percent']);
+        $query2 = "SELECT * from tanks where token = ?";
+        $stmt2 = mysqli_prepare($dbConn, $query2);
 
-		$recordDataNode->appendChild($controlNode);
+        // Check if the statement preparation failed
+        if (!$stmt2) {
+            dbError($xmlDoc, $recordDataNode, mysqli_error($dbConn));
+            return $recordDataNode;
+        }
 
-	}
-	$recordDataNode->appendChild($statusNode);
-	return $recordDataNode;
+        mysqli_stmt_bind_param($stmt2, "s", $row['token']);
+        mysqli_stmt_execute($stmt2);
+        $result2 = mysqli_stmt_get_result($stmt2);
+
+        if (!$result2) {
+            dbError($xmlDoc, $recordDataNode, mysqli_error($dbConn));
+            return $recordDataNode;
+        }
+
+        $row2 = mysqli_fetch_assoc($result2);
+        $controlNode->setAttribute('tank_name', $row2['tank_name']);
+        $controlNode->setAttribute('fluid_type', $row2['fluid_type']);
+        $controlNode->setAttribute('percent', $row2['percent']);
+
+        $recordDataNode->appendChild($controlNode);
+    }
+
+    $statusNode->textContent = 'success'; // Set the content of the status node
+    $recordDataNode->appendChild($statusNode);
+    return $recordDataNode;
 }
 
 
 function getEnergyLevels($dbConn, $xmlDoc, $user_id) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+    $recordDataNode = $xmlDoc->createElement('recorddata');
 
-	$query = "SELECT * from tokens where user_id = '".dbEsc($dbConn, $user_id)."' AND module_type = '2'";
-	$result = mysqli_query($dbConn, $query);
+    $query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = '2'";
+    $stmt = mysqli_prepare($dbConn, $query);
 
-	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC )) {
-		$controlNode = $xmlDoc->createElement('modules');
-		$controlNode->setAttribute('name', $row['computer_name']);
-		$controlNode->setAttribute('token', $row['token']);
+    // Bind the user_id parameter
+    mysqli_stmt_bind_param($stmt, "s", $user_id);
 
-		$datetime1 = strtotime($row['last_seen']);
-		$datetime2 = time();
-		$diff = $datetime2-$datetime1;
-		if ($diff > 200) {
-			$controlNode->setAttribute('active', false);
-		} else {
-			$controlNode->setAttribute('active', true);
-		}
+    // Execute the statement
+    mysqli_stmt_execute($stmt);
 
-		$query2 = "SELECT * from energy_storage where token = '".$row['token']."'";
-		$result2 = mysqli_query($dbConn, $query2);
+    // Get the result set
+    $result = mysqli_stmt_get_result($stmt);
 
-		if (!($result2)) {
-			$statusNode = $xmlDoc->createElement('status', $query);
+    while ($row = mysqli_fetch_assoc($result)) {
+        $controlNode = $xmlDoc->createElement('modules');
+        $controlNode->setAttribute('name', $row['computer_name']);
+        $controlNode->setAttribute('token', $row['token']);
 
-			dbError($xmlDoc, $recordDataNode, mysqli_error());
-		} else {
-			$statusNode = $xmlDoc->createElement('status', 'success');
-		}
+        $datetime1 = strtotime($row['last_seen']);
+        $datetime2 = time();
+        $diff = $datetime2 - $datetime1;
+        if ($diff > 200) {
+            $controlNode->setAttribute('active', false);
+        } else {
+            $controlNode->setAttribute('active', true);
+        }
 
-		$row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC );
+        $query2 = "SELECT * FROM energy_storage WHERE token = ?";
+        $stmt2 = mysqli_prepare($dbConn, $query2);
 
-		$controlNode->setAttribute('bat_name', $row2['bat_name']);
-		$controlNode->setAttribute('energy_type', $row2['energy_type']);
-		$controlNode->setAttribute('percent', $row2['percent']);
+        // Bind the token parameter
+        mysqli_stmt_bind_param($stmt2, "s", $row['token']);
 
-		$recordDataNode->appendChild($controlNode);
+        // Execute the statement
+        mysqli_stmt_execute($stmt2);
 
-	}
-	$recordDataNode->appendChild($statusNode);
-	return $recordDataNode;
+        // Get the result set
+        $result2 = mysqli_stmt_get_result($stmt2);
+
+        if (!$result2) {
+            $statusNode = $xmlDoc->createElement('status', 'error');
+            dbError($xmlDoc, $recordDataNode, mysqli_error($dbConn)); // Assuming $dbConn is the database connection object
+        } else {
+            $statusNode = $xmlDoc->createElement('status', 'success');
+            $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
+
+            $controlNode->setAttribute('bat_name', $row2['bat_name']);
+            $controlNode->setAttribute('energy_type', $row2['energy_type']);
+            $controlNode->setAttribute('percent', $row2['percent']);
+        }
+
+        $recordDataNode->appendChild($controlNode);
+    }
+    $recordDataNode->appendChild($statusNode);
+    return $recordDataNode;
 }
 
 function removeModule($dbConn, $xmlDoc, $token) {
@@ -449,8 +495,17 @@ function redstoneEventDropdowns($dbConn, $xmlDoc, $user_id) {
 		$recordDataNode->appendChild($controlNode);
 	}
 
-	$query = "SELECT * from tokens where user_id = '".dbEsc($dbConn, $user_id)."' AND module_type = '4'";
-	$result = mysqli_query($dbConn, $query);
+	$query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = '4'";
+	$stmt = mysqli_prepare($dbConn, $query);
+	
+	// Bind the user_id parameter
+	mysqli_stmt_bind_param($stmt, "s", $user_id);
+	
+	// Execute the statement
+	mysqli_stmt_execute($stmt);
+	
+	// Get the result set
+	$result = mysqli_stmt_get_result($stmt);
 
 	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC )) {
 		$controlNode = $xmlDoc->createElement('redstone_modules');
@@ -465,8 +520,17 @@ function redstoneEventDropdowns($dbConn, $xmlDoc, $user_id) {
 function getRedstoneSides($dbConn, $xmlDoc, $token) {
 	$recordDataNode = $xmlDoc->createElement('recorddata');
 
-	$query = "SELECT * from redstone_controls where token = '".dbEsc($dbConn, $token)."'";
-	$result = mysqli_query($dbConn, $query);
+	$query = "SELECT * FROM redstone_controls WHERE token = ?";
+	$stmt = mysqli_prepare($dbConn, $query);
+	
+	// Bind the token parameter
+	mysqli_stmt_bind_param($stmt, "s", $token);
+	
+	// Execute the statement
+	mysqli_stmt_execute($stmt);
+	
+	// Get the result set
+	$result = mysqli_stmt_get_result($stmt);
 
 	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC )) {
 		$controlNode = $xmlDoc->createElement('modules');
@@ -505,8 +569,17 @@ function createRedstoneEvent($dbConn, $xmlDoc, $storageToken, $redstoneToken, $t
 function loadRedstoneEvents($dbConn, $xmlDoc, $user_id) {
 	$recordDataNode = $xmlDoc->createElement('recorddata');
 
-	$query = "SELECT * from redstone_events where user_id = '".dbEsc($dbConn, $user_id)."'";
-	$result = mysqli_query($dbConn, $query);
+	$query = "SELECT * FROM redstone_events WHERE user_id = ?";
+	$stmt = mysqli_prepare($dbConn, $query);
+	
+	// Bind the user_id parameter
+	mysqli_stmt_bind_param($stmt, "s", $user_id);
+	
+	// Execute the statement
+	mysqli_stmt_execute($stmt);
+	
+	// Get the result set
+	$result = mysqli_stmt_get_result($stmt);
 
 	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC )) {
 		$controlNode = $xmlDoc->createElement('events');
@@ -551,8 +624,14 @@ function loadRedstoneEvents($dbConn, $xmlDoc, $user_id) {
 function removeEvent($dbConn, $xmlDoc, $event_id) {
 	$recordDataNode = $xmlDoc->createElement('recorddata');
 
-	$query2 = "DELETE FROM redstone_events WHERE event_id = '".dbEsc($dbConn, $event_id)."'";
-	$result2 = mysqli_query($dbConn, $query2);
+	$query2 = "DELETE FROM redstone_events WHERE event_id = ?";
+	$stmt = mysqli_prepare($dbConn, $query2);
+	
+	// Bind the event_id parameter
+	mysqli_stmt_bind_param($stmt, "s", $event_id);
+	
+	// Execute the statement
+	$result2 = mysqli_stmt_execute($stmt);
 
 	if (!($result2)) {
 			$statusNode = $xmlDoc->createElement('status', $query);

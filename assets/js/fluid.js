@@ -34,7 +34,7 @@ function loadModules(template) {
 		async: false,
 		success: function(xml) {	
 			
-			//alert((new XMLSerializer()).serializeToString(xml));	
+			//
 
 			$(xml).find('modules').each(function() {
 				var newModule = template.clone(true),
@@ -84,7 +84,7 @@ function loadModules(template) {
 			});
 		},
 		error: function(xhr) {
-		  //alert(xhr.responseText);
+		  alert(xhr.responseText);
 		}
 	});
 
@@ -110,11 +110,11 @@ function removeModule(token) {
 			dataType: 'xml', 
 			async: false,
 			success: function(xml) {	
-				//alert((new XMLSerializer()).serializeToString(xml));	
+				//
 				result = true;
 			},
 			error: function(xhr) {
-			  //alert(xhr.responseText);
+			  alert(xhr.responseText);
 			 
 			}
 		});

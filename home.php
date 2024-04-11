@@ -1,10 +1,12 @@
+<!doctype html>
 <html class="no-js" lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CraftNanny</title>
-    <link rel="stylesheet" type="text/css" href="assets/css/foundation.css" />
+    <link rel="stylesheet" href="assets/css/foundation.css" />
     <script src="assets/js/vendor/modernizr.js"></script>
+   
   </head>
   <body>
     
@@ -37,6 +39,7 @@
           <div id='cssmenu'>
                
              <ul>  
+               <li><a href='tracking.php'><span>Player Tracking</span></a></li>
                <li><a href='energy.php'><span>Energy Storage</span></a></li>
                <li><a href='fluid.php'><span>Fluid Storage</span></a></li>
                </ul>
@@ -46,8 +49,8 @@
                
              <ul>  
                <li><a href='redstone.php'><span>Redstone Controls</span></a></li>
-              <!-- <li><a href='rednet.php'><span>Rednet Controls</span></a></li>
-               <li><a href='bigreactors.php'><span>BigReactors Control</span></a></li>-->
+               <!-- <li><a href='rednet.php'><span>Rednet Controls</span></a></li>
+               <li><a href='bigreactors.php'><span>BigReactors Control</span></a></li> -->
                </ul>
           </div>
           <!-- <soan id="menu_headers">Events</span>
@@ -102,12 +105,12 @@
         <p>
           
   		  <div class="row">
-        <!-- <div class="large-4 columns modules" id="sensor_modules">
+        <div class="large-4 columns modules" id="sensor_modules">
            <strong style="color:#0099FF">Player Modules:</strong>
            <div class="no_modules" id="no_player_modules">
             <span>No Player Modules Connected</span>
           </div>
-        </div> -->
+        </div>
         
         <div class="large-4 columns modules" id="energy_modules">
           <strong style="color:#0099FF">Energy Modules:</strong>
@@ -115,8 +118,7 @@
             <span>No Energy Modules Connected</span>
           </div>
         </div>
-
-        <div class="row">
+        
         <div class="large-4 columns modules" id="fluid_modules">
           <strong style="color:#0099FF">Fluid Modules:</strong>
           <div class="no_modules" id = "no_fluid_modules">
@@ -128,7 +130,7 @@
         
         <p>
           
-       <!-- <div class="row">
+       <div class="row">
         <div class="large-4 columns modules" id="redstone_modules">
            <strong style="color:#0099FF">Redstone Modules:</strong>
            <div class="no_modules" id="no_redstone_modules">
@@ -136,7 +138,7 @@
           </div>
         </div>
         
-        <div class="large-4 columns modules" id="energy_modules">
+        <!-- <div class="large-4 columns modules" id="energy_modules">
           <strong style="color:#0099FF">Rednet Modules</strong>
           <div class="no_modules" id="no_player_modules">
             <span>No Rednet Modules Connected</span>
@@ -172,12 +174,12 @@
         <div class="large-12 columns footer_middle">
           <div class="row">
             <div class="large-2 columns">
-              <img src="https://crafatar.com/renders/body/283502a2-4134-454c-bb47-39c3875b0dd4" style="height:200px;">
+              <img src="https://mc-heads.net/body/SkyNetCloud" style="height:200px;">
             </div>
             <div class="large-4 columns" style="height:200px">
               <p><h2 style="font-weight:bold;color:#cccccc;">CraftNanny.org</h2>
               <p style="color:#cccccc;font-size:18px;">Contribute to this open-source project on GitHub!</p>
-              <a href="https://github.com/skynetcloud/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
+              <a href="https://github.com/jaranvil/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
             </div>
             <div class="large-6 columns">
 
@@ -191,10 +193,10 @@
             </div>
             <div class="large-9 columns" style="color:#cccccc">
               <ul class="inline-list right" style="margin-top:40px;">
-                <li><a src="home.php" style="color:#cccccc">My Dashboard</a>  </li>
-                <li><a src="setup.php" style="color:#cccccc">Setup Instructions</a>  </li>
-                <li><a src="modules.php" style="color:#cccccc">Modules</a> </li>
-                <li><a src="https://github.com/skynetcloud/CraftNanny/issues" style="color:#cccccc">Report Issues </a></li>
+                <li><a href="home.php" style="color:#cccccc">My Dashboard</a>  </li>
+                <li><a href="setup.php" style="color:#cccccc">Setup Instructions</a>  </li>
+                <li><a href="modules.php" style="color:#cccccc">Modules</a> </li>
+                <li><a href="https://github.com/skynetcloud/CraftNanny/issues" style="color:#cccccc">Report Issues </a></li>
               </ul>
             </div>
           </div>
