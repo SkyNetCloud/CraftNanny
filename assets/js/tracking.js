@@ -173,7 +173,7 @@ function removeModule(token) {
                 result = true;
             },
             error: function(xhr) {
-                //alert(xhr.responseText);
+                alert(xhr.responseText);
             }
         });
     }
