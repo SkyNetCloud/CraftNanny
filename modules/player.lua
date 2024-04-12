@@ -126,21 +126,15 @@ end
 function record()
     local onlinePlayers = s.getOnlinePlayers()
     
-    -- Iterate over online players
-    for _, player in ipairs(onlinePlayers) do
-        local playerName = tostring(player)
-        
-        -- Check if player is in range
+    for _, playerName in ipairs(onlinePlayers) do
         local inRange = s.isPlayerInRange(playerName, 15)
         
         if inRange then
-            -- If player is in range and not previously recorded, they entered the range
             if not playersInRange[playerName] then
                 post(playerName, 1, "has entered sensor range")
                 playersInRange[playerName] = true
             end
         else
-            -- If player is not in range and was previously recorded, they left the range
             if playersInRange[playerName] then
                 post(playerName, 2, "has left sensor range")
                 playersInRange[playerName] = nil
@@ -148,6 +142,7 @@ function record()
         end
     end
 end
+
 
 
 -- -- iterate through all players with an active flag
