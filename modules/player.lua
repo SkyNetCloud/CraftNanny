@@ -132,11 +132,13 @@ function record()
         if inRange then
             if not playersInRange[playerName] then
                 post(playerName, 1, "has entered sensor range")
+				pirnt(playerName)
                 playersInRange[playerName] = true
             end
         else
             if playersInRange[playerName] then
                 post(playerName, 2, "has left sensor range")
+				pirnt(playerName)
                 playersInRange[playerName] = nil
             end
         end
