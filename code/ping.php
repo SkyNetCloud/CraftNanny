@@ -1,6 +1,6 @@
 <?php
 
-$version = 3;
+$version = 4;
 
 require_once('connection.php');
 
