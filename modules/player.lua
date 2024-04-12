@@ -64,8 +64,9 @@ function scanner_screen()
 end
 
 function downloadFromGitHub(file)
-	local url = "https://raw.githubusercontent.com/SkyNetCloud/CraftNanny/master/modules".. file
-	local localPath = fs.combine(shell.dir(), file)
+
+	local url = "https://raw.githubusercontent.com/SkyNetCloud/CraftNanny/master/modules".. installer
+	local localPath = fs.combine(shell.dir(), installer)
 	local response = http.get(url)
 	if response then
 		local content = response.readAll()
@@ -96,7 +97,7 @@ function run_installer()
     if fs.exists("installer.lua") then
         fs.delete("installer.lua")
     end
-    downloadFromGitHub(files)
+    downloadFromGitHub(installer)
     sleep(1)
     shell.run("installer.lua")
 end
