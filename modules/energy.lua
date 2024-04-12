@@ -63,7 +63,7 @@ function downloadFromGitHub(file)
 function load_config()
     sr = fs.open("config.txt", "r")
     token = sr.readLine()
-	scanner = sr.readLine()
+    module_name = sr.readLine()
 	username = sr.readLine()
     sr.close()
 end

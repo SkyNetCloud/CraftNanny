@@ -79,11 +79,10 @@ function downloadFromGitHub(file)
 function load_config()
     sr = fs.open("config.txt", "r")
     token = sr.readLine()
-	scanner = sr.readLine()
+    module_name = sr.readLine()
 	username = sr.readLine()
     sr.close()
 end
-
 -- called for new installations and when the scanner needs to be updated
 function run_installer()
     if fs.exists("installer.lua") then
