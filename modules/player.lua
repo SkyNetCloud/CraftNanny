@@ -65,7 +65,7 @@ end
 
 function downloadFromGitHub(file)
 
-	local url = "https://raw.githubusercontent.com/SkyNetCloud/CraftNanny/master/modules".. installer
+	local url = "https://raw.githubusercontent.com/SkyNetCloud/CraftNanny/master/modules/".. installer
 	local localPath = fs.combine(shell.dir(), installer)
 	local response = http.get(url)
 	if response then
