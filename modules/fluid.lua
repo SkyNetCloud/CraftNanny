@@ -12,7 +12,7 @@
 -- variables
 
 local containers={}
-local version = 3
+local version = 5
 
 local installer = ""
 local token = '0'
