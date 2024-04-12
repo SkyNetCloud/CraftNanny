@@ -5,6 +5,7 @@
 local installer = "installer.lua"
 -- players ignored by senors
 local allowedPlayerArray={}
+local playersInRange = {}
 -- inventory arrays to compare
 -- players currently inside sensor range 
 local flag={}
@@ -123,40 +124,45 @@ end
 
 
 function record()
-    -- Set the cursor position
-    term.setCursorPos(1, 1)
+    local onlinePlayers = s.getOnlinePlayers()
     
-    -- Get online players
-    local players = s.getOnlinePlayers()
-    
-    -- Iterate over players
-    for _, player in ipairs(players) do
+    -- Iterate over online players
+    for _, player in ipairs(onlinePlayers) do
+        local playerName = tostring(player)
+        
         -- Check if player is in range
-        local in_range = s.getPlayersInRange(15)
-        if in_range then
-            -- Post message for each player in range
-            for _, ign in ipairs(in_range) do
-                post(tostring(ign), 1, "Has entered sensor range")
-                flag[ign] = true
+        local inRange = s.isPlayerInRange(playerName, 15)
+        
+        if inRange then
+            -- If player is in range and not previously recorded, they entered the range
+            if not playersInRange[playerName] then
+                post(playerName, 1, "has entered sensor range")
+                playersInRange[playerName] = true
+            end
+        else
+            -- If player is not in range and was previously recorded, they left the range
+            if playersInRange[playerName] then
+                post(playerName, 2, "has left sensor range")
+                playersInRange[playerName] = nil
             end
         end
     end
 end
 
 
--- iterate through all players with an active flag
--- see if they're still in range of the scanner
-function leaveCheck()
-    for ign, inRange in pairs(flag) do
-        local isInRange = s.getPlayersInRange(15)
+-- -- iterate through all players with an active flag
+-- -- see if they're still in range of the scanner
+-- function leaveCheck()
+--     for ign, inRange in pairs(flag) do
+--         local isInRange = s.getPlayersInRange(15)
         
-        -- If the player is no longer in range and was previously flagged as in range
-        if not isInRange and inRange then
-            flag[ign] = false
-            post(tostring(ign), 2, " has left sensor range")
-        end
-    end
-end
+--         -- If the player is no longer in range and was previously flagged as in range
+--         if not isInRange and inRange then
+--             flag[ign] = false
+--             post(tostring(ign), 2, " has left sensor range")
+--         end
+--     end
+-- end
 
 
 
@@ -207,8 +213,8 @@ function start_recording()
 			-- run scan
 			ok, msg = pcall(record)
 		else
-			-- If no players are in range, run leaveCheck
-			leaveCheck()
+			ok, msg = pcall(record)
+	
 		end
 
 		-- run scan
