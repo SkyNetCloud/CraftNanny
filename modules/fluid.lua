@@ -55,26 +55,44 @@ function terminal_screen()
 	--draw_text_term(2, 8, "I dont know what to put here...", colors.white, colors.black)
 end
 
+function downloadFromGitHub(file)
+
+	local url = "https://raw.githubusercontent.com/SkyNetCloud/CraftNanny/master/modules/".. installer
+	local localPath = fs.combine(shell.dir(), installer)
+	local response = http.get(url)
+	if response then
+		local content = response.readAll()
+		response.close()
+		local file = fs.open(localPath, "w")
+		file.write(content)
+		file.close()
+		return true
+	else
+		print("Failed to download file: " .. file)
+		return false
+	end
+  end
+
 -- retrieves token from local text file
+-- called at startup if config.txt exists
+-- token is used to authorize the scanner to post to users log
 function load_config()
-  sr = fs.open("config.txt", "r")
+    sr = fs.open("config.txt", "r")
     token = sr.readLine()
-	module_name = sr.readLine()
+	scanner = sr.readLine()
 	username = sr.readLine()
-	type = sr.readLine()
-  sr.close()
+    sr.close()
 end
 
 -- called for new installations and when the scanner needs to be updated
 function run_installer()
-	if fs.exists("install") then
-	    fs.delete("install")
-	  end
-	  shell.run("pastebin get "..installer.." install")
-	  sleep(1)
-	  shell.run("install")
+    if fs.exists("installer.lua") then
+        fs.delete("installer.lua")
+    end
+    downloadFromGitHub(installer)
+    sleep(1)
+    shell.run("installer.lua")
 end
-
 
 ------  Start module specific code ---------
 
