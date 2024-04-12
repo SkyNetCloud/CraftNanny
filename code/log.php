@@ -50,10 +50,17 @@ function enterRecord($ign, $event, $description, $user_id, $token, $dbConn) {
             echo 'Error: ' . mysqli_error($dbConn);
         }
     } else {
-        // If no record exists, do nothing or handle accordingly
-        // You can choose to insert a new record here if required
-        // For this implementation, we'll do nothing if the record already exists
-        echo 'Record already exists for user ' . $ign . ' and event ' . $event;
+        // If no record exists, insert a new record
+        $insertQuery = "INSERT INTO logs (user_id, ign, event, description, timestamp) VALUES (?, ?, ?, ?, NOW())";
+        $insertStmt = mysqli_prepare($dbConn, $insertQuery);
+        mysqli_stmt_bind_param($insertStmt, 'iss', $user_id, $ign, $event, $description);
+        $success = mysqli_stmt_execute($insertStmt);
+
+        if ($success) {
+            echo 'success (inserted)';
+        } else {
+            echo 'Error: ' . mysqli_error($dbConn);
+        }
     }
 }
 
