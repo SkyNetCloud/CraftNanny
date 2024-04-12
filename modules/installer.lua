@@ -58,8 +58,23 @@ function load_config()
 end
  
 function launch_module()
-  shell.run("CN_module")
+    local modules = {
+        "player.lua",
+        "energy.lua",
+        "fluid.lua",
+        "redstone.lua"
+    }
+
+    for _, module in ipairs(modules) do
+        if fs.exists(module) then
+            shell.run(module)
+            return -- Stop after running the first module found
+        end
+    end
+
+    print("No module found.")
 end
+
 
 
 function downloadFromGitHub(file)
