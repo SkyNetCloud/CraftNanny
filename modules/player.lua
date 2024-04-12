@@ -203,14 +203,8 @@ function start_recording()
 
 	
 	while true do
-		local playersInRange = s.isPlayersInRange(15)
-		if playersInRange then -- If players are in range
-			-- run scan
-			ok, msg = pcall(record)
-		else
-			ok, msg = pcall(record)
 	
-		end
+		ok, msg = pcall(record)
 
 		-- run scan
 		-- animate screen and delay
