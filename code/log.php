@@ -12,7 +12,7 @@ ini_set('display_errors', 1);
 // If you want to log errors to a file, you can set log_errors to On in php.ini
 ini_set('log_errors', 1);
 
-$version = 4;
+$version = 1;
 
 require_once('connection.php');
 
@@ -30,41 +30,40 @@ if ($user_id) {
 }
 
 function enterRecord($ign, $event, $description, $user_id, $token, $dbConn) {
-    // Check if a record already exists for the given event and user
-    $existingRecordQuery = "SELECT * FROM logs WHERE user_id = ? AND ign = ? AND event = ?";
+    // Check if a record already exists for the player and event
+    $existingRecordQuery = "SELECT COUNT(*) AS record_count FROM logs WHERE user_id = ? AND ign = ? AND event = ?";
     $stmt = mysqli_prepare($dbConn, $existingRecordQuery);
     mysqli_stmt_bind_param($stmt, 'iss', $user_id, $ign, $event);
     mysqli_stmt_execute($stmt);
     $existingRecordResult = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($existingRecordResult);
+    $recordCount = $row['record_count'];
 
-    if ($existingRecordResult) {
-        // If a record exists, update the existing row
-        if (mysqli_num_rows($existingRecordResult) > 0) {
-            $updateQuery = "UPDATE logs SET description = ?, timestamp = NOW() WHERE user_id = ? AND ign = ? AND event = ?";
-            $updateStmt = mysqli_prepare($dbConn, $updateQuery);
-            mysqli_stmt_bind_param($updateStmt, 'siss', $description, $user_id, $ign, $event);
-            $success = mysqli_stmt_execute($updateStmt);
+    if ($recordCount > 0) {
+        echo "Error: Record already exists for player '$ign' and event '$event'";
+        return;
+    }
 
-            if ($success) {
-                echo 'success (updated)';
-            } else {
-                echo 'Error updating record: ' . mysqli_error($dbConn);
-            }
-        } else {
-            // If no record exists, insert a new record
-            $insertQuery = "INSERT INTO logs (user_id, ign, event, description, timestamp) VALUES (?, ?, ?, ?, NOW())";
-            $insertStmt = mysqli_prepare($dbConn, $insertQuery);
-            mysqli_stmt_bind_param($insertStmt, 'iss', $user_id, $ign, $event, $description);
-            $success = mysqli_stmt_execute($insertStmt);
-
-            if ($success) {
-                echo 'success (inserted)';
-            } else {
-                echo 'Error inserting record: ' . mysqli_error($dbConn);
-            }
-        }
+    // Prepare SQL statement with placeholders
+    $query = "INSERT INTO logs (user_id, ign, event, description, timestamp, token) VALUES (?, ?, ?, ?, NOW(), ?)";
+    
+    // Prepare statement
+    $stmt = mysqli_prepare($dbConn, $query);
+    if (!$stmt) {
+        echo 'Error: Failed to prepare statement: ' . mysqli_error($dbConn);
+        return;
+    }
+    
+    // Bind parameters to the statement
+    mysqli_stmt_bind_param($stmt, 'ssiss', $user_id, $ign, $event, $description, $token);
+    
+    // Execute the statement
+    $success = mysqli_stmt_execute($stmt);
+    
+    if ($success) {
+        echo 'success';
     } else {
-        echo 'Error querying existing records: ' . mysqli_error($dbConn);
+        echo 'Error: ' . mysqli_error($dbConn);
     }
 }
 
