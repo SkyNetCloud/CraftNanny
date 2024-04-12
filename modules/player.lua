@@ -19,7 +19,7 @@ local scanner = ''
 -- oweners username on website
 local username = ''
 -- currently installed version
-local version = 4
+local version = 5
 
 -- write text to the terminal screen
 function draw_text_term(x, y, text, text_color, bg_color)
@@ -146,15 +146,18 @@ end
 
 -- iterate through all players with an active flag
 -- see if they're still in range of the scanner
-function leaveCheck()  
-    for ign,v in pairs(flag) do
-        local ok,msg = pcall(function() s.isPlayersInRange(15) end)
-        if not msg and flag[ign] then
+function leaveCheck()
+    for ign, inRange in pairs(flag) do
+        local isInRange = s.isPlayerInRange(ign, 15)
+        
+        -- If the player is no longer in range and was previously flagged as in range
+        if not isInRange and inRange then
             flag[ign] = false
             post(tostring(ign), 2, " has left sensor range")
         end
     end
 end
+
 
 
 -- e.g. post('tom', 2, ' has left sensor range')
