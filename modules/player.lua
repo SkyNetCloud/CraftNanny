@@ -127,7 +127,7 @@ function record()
     local onlinePlayers = s.getOnlinePlayers()
     
     for _, playerName in ipairs(onlinePlayers) do
-        local inRange = s.isPlayerInRange(playerName, 15)
+        local inRange = s.isPlayersInRange(1, playerName)
         
         if inRange then
             if not playersInRange[playerName] then
