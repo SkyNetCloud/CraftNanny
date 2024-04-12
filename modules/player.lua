@@ -148,7 +148,7 @@ end
 -- see if they're still in range of the scanner
 function leaveCheck()
     for ign, inRange in pairs(flag) do
-        local isInRange = s.isPlayerInRange(ign, 15)
+        local isInRange = s.getPlayersInRange(15)
         
         -- If the player is no longer in range and was previously flagged as in range
         if not isInRange and inRange then
