@@ -60,6 +60,7 @@ if ($debugMode) {
 }
 
 foreach ($actionArray as $action) {
+	$lastUpdateTime = time();
 	switch ($action) {
 		case "setuprecord":
 			$xmlRoot->appendChild(setUpRecord($dbConn, $ldapConfig, $xmlDoc, $_REQUEST['username']));
@@ -126,7 +127,7 @@ foreach ($actionArray as $action) {
 			
 			break;
 		case "logs":
-			$xmlRoot->appendChild(getLogs($dbConn, $xmlDoc, $_REQUEST['user_id']));
+			$xmlRoot->appendChild(getLogs($dbConn, $xmlDoc, $_REQUEST['user_id'], $lastUpdateTime));
 			
 			break;
 		case "getPlayerData":
