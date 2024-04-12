@@ -127,7 +127,7 @@ foreach ($actionArray as $action) {
 			
 			break;
 		case "logs":
-			$xmlRoot->appendChild(getLogs($dbConn, $xmlDoc, $_REQUEST['user_id'], $lastUpdateTime));
+			$xmlRoot->appendChild(getLogs($dbConn, $xmlDoc, $_REQUEST['user_id']));
 			
 			break;
 		case "getPlayerData":

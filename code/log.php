@@ -37,30 +37,34 @@ function enterRecord($ign, $event, $description, $user_id, $token, $dbConn) {
     mysqli_stmt_execute($stmt);
     $existingRecordResult = mysqli_stmt_get_result($stmt);
 
-    if ($existingRecordResult && mysqli_num_rows($existingRecordResult) > 0) {
+    if ($existingRecordResult) {
         // If a record exists, update the existing row
-        $updateQuery = "UPDATE logs SET description = ?, timestamp = NOW() WHERE user_id = ? AND ign = ? AND event = ?";
-        $updateStmt = mysqli_prepare($dbConn, $updateQuery);
-        mysqli_stmt_bind_param($updateStmt, 'siss', $description, $user_id, $ign, $event);
-        $success = mysqli_stmt_execute($updateStmt);
+        if (mysqli_num_rows($existingRecordResult) > 0) {
+            $updateQuery = "UPDATE logs SET description = ?, timestamp = NOW() WHERE user_id = ? AND ign = ? AND event = ?";
+            $updateStmt = mysqli_prepare($dbConn, $updateQuery);
+            mysqli_stmt_bind_param($updateStmt, 'siss', $description, $user_id, $ign, $event);
+            $success = mysqli_stmt_execute($updateStmt);
 
-        if ($success) {
-            echo 'success (updated)';
+            if ($success) {
+                echo 'success (updated)';
+            } else {
+                echo 'Error updating record: ' . mysqli_error($dbConn);
+            }
         } else {
-            echo 'Error: ' . mysqli_error($dbConn);
+            // If no record exists, insert a new record
+            $insertQuery = "INSERT INTO logs (user_id, ign, event, description, timestamp) VALUES (?, ?, ?, ?, NOW())";
+            $insertStmt = mysqli_prepare($dbConn, $insertQuery);
+            mysqli_stmt_bind_param($insertStmt, 'iss', $user_id, $ign, $event, $description);
+            $success = mysqli_stmt_execute($insertStmt);
+
+            if ($success) {
+                echo 'success (inserted)';
+            } else {
+                echo 'Error inserting record: ' . mysqli_error($dbConn);
+            }
         }
     } else {
-        // If no record exists, insert a new record
-        $insertQuery = "INSERT INTO logs (user_id, ign, event, description, timestamp) VALUES (?, ?, ?, ?, NOW())";
-        $insertStmt = mysqli_prepare($dbConn, $insertQuery);
-        mysqli_stmt_bind_param($insertStmt, 'iss', $user_id, $ign, $event, $description);
-        $success = mysqli_stmt_execute($insertStmt);
-
-        if ($success) {
-            echo 'success (inserted)';
-        } else {
-            echo 'Error: ' . mysqli_error($dbConn);
-        }
+        echo 'Error querying existing records: ' . mysqli_error($dbConn);
     }
 }
 
