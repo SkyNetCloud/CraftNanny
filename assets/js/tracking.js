@@ -10,8 +10,7 @@ function initPage() {
 
     user_id = token;
 
-    getUser();
-
+    // AJAX request for visitor_template.html
     $.ajax({
         type: 'GET',
         url: 'visitor_template.html',
@@ -20,9 +19,13 @@ function initPage() {
         dataType: 'html',
         success: function(theHtml) {
             visitor_template = theHtml;
+        },
+        error: function(xhr, status, error) {
+            console.error("Error loading visitor_template.html:", error);
         }
     });
 
+    // AJAX request for visit_template.html
     $.ajax({
         type: 'GET',
         url: 'visit_template.html',
@@ -31,6 +34,9 @@ function initPage() {
         dataType: 'html',
         success: function(theHtml) {
             visit_template = theHtml;
+        },
+        error: function(xhr, status, error) {
+            console.error("Error loading visit_template.html:", error);
         }
     });
 
