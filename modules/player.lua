@@ -145,12 +145,28 @@ end
 
 -- iterate through all players with an active flag
 -- see if they're still in range of the scanner
-function leaveCheck()  
-    for ign,v in pairs(flag) do
-        local ok,msg = pcall(function() s.isPlayersInRange(15) end)
-        if not msg and flag[ign] then
-            flag[ign] = false
-            post(tostring(ign), 2, " has left sensor range")
+function leaveCheck()
+    -- Get online players
+    local players = s.getOnlinePlayers()
+    
+    -- Iterate over players with an active flag
+    for player, active in pairs(flag) do
+        if active then
+            -- Check if player is still in range
+            local in_range = s.getPlayersInRange(15)
+            local still_in_range = false
+            -- Check if the player is still in range
+            for _, ign in ipairs(in_range) do
+                if ign == player then
+                    still_in_range = true
+                    break
+                end
+            end
+            -- If the player is not in range, post a message
+            if not still_in_range then
+                post(player, 2, "Has left sensor range")
+                flag[player] = false
+            end
         end
     end
 end
