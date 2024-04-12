@@ -12,7 +12,7 @@ ini_set('display_errors', 1);
 // If you want to log errors to a file, you can set log_errors to On in php.ini
 ini_set('log_errors', 1);
 
-$version = 1;
+$version = 4;
 
 require_once('connection.php');
 
