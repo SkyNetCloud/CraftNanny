@@ -3,7 +3,7 @@
 // Database configuration
 $servername = "localhost";
 $username = "craftnanny";
-$password = "ShadowCow6f22#";
+$password = "old";
 $database = "craftnanny";
 
 // Create connection
