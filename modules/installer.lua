@@ -223,18 +223,8 @@ end
  
 function choose_module(input) 
     if input == '1' then
-        player_tracker()
-    elseif input == '2' then
-        type = '2'
+        type = '1'
         name()
-    elseif input == '3' then
-        type = '3'
-        name()
-    elseif input == '4' then
-        type = '4'
-        name()
-    elseif input == '5' then
-    
     end
     
 end
