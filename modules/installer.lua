@@ -114,7 +114,7 @@ function select_module()
         username = args[1]
         type = args[2]
         module_name = args[3]
-        token = hash("your_password")  -- Replace "your_password" with a secure method or pre-supplied hashed token
+        token = sha1_api.sha1(salt..password)  -- Replace "your_password" with a secure method or pre-supplied hashed token
         os.setComputerLabel(module_name:gsub("%s+", ""))
         login()
     else
