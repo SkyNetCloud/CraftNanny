@@ -8,7 +8,7 @@ function initPage() {
 
     $.ajax({
         type: 'GET',
-        url: 'energy_template.html',
+        url: 'assets/template/energy_template.html',
         async: false,
         contentType: 'text/html',
         dataType: 'html',

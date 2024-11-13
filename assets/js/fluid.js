@@ -6,7 +6,7 @@ function initPage() {
 	
 	$.ajax({
 		type: 'GET', 
-		url: 'fluid_template.html', 
+		url: 'assets/template/fluid_template.html', 
 		async: false, 
 		contentType   :  'text/html',
   		dataType      :  'html',

@@ -6,7 +6,7 @@ function initPage() {
 	
 	$.ajax({
 		type: 'GET', 
-		url: 'event_template.html', 
+		url: 'assets/template/event_template.html', 
 		async: false, 
 		contentType   :  'text/html',
   		dataType      :  'html',

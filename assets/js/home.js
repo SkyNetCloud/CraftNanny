@@ -7,7 +7,7 @@ function initPage() {
     var module_template;
     $.ajax({
         type: 'GET',
-        url: 'module_template.html',
+        url: 'assets/template/module_template.html',
         async: false,
         contentType: 'text/html',
         dataType: 'html',
@@ -19,7 +19,7 @@ function initPage() {
     var event_template;
     $.ajax({
         type: 'GET',
-        url: 'event_template.html',
+        url: 'assets/template/event_template.html',
         async: false,
         contentType: 'text/html',
         dataType: 'html',

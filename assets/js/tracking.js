@@ -16,7 +16,7 @@ function initPage() {
 
 	$.ajax({
 		type: 'GET',
-		url: 'visitor_template.html',
+		url: 'assets/template/visitor_template.html',
 		async: false,
 		contentType   :  'text/html',
   		dataType      :  'html',
@@ -27,7 +27,7 @@ function initPage() {
 
 	$.ajax({
 		type: 'GET',
-		url: 'visit_template.html',
+		url: 'assets/template/visit_template.html',
 		async: false,
 		contentType   :  'text/html',
   		dataType      :  'html',

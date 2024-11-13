@@ -6,10 +6,8 @@
     <title>CraftNanny</title>
     <link rel="stylesheet" href="assets/css/foundation.css" />
     <script src="assets/js/vendor/modernizr.js"></script>
-   
   </head>
   <body>
-    
       <div class="large-12 columns top_bar">
           <div class="row">
            <span style="font-weight:bold;font-size:36px;color:#1b9bff">
@@ -22,8 +20,6 @@
         </div>
         <div class="large-12 columns thin_bar">
         </div>
-
-
       <div class="row">  
       <div class="large-3 columns">
         <p>
@@ -34,10 +30,8 @@
               <li><a href='setup.php'><span>Setup Instructions</span></a></li>
              </ul>
           </div>
-        
          <soan id="menu_headers">Monitoring</span>
           <div id='cssmenu'>
-               
              <ul>  
                <!--<li><a href='tracking.php'><span>Player Tracking</span></a></li>-->
                <li><a href='energy.php'><span>Energy Storage</span></a></li>
@@ -61,19 +55,12 @@
                <li class='last'><a href='notifications.php'><span>Email Notifications</span></a></li>
             </ul>
           </div> -->
-   
       </div>
-        
-      
       <div class="large-9 columns">
         <div class="row">
-          
-          
-          
-    
+
         <h3 style="color:#0099FF" id="welcome"></h3>
         <span style="font-weight:bold;font-size:16px;color:red">For bug reports, suggestions and questions <a href="https://github.com/skynetcloud/CraftNanny/issues">post here</a></span>
-       
           <!--<div class="large-12 columns notifications" id="">
              <strong style="color:#0099FF">Active Rules:</strong>
              <p>
@@ -137,25 +124,18 @@
             <span>No Redstone Modules Connected</span>
           </div>
         </div> -->
-        
         <!-- <div class="large-4 columns modules" id="energy_modules">
           <strong style="color:#0099FF">Rednet Modules</strong>
           <div class="no_modules" id="no_player_modules">
             <span>No Rednet Modules Connected</span>
           </div>
         </div> -->
-        
         <div class="large-4 columns">
          <!--<strong style="color:#0099FF">stub</strong>-->
          </div>
       
         </div>
-        
-     
-      
-     
-     
-                
+
         </div>
       </div>
         
@@ -179,7 +159,7 @@
             <div class="large-4 columns" style="height:200px">
               <p><h2 style="font-weight:bold;color:#cccccc;">CraftNanny.org</h2>
               <p style="color:#cccccc;font-size:18px;">Contribute to this open-source project on GitHub!</p>
-              <a href="https://github.com/jaranvil/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
+              <a href="https://github.com/SkyNetCloud/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
             </div>
             <div class="large-6 columns">
 
@@ -196,7 +176,7 @@
                 <li><a href="home.php" style="color:#cccccc">My Dashboard</a>  </li>
                 <li><a href="setup.php" style="color:#cccccc">Setup Instructions</a>  </li>
                 <li><a href="modules.php" style="color:#cccccc">Modules</a> </li>
-                <li><a href="https://github.com/skynetcloud/CraftNanny/issues" style="color:#cccccc">Report Issues </a></li>
+                <li><a href="https://github.com/SkyNetCloud/CraftNanny/issues" style="color:#cccccc">Report Issues </a></li>
               </ul>
             </div>
           </div>
