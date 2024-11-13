@@ -1,5 +1,5 @@
 local bat={}
-local version = 6
+local version = 5
 
 local installer = "installer.lua"
 local token = '0'
