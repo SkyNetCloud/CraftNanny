@@ -1,30 +1,32 @@
+/// <reference path="../typings/jquery/jquery.d.ts"/>
+
+//  User System  //
+
 function createUser() {
-    var usernameInput = $('#username').val(),
-        passwordInput = $('#password').val(),
-        passwordInput2 = $('#password2').val(),
-        email = $('#email').val();
-        
-    if (confirmEmail(email)) {
-        if (usernameInput.length > 3) {
-            if (passwordInput.length > 2 && passwordInput2.length > 2) {
-                if (passwordInput == passwordInput2) {
-                    checkForUser(usernameInput, function(userExists) {
-                        if (userExists) {
-                            alert('User already exists');
-                        } else {
-                            addNewUser(usernameInput, passwordInput, email);
-                        }
-                    });
-                } else {
-                    alert('Passwords did not match!');
-                }
-            } else {
-                alert('Password is too short.');
-            }
-        } else {
-            alert('Username is too short');
-        }
-    }
+	var usernameInput = $('#username').val(),
+		passwordInput = $('#password').val(),
+		passwordInput2 = $('#password2').val(),
+		email = $('#email').val();
+		
+	if (confirmEmail(email)) {
+		if (usernameInput.length > 3) {
+			if (passwordInput.length > 2 && passwordInput2.length > 2) {
+				if (passwordInput == passwordInput2) {
+					if (checkForUser(usernameInput)) {
+						alert('User already exists');
+					} else {
+						addNewUser(usernameInput, passwordInput, email);
+					}
+				} else {
+					alert('Passwords did not match!');
+				}
+			} else {
+				alert('Password is too short.');
+			}
+		} else {
+			alert('Username is too short');
+		}
+	}
 }
 
 function confirmEmail(email) {
@@ -55,7 +57,7 @@ function addNewUser(name, pwd, email) {
 		async: true,
 		success: function(xml) {		
 			$('#sidebar_create').hide();
-			//
+			//alert((new XMLSerializer()).serializeToString(xml));	
 			signIn($(xml).find('token').text());
 			
 		},
@@ -85,7 +87,7 @@ function loginUser() {
 		dataType: 'xml', 
 		async: true,
 		success: function(xml) {		
-			//
+			//alert((new XMLSerializer()).serializeToString(xml));	
 			var token = $(xml).find('token').text();
 			if (token.length > 0) {
 				signIn(token);
@@ -101,7 +103,7 @@ function loginUser() {
 
 function signIn(token) {
 	document.cookie = 'logger_token' + "=" + token + "; path=/";
-	window.location.assign("https://craftnanny.org/home.php")
+	window.location.assign("https://www.craftnanny.org/home.php")
 }
 
 function signOut() {
@@ -121,32 +123,36 @@ function signOut() {
 
 }
 
-function checkForUser(username, callback) {
-    var result;
-    
-    theParams = {
-        a: 'doesUserExist',
-        id: username,
-        user_type: 'main'
-    }
-    
-    $.ajax({
-        type: "POST",
-        url: "code/main.php",
-        data: theParams, 
-        dataType: 'xml', 
-        success: function(xml) {       
-            if($(xml).find('records').text() == '0') {
-                result = false;
-            } else {
-                result = true;
-            }
-            callback(result);
-        },
-        error: function(xhr) {     
-          alert(xhr.responseText);
-        }
-    });
+function checkForUser(username) {
+	var result;
+	
+	theParams = {
+		a: 'doesUserExist',
+		id: username,
+		user_type: 'main'
+	}
+	
+	$.ajax({
+		type: "POST",
+		url: "code/main.php",
+		data: theParams, 
+		dataType: 'xml', 
+		async: false,
+		success: function(xml) {		
+			//alert((new XMLSerializer()).serializeToString(xml));	
+			
+			if($(xml).find('records').text() == '0') {
+				result = false;
+			} else {
+				result = true;
+			}
+		},
+		error: function(xhr) {
+			
+		  alert(xhr.responseText);
+		}
+	});
+	return result;
 }
 
 

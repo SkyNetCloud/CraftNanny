@@ -1,310 +1,297 @@
+/// <reference path="../typings/jquery/jquery.d.ts"/>
+
 var $moduleTemplate,
-	$blankEvent;
+    $blankEvent;
 
 function initPage() {
-	var module_template;
-	$.ajax({
-		type: 'GET', 
-		url: 'module_template.html', 
-		async: false, 
-		contentType   :  'text/html',
-  		dataType      :  'html',
-		success: function(theHtml) {
-			module_template = theHtml;
-		}
-	}); 
-	
-	var event_template;
-	$.ajax({
-		type: 'GET', 
-		url: 'event_template.html', 
-		async: false, 
-		contentType   :  'text/html',
-  		dataType      :  'html',
-		success: function(theHtml) {
-			event_template = theHtml;
-		}
-	}); 
-	
-	$blankEvent = $(event_template);
-	loadEvents($blankEvent);
-	
-	$moduleTemplate = $(module_template);
-	
-	getUser();
-	getPlayerModules();
-	getRedstoneModules();
-	gerFluidModules($moduleTemplate);
-	getEnergyModules($moduleTemplate); 
+    var module_template;
+    $.ajax({
+        type: 'GET',
+        url: 'module_template.html',
+        async: false,
+        contentType: 'text/html',
+        dataType: 'html',
+        success: function (theHtml) {
+            module_template = theHtml;
+        }
+    });
+
+    var event_template;
+    $.ajax({
+        type: 'GET',
+        url: 'event_template.html',
+        async: false,
+        contentType: 'text/html',
+        dataType: 'html',
+        success: function (theHtml) {
+            event_template = theHtml;
+        }
+    });
+
+    $blankEvent = $(event_template);
+    loadEvents($blankEvent);
+
+    $moduleTemplate = $(module_template);
+
+    getUser();
+    getPlayerModules();
+    getRedstoneModules();
+    gerFluidModules($moduleTemplate);
+    getEnergyModules($moduleTemplate);
 }
 
 function getUser() {
-	theParams = {
-		a: 'getUser',
-		user_id: token
-	}
-	
-	$.ajax({
-		type: "POST",
-		url: "code/main.php",
-		data: theParams, 
-		dataType: 'xml', 
-		async: false,
-		success: function(xml) {	
-			
-			//
-			
-			$(xml).find('user').each(function() {
-				$('#username').text($(this).attr('username'));
-				$('#welcome').text("Welcome, "+$(this).attr('username'));
-			});
-		
-		},
-		error: function(xhr) {
-		  alert(xhr.responseText);
-		}
-	});
+    theParams = {
+        a: 'getUser',
+        user_id: token
+    }
+
+    $.ajax({
+        type: "POST",
+        url: "code/main.php",
+        data: theParams,
+        dataType: 'json',  // Expect JSON response
+        async: false,
+        success: function (response) {
+            console.log("User Response:", response);
+
+
+                $('#username').text(response.user.username);
+                $('#welcome').text("Welcome, " + response.user.username);
+        },
+        error: function (xhr) {
+            alert(xhr.responseText);
+        }
+    });
 }
 
 function loadEvents(template) {
-	var counter = 0;
-	
-	theParams = {
-		a: 'load_redstone_events',
-		user_id: token
-	}
+    var counter = 0;
 
-	$.ajax({
-		type: "POST",
-		url: "code/main.php",
-		data: theParams, 
-		dataType: 'xml', 
-		async: false,
-		success: function(xml) {	
-			
-			//
-			
-			$(xml).find('events').each(function() {
-				var newModule = template.clone(true);
-				
-				var output;
-				if ($(this).attr('output') == '1' ) {
-					output = 'true';
-				} else 
-				output = 'false';
-				var inequality;
-				if($(this).attr('event_type') == '1') {
-					inequality = '>';
-				} else {
-					inequality = '<';
-				}
-				
-				var event = $(this);
-				$(newModule).find('#event_title').text("When " + $(this).attr('storage_module') + " " + inequality + " " + $(this).attr('trigger_value') + "%, " + $(this).attr('redstone_module') + " " + $(this).attr('side') + " set to " + output);
-				$(newModule).find('#remove_link').click(function(e) {
-					if (removeEvent(event)) {
-						$(newModule).hide(500);
-					}
-					e.preventDefault()
-				});
-				$('#active_events').append($(newModule));
-				
-				counter = counter + 1;
-			});
-		},
-		error: function(xhr) {
-		  //alert(xhr.responseText);
-		}
-	});
-	
-	if (counter > 0 ) {
-		$('.no_events').hide();
-	}
+    theParams = {
+        a: 'load_redstone_events',
+        user_id: token
+    }
+
+    $.ajax({
+        type: "POST",
+        url: "code/main.php",
+        data: theParams,
+        dataType: 'json',  // Expect JSON response
+        async: false,
+        success: function (response) {
+            console.log("Events Response:", response);
+
+            if (response.status === "success" && response.events) {
+                $.each(response.data.events, function (index, event) {
+                    var newModule = template.clone(true);
+
+                    var output = event.output === '1' ? 'true' : 'false';
+                    var inequality = event.event_type === '1' ? '>' : '<';
+
+                    $(newModule).find('#event_title').text("When " + event.storage_module + " " + inequality + " " + event.trigger_value + "%, " + event.redstone_module + " " + event.side + " set to " + output);
+                    $(newModule).find('#remove_link').click(function (e) {
+                        if (removeEvent(event)) {
+                            $(newModule).hide(500);
+                        }
+                        e.preventDefault();
+                    });
+                    $('#active_events').append($(newModule));
+
+                    counter++;
+                });
+            }
+        },
+        error: function (xhr) {
+            alert(xhr.responseText);
+        }
+    });
+
+    if (counter > 0) {
+        $('.no_events').hide();
+    }
 }
 
 function removeEvent(event) {
-	var result = false;
-	if (confirm('Are you sure you want to delete this event?')) {
-		theParams = {
-			a: 'remove_event',
-			event_id: $(event).attr('event_id')
-		}
-	
-		$.ajax({
-			type: "POST",
-			url: "code/main.php",
-			data: theParams, 
-			dataType: 'xml', 
-			async: false,
-			success: function(xml) {	
-				//
-				result = true;
-			},
-			error: function(xhr) {
-			 // alert(xhr.responseText);
-			 
-			}
-		});
-	} 
-	return result;
+    var result = false;
+    if (confirm('Are you sure you want to delete this event?')) {
+        theParams = {
+            a: 'remove_event',
+            event_id: event.event_id
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "code/main.php",
+            data: theParams,
+            dataType: 'json',  // Expect JSON response
+            async: false,
+            success: function (response) {
+                if (response.status === "success") {
+                    result = true;
+                }
+            },
+            error: function (xhr) {
+                alert(xhr.responseText);
+            }
+        });
+    }
+    return result;
 }
 
 function getPlayerModules() {
+    theParams = {
+        a: 'getConnections',
+        user_id: token,
+        module_type: '1'
+    }
 
-	theParams = {
-		a: 'getConnections',
-		user_id: token,
-		module_type: '1'
-	}
+    $.ajax({
+        type: "POST",
+        url: "code/main.php",
+        data: theParams,
+        dataType: 'json',  // Expect JSON response
+        async: true,
+        success: function (response) {
+            console.log("Player Modules Response:", response);
 
-	$.ajax({
-		type: "POST",
-		url: "code/main.php",
-		data: theParams, 
-		dataType: 'xml', 
-		async: true,
-		success: function(xml) {	
-			
-			//
-			var counter = 0;
-			$(xml).find('connection').each(function() {
-				if ($(this).attr('active') == '1') {
-					$('#sensor_modules').append("<li><img src='assets/img/online.png' style='width:10px'>"+" "+$(this).attr('name')+"</li>");
-				} else {
-					$('#sensor_modules').append("<li><img src='assets/img/offline.png' style='width:10px'>"+" "+$(this).attr('name')+"</li>");
-				}
-				counter = counter + 1;
-			});
-			if (counter != 0) {
-				$('#no_player_modules').hide();
-			}
-		},
-		error: function(xhr) {
-		  alert(xhr.responseText);
-		}
-	});
+            var counter = 0;
+            if (response.status === "success" && response.connections) {
+                $.each(response.connections, function (index, connection) {
+                    if (connection.active === '1') {
+                        $('#sensor_modules').append("<li><img src='img/online.png' style='width:10px'>" + " " + connection.name + "</li>");
+                    } else {
+                        $('#sensor_modules').append("<li><img src='img/offline.png' style='width:10px'>" + " " + connection.name + "</li>");
+                    }
+                    counter++;
+                });
+            }
+            if (counter != 0) {
+                $('#no_player_modules').hide();
+            }
+        },
+        error: function (xhr) {
+            alert(xhr.responseText);
+        }
+    });
 }
 
 function getRedstoneModules() {
+    theParams = {
+        a: 'getConnections',
+        user_id: token,
+        module_type: '4'
+    }
 
-	theParams = {
-		a: 'getConnections',
-		user_id: token,
-		module_type: '4'
-	}
+    $.ajax({
+        type: "POST",
+        url: "code/main.php",
+        data: theParams,
+        dataType: 'json',  // Expect JSON response
+        async: true,
+        success: function (response) {
+            console.log("Redstone Modules Response:", response);
 
-	$.ajax({
-		type: "POST",
-		url: "code/main.php",
-		data: theParams, 
-		dataType: 'xml', 
-		async: true,
-		success: function(xml) {	
-			
-			//
-			var counter = 0;
-			$(xml).find('connection').each(function() {
-				if ($(this).attr('active') == '1') {
-					$('#redstone_modules').append("<li><img src='assets/img/online.png' style='width:10px'>"+" "+$(this).attr('name')+"</li>");
-				} else {
-					$('#redstone_modules').append("<li><img src='assets/img/offline.png' style='width:10px'>"+" "+$(this).attr('name')+"</li>");
-				}
-				counter = counter + 1;
-			});
-			if (counter != 0) {
-				$('#no_redstone_modules').hide();
-			}
-		},
-		error: function(xhr) {
-		  alert(xhr.responseText);
-		}
-	});
+            var counter = 0;
+            if (response.status === "success" && response.data) {
+                $.each(response.data.connections, function (index, connection) {
+                    if (connection.active === '1') {
+                        $('#redstone_modules').append("<li><img src='img/online.png' style='width:10px'>" + " " + connection.name + "</li>");
+                    } else {
+                        $('#redstone_modules').append("<li><img src='img/offline.png' style='width:10px'>" + " " + connection.name + "</li>");
+                    }
+                    counter++;
+                });
+            }
+            if (counter != 0) {
+                $('#no_redstone_modules').hide();
+            }
+        },
+        error: function (xhr) {
+            alert(xhr.responseText);
+        }
+    });
 }
 
 function gerFluidModules(template) {
+    theParams = {
+        a: 'getConnections',
+        user_id: token,
+        module_type: '3'
+    }
 
-	theParams = {
-		a: 'getConnections',
-		user_id: token,
-		module_type: '3'
-	}
+    $.ajax({
+        type: "POST",
+        url: "code/main.php",
+        data: theParams,
+        dataType: 'json',  // Expect JSON response
+        async: true,
+        success: function (response) {
+            console.log("Fluid Modules Response:", response);
 
-	$.ajax({
-		type: "POST",
-		url: "code/main.php",
-		data: theParams, 
-		dataType: 'xml', 
-		async: true,
-		success: function(xml) {	
-			
-			//
-			var counter = 0;
-			$(xml).find('connection').each(function() {
-				var newModule = template.clone(true);
-							
-				if ($(this).attr('active') == '1') {
-					//$(newModule).find('#status_img').attr('src', 'assets/img/online.png');	
-					$('#fluid_modules').append("<li><img src='assets/img/online.png' style='width:10px'>"+" "+$(this).attr('name')+"</li>");
-				} else {
-					//$(newModule).find('#status_img').attr('src', 'assets/img/offine.png');
-					$('#fluid_modules').append("<li><img src='assets/img/offline.png' style='width:10px'>"+" "+$(this).attr('name')+"</li>");
-				}
-				//$(newModule).find('#module_title').text($(this).attr('name'));
-				//$('#fluid_modules').append($(newModule));
-				counter = counter + 1;
-			});
-			if (counter != 0) {
-				$('#no_fluid_modules').hide();
-			}
-		},
-		error: function(xhr) {
-		  alert(xhr.responseText);
-		}
-	});
+            var counter = 0;
+            if (response.status === "success" && response.data) {
+                $.each(response.data.connections, function (index, connection) {
+                    var newModule = template.clone(true);
+
+                    if (connection.active === '1') {
+                        $('#fluid_modules').append("<li><img src='img/online.png' style='width:10px'>" + " " + connection.name + "</li>");
+                    } else {
+                        $('#fluid_modules').append("<li><img src='img/offline.png' style='width:10px'>" + " " + connection.name + "</li>");
+                    }
+                    counter++;
+                });
+            }
+            if (counter != 0) {
+                $('#no_fluid_modules').hide();
+            }
+        },
+        error: function (xhr) {
+            alert(xhr.responseText);
+        }
+    });
 }
 
 function getEnergyModules(template) {
+    theParams = {
+        a: 'getConnections',
+        user_id: token,
+        module_type: '2'
+    }
 
-	theParams = {
-		a: 'getConnections',
-		user_id: token,
-		module_type: '2'
-	}
+    $.ajax({
+        type: "POST",
+        url: "code/main.php",
+        data: theParams,
+        dataType: 'json',  // Expect JSON response
+        async: true,
+        success: function (response) {
+            console.log("Energy Modules Response:", response);
 
-	$.ajax({
-		type: "POST",
-		url: "code/main.php",
-		data: theParams, 
-		dataType: 'xml', 
-		async: true,
-		success: function(xml) {	
-			
-			
-			var counter = 0;
-			$(xml).find('connection').each(function() {
-				var newModule = template.clone(true);
-							
-				if ($(this).attr('active') == '1') {
-					$(newModule).find('#status_img').attr('src', 'assets/img/online.png');	
-					$('#energy_modules').append("<li><img src='assets/img/online.png' style='width:10px'>"+" "+$(this).attr('name')+"</li>");
-				} else {
-					//$(newModule).find('#status_img').attr('src', 'assets/img/offine.png');
-					$('#energy_modules').append("<li><img src='assets/img/offline.png' style='width:10px'>"+" "+$(this).attr('name')+"</li>");
-				}
-				//$(newModule).find('#module_title').text($(this).attr('name'));
-				//$('#fluid_modules').append($(newModule));
-				counter = counter + 1;
-			});
-			if (counter != 0) {
-				$('#no_energy_modules').hide();
-			}
-		},
-		error: function(xhr) {
-		  alert(xhr.responseText);
-		}
-	});
+            var counter = 0;
+            if (response.status === "success") {
+                $.each(response.connections, function (index, connections) {
+                    console.log(connections); // Log connections for debugging
+                    var newModule = template.clone(true);
+
+                    if (connections.active === true) {  // Use boolean comparison if 'active' is a boolean
+                        $('#energy_modules').append("<li><img src='img/online.png' style='width:10px'>" + " " + connections.name + "</li>");
+                    } else {
+                        $('#energy_modules').append("<li><img src='img/offline.png' style='width:10px'>" + " " + connections.name + "</li>");
+                    }
+                    counter++;
+                });
+            }
+            if (counter != 0) {
+                $('#no_energy_modules').hide();
+            }
+        },
+        error: function (xhr) {
+            alert(xhr.responseText);
+        }
+    });
 }
 
-$(document).ready(function() {
-	initPage();
+$(document).ready(function () {
+    initPage();
 });

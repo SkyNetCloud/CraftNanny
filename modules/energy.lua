@@ -117,7 +117,7 @@ function round(num, idp)
 end
 
 function getBat(t,batName)
-    bt=peripheral.wrap(t)
+    bt = peripheral.wrap(t)
 
     okFE,msg = pcall(bt.getMaxEnergy)
     okRF,msg = pcall(bt.getEnergyCapacity)

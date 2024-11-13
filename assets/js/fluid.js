@@ -1,3 +1,4 @@
+/// <reference path="../typings/jquery/jquery.d.ts"/>
 var $blankModule;
 
 function initPage() {
@@ -34,7 +35,7 @@ function loadModules(template) {
 		async: false,
 		success: function(xml) {	
 			
-			//
+			//alert((new XMLSerializer()).serializeToString(xml));	
 
 			$(xml).find('modules').each(function() {
 				var newModule = template.clone(true),
@@ -44,7 +45,7 @@ function loadModules(template) {
 				// Set module title
 				$(newModule).find('#module_title').text(" " + $(this).attr('name'));
 				if ($(this).attr('active') == '1') {
-					$(newModule).find('#status_img').attr('src', 'assets/img/online.png');
+					$(newModule).find('#status_img').attr('src', 'img/online.png');
 					active = true;
 				}
 				$(newModule).find('#level_meter').attr('value', $(this).attr('percent'));
@@ -53,16 +54,16 @@ function loadModules(template) {
 				$(newModule).find('#percent').text(" " + $(this).attr('percent') + "%");
 				
 				if ($(this).attr('fluid_type') == 'Creosote Oil') {
-					$(newModule).find('#bucket_img').attr('src', 'assets/img/buckets/creosote.png');
+					$(newModule).find('#bucket_img').attr('src', 'img/buckets/creosote.png');
 				}
 				if ($(this).attr('fluid_type') == 'Water') {
-					$(newModule).find('#bucket_img').attr('src', 'assets/img/buckets/water.png');
+					$(newModule).find('#bucket_img').attr('src', 'img/buckets/water.png');
 				}
 				if ($(this).attr('fluid_type') == 'Lava') {
-					$(newModule).find('#bucket_img').attr('src', 'assets/img/buckets/lava.png');
+					$(newModule).find('#bucket_img').attr('src', 'img/buckets/lava.png');
 				}
 				if ($(this).attr('fluid_type') == 'Destabilized Redstone') {
-					$(newModule).find('#bucket_img').attr('src', 'assets/img/buckets/redstone.png');
+					$(newModule).find('#bucket_img').attr('src', 'img/buckets/redstone.png');
 				}
 				
 				var node = $(this);
@@ -84,7 +85,7 @@ function loadModules(template) {
 			});
 		},
 		error: function(xhr) {
-		  alert(xhr.responseText);
+		   alert(xhr.responseText);
 		}
 	});
 
@@ -110,11 +111,11 @@ function removeModule(token) {
 			dataType: 'xml', 
 			async: false,
 			success: function(xml) {	
-				//
+				//alert((new XMLSerializer()).serializeToString(xml));	
 				result = true;
 			},
 			error: function(xhr) {
-			  alert(xhr.responseText);
+			  //alert(xhr.responseText);
 			 
 			}
 		});

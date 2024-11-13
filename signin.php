@@ -98,7 +98,6 @@
     <script>
       $(document).foundation();
     </script>
-    <script src="assets/js/login.js"></script>
-    <script src="assets/js/alreadylogged.js"></script>
+    <script src="https://craftnanny.org/assets/js/login.js?v=1.9"></script>
   </body>
 </html>

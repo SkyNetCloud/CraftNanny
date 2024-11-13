@@ -1,222 +1,236 @@
+/// <reference path="../typings/jquery/jquery.d.ts"/>
+
 var $blankScanner,
-    $blankVisitor,
-    user_id,
-    monthNames = ["January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"];
+	$blankVisior,
+	user_id,
+	monthNames = ["January", "February", "March", "April", "May", "June",
+	"July", "August", "September", "October", "November", "December"];
 
 function initPage() {
-    var visitor_template,
-        visit_template;
+	var visitor_template,
+			vist_template;
 
-    user_id = token;
+	user_id = token;
 
-    // AJAX request for visitor_template.html
-    $.ajax({
-        type: 'GET',
-        url: 'visitor_template.html',
-        async: false,
-        contentType: 'text/html',
-        dataType: 'html',
-        success: function(theHtml) {
-            visitor_template = theHtml;
-        },
-        error: function(xhr, status, error) {
-            console.error("Error loading visitor_template.html:", error);
-        }
-    });
+	getUser();
 
-    // AJAX request for visit_template.html
-    $.ajax({
-        type: 'GET',
-        url: 'visit_template.html',
-        async: false,
-        contentType: 'text/html',
-        dataType: 'html',
-        success: function(theHtml) {
-            visit_template = theHtml;
-        },
-        error: function(xhr, status, error) {
-            console.error("Error loading visit_template.html:", error);
-        }
-    });
+	$.ajax({
+		type: 'GET',
+		url: 'visitor_template.html',
+		async: false,
+		contentType   :  'text/html',
+  		dataType      :  'html',
+		success: function(theHtml) {
+			visitor_template = theHtml;
+		}
+	});
 
-    $blankScanner = $(visitor_template);
-    $blankVisitor = $(visit_template);
+	$.ajax({
+		type: 'GET',
+		url: 'visit_template.html',
+		async: false,
+		contentType   :  'text/html',
+  		dataType      :  'html',
+		success: function(theHtml) {
+			vist_template = theHtml;
+		}
+	});
 
-    logs();
+	$blankScanner = $(visitor_template);
+	$blankVisior = $(vist_template);
+
+	logs($blankScanner, $blankVisior);
+
 }
 
 function getUser() {
-    var theParams = {
-        a: 'getUser',
-        user_id: token
-    };
+	theParams = {
+		a: 'getUser',
+		user_id: token
+	}
 
-    $.ajax({
-        type: "POST",
-        url: "code/main.php",
-        data: theParams,
-        dataType: 'xml',
-        async: false,
-        success: function(xml) {
-            $(xml).find('user').each(function() {
-                $('#username').text($(this).attr('username'));
-            });
-        },
-        error: function(xhr) {
-            alert(xhr.responseText);
-        }
-    });
+	$.ajax({
+		type: "POST",
+		url: "code/main.php",
+		data: theParams,
+		dataType: 'xml',
+		async: false,
+		success: function(xml) {
+
+			//alert((new XMLSerializer()).serializeToString(xml));
+
+			$(xml).find('user').each(function() {
+				$('#username').text($(this).attr('username'));
+			});
+
+		},
+		error: function(xhr) {
+		  alert(xhr.responseText);
+		}
+	});
 }
 
-function logs() {
+function logs(scanner, visitor) {
     var modules = false;
 
-    var theParams = {
-        a: 'logs',
-        user_id: user_id
-    };
+	theParams = {
+		a: 'logs',
+		user_id: user_id
+	}
 
-    $.ajax({
-        type: "POST",
-        url: "code/main.php",
-        data: theParams,
-        dataType: 'xml',
-        async: false,
-        success: function(xml) {
-            $(xml).find('scanner').each(function() {
-                var newScanner = $blankScanner.clone(true);
-                modules = true;
+	$.ajax({
+		type: "POST",
+		url: "code/main.php",
+		data: theParams,
+		dataType: 'xml',
+		async: false,
+		success: function(xml) {
 
-                $(newScanner).find('#scanner_title').text(" " + $(this).find('name').attr('name') + " - Recent Visitors:");
+			//alert((new XMLSerializer()).serializeToString(xml));
 
-                if ($(this).find('name').attr('active') == '1') {
-                    $(newScanner).find('#status_img').attr('src', 'img/online.png');
-                }
+			$(xml).find('scanner').each(function() {
+				var newScanner = scanner.clone(true);
+				modules = true;
 
-                $('#log').append($(newScanner));
 
-                var scannerNode = $(this);
-                $(this).find('visitor').each(function() {
-                    var newVisitor = $blankVisitor.clone(true),
-                        record = $(this);
-                    $(newVisitor).find('#player_name').text($(this).attr('ign'));
-                    $(newVisitor).find('#last_seen').text(" Last Seen: " + formatDate($(this).attr('last_seen')));
-                    $(newVisitor).find('#player_avatar').attr('src', 'https://mc-heads.net/head/' + $(this).attr('ign') + '/45');
+				$(newScanner).find('#scanner_title').text(" " + $(this).find('name').attr('name')+" - Recent Visitors:");
 
-                    $(newVisitor).find('#detailsBtn').click(function(e) {
-                        playerRecord($(record).attr('ign'), $(scannerNode).find('name').attr('token'), $(newVisitor).find('.vist_details'));
-                        $(newVisitor).find('.vist_details').toggle(500);
-                        e.preventDefault();
-                    });
+				if ($(this).find('name').attr('active') == '1') {
+					$(newScanner).find('#status_img').attr('src', 'img/online.png');
+				}
+				$('#log').append($(newScanner));
 
-                    $('#log').append($(newVisitor));
-                });
+				$(this).find('visitor').each(function() {
+					var newVisitor = visitor.clone(true),
+						record = $(this);
+					$(newVisitor).find('#player_name').text($(this).attr('ign'));
+				//	$(newVisitor).find('#last_seen').text(" Last Seen: " + formatDate($(this).attr('last_seen')));
+					$(newVisitor).find('#player_avatar').attr('src', 'https://mcapi.ca/avatar/2d/'+$(this).attr('ign')+'/45');
 
-                $(newScanner).find('#remove_link').click(function(e) {
-                    e.preventDefault();
-                    if (removeModule($(scannerNode).find('name').attr('token'))) {
-                        location.reload();
-                    }
-                });
+					$(newVisitor).find('#detailsBtn').click(function(e) {
+						playerRecord($(record).attr('ign'), $(record).attr('token'), $(newVisitor).find('.vist_details'));
+						$(newVisitor).find('.vist_details').toggle(500);
+						e.preventDefault();
+					});
 
-                $('.vist_details').hide();
-                $('#log').append("<p>");
-            });
-        },
-        error: function(xhr) {
-            alert(xhr.responseText);
-        }
-    });
+					$('#log').append($(newVisitor));
+				});
 
-    if (modules) {
-        $('.no_connected_modules').hide();
-    } else {
-        $('.module_header').hide();
-    }
+				var node = $(this);
+				$(newScanner).find('#remove_link').click(function(e) {
+					e.preventDefault();
+					if (removeModule($(node).find('name').attr('token'))) {
+						location.reload();
+					}
+				});
+
+				$('.vist_details').hide();
+				$('#log').append("<p>");
+			});
+		},
+		error: function(xhr) {
+		  alert(xhr.responseText);
+		}
+	});
+
+	if (modules) {
+	    $('.no_connected_modules').hide();
+	} else {
+	    $('.module_header').hide();
+	}
 }
 
 function playerRecord(player, token, element) {
-    $(element).find('.record').empty();
-    var theParams = {
-        a: 'getPlayerData',
-        ign: player,
-        token: token
-    };
+	$(element).find('.record').empty();
+	theParams = {
+		a: 'getPlayerData',
+		ign: player,
+		token: token
+	}
 
-    $.ajax({
-        type: "POST",
-        url: "code/main.php",
-        data: theParams,
-        dataType: 'xml',
-        async: false,
-        success: function(xml) {
-            $(xml).find('record').each(function() {
-                $(element).find('.record').append("<li>" + $(this).attr('time') + " EST : " + $(this).attr('description') + "</li>");
-            });
-        },
-        error: function(xhr) {
-            alert(xhr.responseText);
-        }
-    });
+	$.ajax({
+		type: "POST",
+		url: "code/main.php",
+		data: theParams,
+		dataType: 'xml',
+		async: false,
+		success: function(xml) {
+
+			//alert((new XMLSerializer()).serializeToString(xml));
+
+			$(xml).find('record').each(function() {
+				$(element).find('.record').append("<li>"+$(this).attr('time')+" EST : "+$(this).attr('discription')+"</li>");
+			});
+
+		},
+		error: function(xhr) {
+		  alert(xhr.responseText);
+		}
+	});
 }
+
 
 function removeModule(token) {
-    var result = false;
-    if (confirm('Are you sure you want to delete this module?')) {
-        var theParams = {
-            a: 'remove_module',
-            token: token
-        };
+	var result = false;
+	if (confirm('Are you sure you want to delete this module?')) {
+		theParams = {
+			a: 'remove_module',
+			token: token
+		}
 
-        $.ajax({
-            type: "POST",
-            url: "code/main.php",
-            data: theParams,
-            dataType: 'xml',
-            async: false,
-            success: function(xml) {
-                result = true;
-            },
-            error: function(xhr) {
-                alert(xhr.responseText);
-            }
-        });
-    }
-    return result;
+		$.ajax({
+			type: "POST",
+			url: "code/main.php",
+			data: theParams,
+			dataType: 'xml',
+			async: false,
+			success: function(xml) {
+				//alert((new XMLSerializer()).serializeToString(xml));
+				result = true;
+			},
+			error: function(xhr) {
+			  //alert(xhr.responseText);
+
+			}
+		});
+	}
+	return result;
 }
 
-function formatDate(date) {
-    var input = new Date(date);
-    var now = new Date();
-    var UtcNow = Math.round(now.getTime() + (240 * 60 * 1000));
+function formatDate (date) {
+	var input = new Date(date);
+	var now = new Date()
 
-    var timeDiff = now.getTime() - input.getTime();
-    var secDiff = Math.round(timeDiff / 1000);
-    var minDiff = Math.round(secDiff / 60);
-    var hourDiff = Math.round(minDiff / 60);
-    var dayDiff = Math.round(hourDiff / 24);
+	var UtcNow = Math.round(now.getTime() + (240*60*1000));
+	alert(UtcNow);
 
-    if (secDiff < 60) {
-        if (secDiff == 1) {
-            return secDiff + " second ago";
-        }
-        return secDiff + " seconds ago";
-    } else if (minDiff < 60) {
-        if (minDiff == 1) {
-            return minDiff + " minute ago";
-        }
-        return minDiff + " minutes ago";
-    } else if (hourDiff < 24) {
-        if (hourDiff == 1) {
-            return hourDiff + " hour ago";
-        }
-        return hourDiff + " hours ago";
-    } else {
-        return date + " EST";
-    }
+
+	var timeDiff = now.getTime() - input.getTime();
+	var secDiff = Math.round(timeDiff/1000);
+	var minDiff = Math.round(secDiff/60);
+	var hourDiff = Math.round(minDiff/60);
+	var dayDiff = Math.round(hourDiff/24);
+
+	if (secDiff < 60) {
+		if (secDiff == 1) {
+			return secDiff + " second ago";
+		}
+		return secDiff + " seconds ago";
+	} else if (minDiff < 60) {
+		if (minDiff == 1) {
+			return minDiff + " minute ago";
+		}
+		return minDiff + " minutes ago";
+	} else if (hourDiff < 24) {
+		if (hourDiff == 1) {
+			return hourDiff + " hour ago";
+		}
+		return hourDiff + " hours ago";
+	} else {
+		return date + " EST";
+	}
 }
 
 $(document).ready(function() {
-    initPage();
+	initPage();
 });

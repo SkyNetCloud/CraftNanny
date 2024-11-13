@@ -1,661 +1,661 @@
 <?php
-// // Enable error reporting to display all errors
-// error_reporting(E_ALL);
 
-// // Optionally, you can also display notices and warnings along with other error types
-//  error_reporting(E_ALL | E_NOTICE | E_WARNING);
+error_reporting(E_ALL);
 
-// // If you want to display errors on the web page, you can set display_errors to On in php.ini
-// ini_set('display_errors', 1);
+  error_reporting(E_ALL | E_NOTICE | E_WARNING);
 
-// // If you want to log errors to a file, you can set log_errors to On in php.ini
-// ini_set('log_errors', 1);
+ ini_set('display_errors', 1);
+
+ini_set('log_errors', 1);
 
 require_once('connection.php');
 
-function doesUserExist($dbConn, $xmlDoc, $id, $type) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function doesUserExist($dbConn, $id, $type) {
+    // Initialize an array for the response
+    $response = [];
 
-	if($type == 'google') {
-		$query = "select * from google_users where google_id = " . $id;
-	} else if ($type == 'main') {
-		$query = "select * from users where username = '" .dbEsc($dbConn, $id). "'";
-	}
+    // Check the type and prepare the query
+    if ($type == 'main') {
+        $query = "SELECT * FROM `users` WHERE username = '" . dbEsc($dbConn, $id) . "'";
+    }
 
+    // Execute the query
+    $result = mysqli_query($dbConn, $query);
 
-	$result = mysqli_query($dbConn, $query);
+    if (!$result) {
+        // If there is an error, set the status to error and add the error message
+        $response['status'] = 'error';
+        $response['message'] = mysqli_error($dbConn);
+    } else {
+        // If the query is successful, set the status to success
+        $response['status'] = 'success';
+    }
 
-	if (!($result)) {
-		$statusNode = $xmlDoc->createElement('status', $query);
+    // Initialize the counter for the number of records found
+    $counter = 0;
 
-		dbError($xmlDoc, $recordDataNode, mysqli_error());
-	} else {
-		$statusNode = $xmlDoc->createElement('status', 'success');
-	}
+    // Count the number of records returned
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $counter++;
+    }
 
-	$counter = 0;
-	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC )) {
-		$counter = $counter + 1;
-	}
-	$statusNode = $xmlDoc->createElement('records', $counter);
+    // Add the number of records to the response
+    $response['records'] = $counter;
 
-
-	$recordDataNode->appendChild($statusNode);
-
-	return $recordDataNode;
+    // Return the response as JSON
+    return json_encode($response);
 }
 
-function addGoogleUser($dbConn, $xmlDoc, $google_id, $name, $email, $image_url) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
 
-	$query = "INSERT INTO google_users (google_id, username, name, email, img_url) " .
-				"VALUES ('".$google_id."', '" . $name ."', '" . $name . "', '" . $email . "', '" . $image_url . "')";
-
-	$result = mysqli_query($dbConn, $query);
-
-	if (!($result)) {
-		$statusNode = $xmlDoc->createElement('status', $query);
-
-		dbError($xmlDoc, $recordDataNode, mysqli_error());
-	} else {
-		$statusNode = $xmlDoc->createElement('status', $google_id);
-	}
-
-	$recordDataNode->appendChild($statusNode);
-
-	return $recordDataNode;
-}
-
-function signIn($dbConn, $xmlDoc, $username, $password) {
-    $recordDataNode = $xmlDoc->createElement('recorddata');
-
-    // Sanitize input
+function signIn($dbconn, $username, $password) {
+    // Sanitize inputs to avoid XSS attacks
     $username = htmlspecialchars($username);
     $password = htmlspecialchars($password);
 
-    // Retrieve salt for the user
-    $query = "SELECT salt FROM users WHERE username = '".$username."'";
-    $stmt = mysqli_prepare($dbConn, $query);
-    // mysqli_stmt_bind_param($stmt, "s", $username);
+    // Prepare SQL to get the salt for the user
+    $query = "SELECT salt FROM users WHERE username = ?";
+    $stmt = mysqli_prepare($dbconn, $query);
+    mysqli_stmt_bind_param($stmt, "s", $username);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
 
-    if (!$result || mysqli_num_rows($result) == 0) {
-        dbError($xmlDoc, $recordDataNode, "User not found");
-        return $recordDataNode;
+    // Check if the user exists
+    if (mysqli_num_rows($result) == 0) {
+        return jsonResponse("error", "User not found");
     }
 
     $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
     $salt = $row['salt'];
 
-    // Hash the password with the retrieved salt
+    // Hash the password with the salt
     $hash = sha1($salt . $password);
 
-    // Check if the username and hashed password match
+    // Prepare SQL to check if the username and password hash match
     $query2 = "SELECT user_id FROM users WHERE username = ? AND password = ?";
-    $stmt2 = mysqli_prepare($dbConn, $query2);
+    $stmt2 = mysqli_prepare($dbconn, $query2);
     mysqli_stmt_bind_param($stmt2, "ss", $username, $hash);
     mysqli_stmt_execute($stmt2);
     $result2 = mysqli_stmt_get_result($stmt2);
 
-    if (!$result2 || mysqli_num_rows($result2) == 0) {
-        dbError($xmlDoc, $recordDataNode, "Invalid username or password");
-        return $recordDataNode;
+    // Check if login is successful
+    if (mysqli_num_rows($result2) == 0) {
+        return jsonResponse("error", "Invalid username or password");
     }
 
-    // Fetch the user_id and create a token
     $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
-    $token = $row2['user_id'];
 
-    // Create XML nodes
-    $statusNode = $xmlDoc->createElement('token', $token);
-    $recordDataNode->appendChild($statusNode);
+    // Create response data
+    $response = [
+        "status" => "success",
+        "message" => "Login successful",
+        "logger_token" => $row2['user_id']
+    ];
 
-    return $recordDataNode;
+    return jsonResponse("success", $response);
+	header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
-function addNewUser($dbConn, $xmlDoc, $username, $password, $email) {
-	$recordDataNode = $xmlDoc->createElement('userdata');
 
-	$username = htmlspecialchars($username);
-	$password = htmlspecialchars($password);
-	$email = htmlspecialchars($email);
 
-	$salt = rand().rand().rand().rand();
-	$hash = sha1($salt.$password);
+function addNewUser($dbConn, $username, $password, $email) {
+    // Initialize the response array
+    $response = [];
 
-	$user_id = rand().rand().rand().rand();
+    // Sanitize inputs
+    $username = htmlspecialchars($username);
+    $password = htmlspecialchars($password);
+    $email = htmlspecialchars($email);
 
-	$query = "INSERT INTO users (user_id, username, password, salt, email) " .
-				"VALUES ('".$user_id."', '" . dbEsc($dbConn, $username) ."', '" . $hash . "', '" . $salt . "', '".dbEsc($dbConn, $email)."')";
+    // Generate salt and hash the password
+    $salt = rand().rand().rand().rand();
+    $hash = sha1($salt.$password);
 
-	$result = mysqli_query($dbConn, $query);
-	
+    // Generate user_id
+    $user_id = rand().rand().rand().rand();
 
-	if (!($result)) {
-		$statusNode = $xmlDoc->createElement('status', $query);
+    // Prepare the SQL query
+    $query = "INSERT INTO users (user_id, username, password, salt, email) VALUES ('".$user_id."', '" . dbEsc($dbConn, $username) ."', '" . $hash . "', '" . $salt . "', '".dbEsc($dbConn, $email)."')";
 
-		dbError($xmlDoc, $recordDataNode, mysqli_error());
-	} else {
-		$statusNode = $xmlDoc->createElement('token', $user_id);
-	}
+    // Execute the query
+    $result = mysqli_query($dbConn, $query);
 
-	$recordDataNode->appendChild($statusNode);
+    // Check if the query was successful
+    if (!$result) {
+        $response['status'] = 'error';
+        $response['message'] = mysqli_error($dbConn);
+    } else {
+        $response['status'] = 'success';
+        $response['token'] = $user_id;
+    }
 
-	return $recordDataNode;
+    // Set the content type to JSON and output the response
+    header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
-function getConnections($dbConn, $xmlDoc, $user_id, $type) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function getConnections($dbConn, $user_id, $type) {
+    // Initialize the response array
+    $response = [];
 
-  $query = "SELECT * FROM tokens WHERE user_id = '".dbEsc($dbConn, $user_id)."' AND module_type = '".dbEsc($dbConn, $type)."'";
+    // Prepare the SQL query to fetch connections
+    $query = "SELECT * FROM tokens WHERE user_id = '".dbEsc($dbConn, $user_id)."' AND module_type = '".dbEsc($dbConn, $type)."'";
+    $result = mysqli_query($dbConn, $query);
 
-	$result = mysqli_query($dbConn, $query);
+    // Check if the query was successful
+    if (!$result) {
+        $response['status'] = 'error';
+        $response['message'] = mysqli_error($dbConn);
+    } else {
+        $response['status'] = 'success';
+        $connections = [];
 
-	if (!($result)) {
-		$statusNode = $xmlDoc->createElement('status', $query);
+        while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+            $connection = [
+                'name' => $row['computer_name'],
+                'token' => $row['token'],
+                'active' => (time() - strtotime($row['last_seen']) > 200) ? false : true
+            ];
+            $connections[] = $connection;
+        }
 
-		dbError($xmlDoc, $recordDataNode, mysqli_error());
-	} else {
-		$statusNode = $xmlDoc->createElement('status', 'success');
-	}
+        $response['connections'] = $connections;
+    }
 
-
-  while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC )) {
-	$theChildNode = $xmlDoc->createElement('connection');
-	$theChildNode->setAttribute('name', $row['computer_name']);
-	$theChildNode->setAttribute('token', $row['token']);
-
-	$datetime1 = strtotime($row['last_seen']);
-	$datetime2 = time();
-	$diff = $datetime2-$datetime1;
-	if ($diff > 200) {
-		$theChildNode->setAttribute('active', false);
-	} else {
-		$theChildNode->setAttribute('active', true);
-	}
-
-	$recordDataNode->appendChild($theChildNode);
-  }
-  	$recordDataNode->appendChild($statusNode);
-	return $recordDataNode;
+    // Set the content type to JSON and output the response
+    header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
-function getLogs($dbConn, $xmlDoc, $user_id) {
-    //main XML element to return
-    $recordDataNode = $xmlDoc->createElement('recorddata');
+function getLogs($dbConn, $user_id) {
+    // Initialize the response array
+    $response = [];
 
-    //prepare and bind parameters for the user_id
+    // Prepare and bind parameters for the user_id
     $query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = '1'";
     $stmt = mysqli_prepare($dbConn, $query);
     mysqli_stmt_bind_param($stmt, "s", $user_id);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
 
-    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-        $theScannerNode = $xmlDoc->createElement('scanner');
-        $nameNode = $xmlDoc->createElement('name');
-        $nameNode->setAttribute('name', $row['computer_name']);
-        $nameNode->setAttribute('token', $row['token']);
-        $datetime1 = strtotime($row['last_seen']);
-        $datetime2 = time();
-        $diff = $datetime2 - $datetime1;
-        $isActive = ($diff > 200) ? false : true;
-        $nameNode->setAttribute('active', $isActive);
-        $theScannerNode->appendChild($nameNode);
+    // Check if the query was successful
+    if (!$result) {
+        $response['status'] = 'error';
+        $response['message'] = mysqli_error($dbConn);
+    } else {
+        $response['status'] = 'success';
+        $scanners = [];
 
-        //for each scanner, get last 10 visitors
-        $query2 = "SELECT DISTINCT(ign) AS ign FROM logs WHERE token = ? ORDER BY timestamp DESC LIMIT 10";
-        $stmt2 = mysqli_prepare($dbConn, $query2);
-        mysqli_stmt_bind_param($stmt2, "s", $row['token']);
-        mysqli_stmt_execute($stmt2);
-        $result2 = mysqli_stmt_get_result($stmt2);
+        while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+            $scanner = [
+                'name' => $row['computer_name'],
+                'token' => $row['token'],
+                'active' => (time() - strtotime($row['last_seen']) > 200) ? false : true
+            ];
 
-        while ($row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC)) {
-            $VistorNode = $xmlDoc->createElement('visitor');
-            $VistorNode->setAttribute('ign', $row2['ign']);
-            $VistorNode->setAttribute('token', $row['token']);
+            // Get last 10 visitors
+            $query2 = "SELECT DISTINCT(ign) AS ign FROM logs WHERE token = ? ORDER BY timestamp DESC LIMIT 10";
+            $stmt2 = mysqli_prepare($dbConn, $query2);
+            mysqli_stmt_bind_param($stmt2, "s", $row['token']);
+            mysqli_stmt_execute($stmt2);
+            $result2 = mysqli_stmt_get_result($stmt2);
 
-            $query3 = "SELECT timestamp FROM logs WHERE token = ? AND ign = ? ORDER BY timestamp DESC LIMIT 1";
-            $stmt3 = mysqli_prepare($dbConn, $query3);
-            mysqli_stmt_bind_param($stmt3, "ss", $row['token'], $row2['ign']);
-            mysqli_stmt_execute($stmt3);
-            $result3 = mysqli_stmt_get_result($stmt3);
-            $row3 = mysqli_fetch_array($result3, MYSQLI_ASSOC);
-            $VistorNode->setAttribute('last_seen', $row3['timestamp']);
-            $theScannerNode->appendChild($VistorNode);
+            $visitors = [];
+            while ($row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC)) {
+                $visitor = [
+                    'ign' => $row2['ign'],
+                    'token' => $row['token']
+                ];
+
+                // Get the last seen timestamp for each visitor
+                $query3 = "SELECT timestamp FROM logs WHERE token = ? AND ign = ? ORDER BY timestamp DESC LIMIT 1";
+                $stmt3 = mysqli_prepare($dbConn, $query3);
+                mysqli_stmt_bind_param($stmt3, "ss", $row['token'], $row2['ign']);
+                mysqli_stmt_execute($stmt3);
+                $result3 = mysqli_stmt_get_result($stmt3);
+                $row3 = mysqli_fetch_array($result3, MYSQLI_ASSOC);
+
+                $visitor['last_seen'] = $row3['timestamp'];
+                $visitors[] = $visitor;
+            }
+
+            $scanner['visitors'] = $visitors;
+            $scanners[] = $scanner;
         }
 
-        $recordDataNode->appendChild($theScannerNode);
+        $response['scanners'] = $scanners;
     }
 
-    return $recordDataNode;
+    // Set the content type to JSON and output the response
+    header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
 
 
 
-function getPlayerData($dbConn, $xmlDoc, $ign, $token) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function getPlayerData($dbConn, $ign, $token) {
+    $response = array();
+    
+    $query = "SELECT * FROM logs WHERE token = '".dbEsc($dbConn, $token)."' AND ign = '".dbEsc($dbConn, $ign)."' ORDER BY timestamp DESC LIMIT 50";
+    $result = mysqli_query($dbConn, $query);
+    
+    $records = array();
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $record = array(
+            'ign' => $row['ign'],
+            'event' => $row['event'],
+            'time' => $row['timestamp'],
+            'description' => $row['description']
+        );
+        $records[] = $record;
+    }
+    
+    $response['recorddata'] = $records;
+    return json_encode($response);
 
-	$query = "SELECT * from logs where token = '".dbEsc($dbConn, $token)."' AND ign = '".dbEsc($dbConn, $ign)."' ORDER BY timestamp DESC LIMIT 50";
-	$result = mysqli_query($dbConn, $query);
-	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC )) {
-		$VistorNode = $xmlDoc->createElement('record');
-		$VistorNode->setAttribute('ign', $row['ign']);
-		$VistorNode->setAttribute('event', $row['event']);
-		$VistorNode->setAttribute('time', $row['timestamp']);
-		$VistorNode->setAttribute('description', $row['description']);
-		$recordDataNode->appendChild($VistorNode);
-	}
-	return $recordDataNode;
+	header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
-function getUser($dbConn, $xmlDoc, $user_id) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function getUser($dbConn, $user_id) {
+    $response = array();
 
-	$query2 = "SELECT username from users where user_id = '".dbEsc($dbConn, $user_id)."'";
-	$result2 = mysqli_query($dbConn, $query2);
-	$row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC );
-	$userNode = $xmlDoc->createElement('user');
-	$userNode->setAttribute('username', $row2['username']);
+    $escapedUserId = dbEsc($dbConn, $user_id);
+    $query2 = "SELECT username FROM users WHERE user_id = '$escapedUserId'";
+    $result2 = mysqli_query($dbConn, $query2);
+    
+    // Check if user exists in the database
+    if ($result2 && mysqli_num_rows($result2) > 0) {
+        // Fetch the username
+        $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
+        $response['user'] = array('username' => $row2['username']);
+    } else {
+        // If no user is found, return an error or handle it as needed
+        $response['error'] = 'User not found';
+        $response['user'] = null;
+    }
 
-	$recordDataNode->appendChild($userNode);
+    // Update the last_seen timestamp
+    $query3 = "UPDATE users SET last_seen = NOW() WHERE user_id = '$escapedUserId'";
+    mysqli_query($dbConn, $query3);
 
-	$query3 = "UPDATE users SET last_seen = NOW() WHERE user_id = '".dbEsc($dbConn, $user_id)."'";
-	$result3 = mysqli_query($dbConn, $query3);
+    // Set the content type header and return the JSON response
+    header('Content-Type: application/json');
+    echo json_encode($response);
 
-	return $recordDataNode;
+    return json_encode($response); // Optional, but typically not needed after echo
 }
 
-function loadRedstoneControls($dbConn, $xmlDoc, $user_id) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function loadRedstoneControls($dbConn, $user_id) {
+    $response = array();
+    
+    $query = "SELECT * FROM tokens WHERE user_id = '".dbEsc($dbConn, $user_id)."' AND module_type = '4'";
+    $result = mysqli_query($dbConn, $query);
 
-	$query = "SELECT * from tokens where user_id = '".dbEsc($dbConn, $user_id)."' AND module_type = '4'";
-	$result = mysqli_query($dbConn, $query);
+    $controls = array();
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $control = array(
+            'name' => $row['computer_name'],
+            'token' => $row['token'],
+            'active' => (time() - strtotime($row['last_seen']) <= 200) ? true : false
+        );
 
-	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC )) {
-		$controlNode = $xmlDoc->createElement('controls');
-		$controlNode->setAttribute('name', $row['computer_name']);
-		$controlNode->setAttribute('token', $row['token']);
+        $query2 = "SELECT * FROM redstone_controls WHERE token = '".$row['token']."'";
+        $result2 = mysqli_query($dbConn, $query2);
+        
+        if ($result2) {
+            $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
+            $control['top'] = $row2['top'];
+            $control['bottom'] = $row2['bottom'];
+            $control['front'] = $row2['front'];
+            $control['back'] = $row2['back'];
+            $control['left'] = $row2['left_side'];
+            $control['right'] = $row2['right_side'];
 
-		$datetime1 = strtotime($row['last_seen']);
-		$datetime2 = time();
-		$diff = $datetime2-$datetime1;
-		if ($diff > 200) {
-			$controlNode->setAttribute('active', false);
-		} else {
-			$controlNode->setAttribute('active', true);
-		}
+            $control['top_name'] = $row2['top_name'];
+            $control['bottom_name'] = $row2['bottom_name'];
+            $control['front_name'] = $row2['front_name'];
+            $control['back_name'] = $row2['back_name'];
+            $control['left_name'] = $row2['left_name'];
+            $control['right_name'] = $row2['right_name'];
 
-		$query2 = "SELECT * from redstone_controls where token = '".$row['token']."'";
-		$result2 = mysqli_query($dbConn, $query2);
+            $control['top_input'] = $row2['top_input'];
+            $control['bottom_input'] = $row2['bottom_input'];
+            $control['front_input'] = $row2['front_input'];
+            $control['back_input'] = $row2['back_input'];
+            $control['left_input'] = $row2['left_input'];
+            $control['right_input'] = $row2['right_input'];
+        }
 
-		if (!($result2)) {
-			$statusNode = $xmlDoc->createElement('status', $query);
+        $controls[] = $control;
+    }
+    
+    $response['recorddata'] = $controls;
+    $response['status'] = 'success';
+    return json_encode($response);
 
-			dbError($xmlDoc, $recordDataNode, mysqli_error());
-		} else {
-			$statusNode = $xmlDoc->createElement('status', 'success');
-		}
+	header('Content-Type: application/json');
+    echo json_encode($response);
 
-		$row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC );
-
-		$controlNode->setAttribute('top', $row2['top']);
-		$controlNode->setAttribute('bottom', $row2['bottom']);
-		$controlNode->setAttribute('front', $row2['front']);
-		$controlNode->setAttribute('back', $row2['back']);
-		$controlNode->setAttribute('left', $row2['left_side']);
-		$controlNode->setAttribute('right', $row2['right_side']);
-
-		$controlNode->setAttribute('top_name', $row2['top_name']);
-		$controlNode->setAttribute('bottom_name', $row2['bottom_name']);
-		$controlNode->setAttribute('front_name', $row2['front_name']);
-		$controlNode->setAttribute('back_name', $row2['back_name']);
-		$controlNode->setAttribute('left_name', $row2['left_name']);
-		$controlNode->setAttribute('right_name', $row2['right_name']);
-
-		$controlNode->setAttribute('top_input', $row2['top_input']);
-		$controlNode->setAttribute('bottom_input', $row2['bottom_input']);
-		$controlNode->setAttribute('front_input', $row2['front_input']);
-		$controlNode->setAttribute('back_input', $row2['back_input']);
-		$controlNode->setAttribute('left_input', $row2['left_input']);
-		$controlNode->setAttribute('right_input', $row2['right_input']);
-
-		$recordDataNode->appendChild($controlNode);
-
-	}
-	$recordDataNode->appendChild($statusNode);
-	return $recordDataNode;
 }
 
-function setRedstoneOutput($dbConn, $xmlDoc, $token, $side, $value, $type) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function setRedstoneOutput($dbConn, $token, $side, $value, $type) {
+    $response = array();
+    
+    if ($type == 'string') {
+        $value = htmlspecialchars($value);
+        $query = "UPDATE redstone_controls SET ".dbEsc($dbConn, $side)." = '".dbEsc($dbConn, $value)."' WHERE token = '".dbEsc($dbConn, $token)."'";
+    } else {
+        $query = "UPDATE redstone_controls SET ".dbEsc($dbConn, $side)." = ".dbEsc($dbConn, $value)." WHERE token = '".dbEsc($dbConn, $token)."'";
+    }
 
-	if ($type == 'string') {
-		$value = htmlspecialchars($value);
-		$query = "UPDATE redstone_controls SET ".dbEsc($dbConn, $side)." = '".dbEsc($dbConn, $value)."' WHERE token = '".dbEsc($dbConn, $token)."'";
-	} else {
-		$query = "UPDATE redstone_controls SET ".dbEsc($dbConn, $side)." = ".dbEsc($dbConn, $value)." WHERE token = '".dbEsc($dbConn, $token)."'";
-	}
+    $result = mysqli_query($dbConn, $query);
+    
+    if ($result) {
+        $response['status'] = 'success';
+    } else {
+        $response['status'] = 'error';
+        $response['message'] = mysqli_error($dbConn);
+    }
 
-	$result = mysqli_query($dbConn, $query);
+    return json_encode($response);
 
-	if (!($result)) {
-		$statusNode = $xmlDoc->createElement('status', $query);
-
-		dbError($xmlDoc, $recordDataNode, mysqli_error());
-	} else {
-		$statusNode = $xmlDoc->createElement('status', 'success');
-	}
-	$recordDataNode->appendChild($statusNode);
-	return $recordDataNode;
+	header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
-function getFluidLevels($dbConn, $xmlDoc, $user_id) {
-    $recordDataNode = $xmlDoc->createElement('recorddata');
-    $statusNode = $xmlDoc->createElement('status'); // Initialize status node outside the loop
+function getFluidLevels($dbConn, $user_id) {
+    $response = array();
 
     $query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = '3'";
     $stmt = mysqli_prepare($dbConn, $query);
-
-    // Check if the statement preparation failed
+    
     if (!$stmt) {
-        dbError($xmlDoc, $recordDataNode, mysqli_error($dbConn));
-        return $recordDataNode;
+        $response['status'] = 'error';
+        $response['message'] = mysqli_error($dbConn);
+        return json_encode($response);
     }
 
-    // Bind the user_id parameter
     mysqli_stmt_bind_param($stmt, "s", $user_id);
-
-    // Execute the statement
     mysqli_stmt_execute($stmt);
-
-    // Get the result set
     $result = mysqli_stmt_get_result($stmt);
 
+    $modules = array();
     while ($row = mysqli_fetch_assoc($result)) {
-        $controlNode = $xmlDoc->createElement('modules');
-        $controlNode->setAttribute('name', $row['computer_name']);
-        $controlNode->setAttribute('token', $row['token']);
+        $module = array(
+            'name' => $row['computer_name'],
+            'token' => $row['token'],
+            'active' => (time() - strtotime($row['last_seen']) <= 200) ? 'true' : 'false'
+        );
 
-        $datetime1 = strtotime($row['last_seen']);
-        $datetime2 = time();
-        $diff = $datetime2 - $datetime1;
-        $controlNode->setAttribute('active', ($diff <= 200) ? 'true' : 'false');
-
-        $query2 = "SELECT * from tanks where token = ?";
+        $query2 = "SELECT * FROM tanks WHERE token = ?";
         $stmt2 = mysqli_prepare($dbConn, $query2);
-
-        // Check if the statement preparation failed
+        
         if (!$stmt2) {
-            dbError($xmlDoc, $recordDataNode, mysqli_error($dbConn));
-            return $recordDataNode;
+            $response['status'] = 'error';
+            $response['message'] = mysqli_error($dbConn);
+            return json_encode($response);
         }
 
         mysqli_stmt_bind_param($stmt2, "s", $row['token']);
         mysqli_stmt_execute($stmt2);
         $result2 = mysqli_stmt_get_result($stmt2);
 
-        if (!$result2) {
-            dbError($xmlDoc, $recordDataNode, mysqli_error($dbConn));
-            return $recordDataNode;
-        }
-
         $row2 = mysqli_fetch_assoc($result2);
-        $controlNode->setAttribute('tank_name', $row2['tank_name']);
-        $controlNode->setAttribute('fluid_type', $row2['fluid_type']);
-        $controlNode->setAttribute('percent', $row2['percent']);
+        $module['tank_name'] = $row2['tank_name'];
+        $module['fluid_type'] = $row2['fluid_type'];
+        $module['percent'] = $row2['percent'];
 
-        $recordDataNode->appendChild($controlNode);
+        $modules[] = $module;
     }
 
-    $statusNode->textContent = 'success'; // Set the content of the status node
-    $recordDataNode->appendChild($statusNode);
-    return $recordDataNode;
+    $response['recorddata'] = $modules;
+    $response['status'] = 'success';
+    return json_encode($response);
+
+	header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
-
-function getEnergyLevels($dbConn, $xmlDoc, $user_id) {
-    $recordDataNode = $xmlDoc->createElement('recorddata');
+function getEnergyLevels($dbConn, $user_id) {
+    $response = array();
 
     $query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = '2'";
     $stmt = mysqli_prepare($dbConn, $query);
-
-    // Bind the user_id parameter
+    
     mysqli_stmt_bind_param($stmt, "s", $user_id);
-
-    // Execute the statement
     mysqli_stmt_execute($stmt);
-
-    // Get the result set
     $result = mysqli_stmt_get_result($stmt);
 
+    $modules = array();
     while ($row = mysqli_fetch_assoc($result)) {
-        $controlNode = $xmlDoc->createElement('modules');
-        $controlNode->setAttribute('name', $row['computer_name']);
-        $controlNode->setAttribute('token', $row['token']);
-
-        $datetime1 = strtotime($row['last_seen']);
-        $datetime2 = time();
-        $diff = $datetime2 - $datetime1;
-        if ($diff > 200) {
-            $controlNode->setAttribute('active', false);
-        } else {
-            $controlNode->setAttribute('active', true);
-        }
+        $module = array(
+            'name' => $row['computer_name'],
+            'token' => $row['token'],
+            'active' => (time() - strtotime($row['last_seen']) <= 200) ? true : false
+        );
 
         $query2 = "SELECT * FROM energy_storage WHERE token = ?";
         $stmt2 = mysqli_prepare($dbConn, $query2);
 
-        // Bind the token parameter
         mysqli_stmt_bind_param($stmt2, "s", $row['token']);
-
-        // Execute the statement
         mysqli_stmt_execute($stmt2);
-
-        // Get the result set
         $result2 = mysqli_stmt_get_result($stmt2);
 
-        if (!$result2) {
-            $statusNode = $xmlDoc->createElement('status', 'error');
-            dbError($xmlDoc, $recordDataNode, mysqli_error($dbConn)); // Assuming $dbConn is the database connection object
-        } else {
-            $statusNode = $xmlDoc->createElement('status', 'success');
+        if ($result2) {
             $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
-
-            $controlNode->setAttribute('bat_name', $row2['bat_name']);
-            $controlNode->setAttribute('energy_type', $row2['energy_type']);
-            $controlNode->setAttribute('percent', $row2['percent']);
+            $module['bat_name'] = $row2['bat_name'];
+            $module['energy_type'] = $row2['energy_type'];
+            $module['percent'] = $row2['percent'];
         }
 
-        $recordDataNode->appendChild($controlNode);
+        $modules[] = $module;
     }
-    $recordDataNode->appendChild($statusNode);
-    return $recordDataNode;
+
+    $response['recorddata'] = $modules;
+    $response['status'] = 'success';
+
+
+	header('Content-Type: application/json');
+    echo json_encode($response);
+
+    return json_encode($response);
+
+
 }
 
-function removeModule($dbConn, $xmlDoc, $token) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function removeModule($dbConn, $token) {
+    $response = array();
 
-	$query2 = "DELETE FROM tokens WHERE token = '".dbEsc($dbConn, $token)."'";
-	$result2 = mysqli_query($dbConn, $query2);
+    $query2 = "DELETE FROM tokens WHERE token = '".dbEsc($dbConn, $token)."'";
+    $result2 = mysqli_query($dbConn, $query2);
 
-	if (!($result2)) {
-			$statusNode = $xmlDoc->createElement('status', $query);
+    if ($result2) {
+        $response['status'] = 'success';
+    } else {
+        $response['status'] = 'error';
+        $response['message'] = mysqli_error($dbConn);
+    }
 
-			dbError($xmlDoc, $recordDataNode, mysqli_error());
-		} else {
-			$statusNode = $xmlDoc->createElement('status', 'success');
-		}
+    return json_encode($response);
 
-	$recordDataNode->appendChild($statusNode);
-
-	return $recordDataNode;
+	header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
-function redstoneEventDropdowns($dbConn, $xmlDoc, $user_id) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function redstoneEventDropdowns($dbConn, $user_id) {
+    // Initialize the response array
+    $response = [
+        'storage_modules' => [],
+        'redstone_modules' => []
+    ];
 
-	$query = "SELECT * from tokens where user_id = '".dbEsc($dbConn, $user_id)."' AND (module_type = '2' OR module_type = '3')";
-	$result = mysqli_query($dbConn, $query);
+    // Query for storage modules
+    $query = "SELECT * FROM tokens WHERE user_id = '".dbEsc($dbConn, $user_id)."' AND (module_type = '2' OR module_type = '3')";
+    $result = mysqli_query($dbConn, $query);
 
-	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC )) {
-		$controlNode = $xmlDoc->createElement('storage_modules');
-		$controlNode->setAttribute('name', $row['computer_name']);
-		$controlNode->setAttribute('token', $row['token']);
-		$recordDataNode->appendChild($controlNode);
-	}
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $response['storage_modules'][] = [
+            'name' => $row['computer_name'],
+            'token' => $row['token']
+        ];
+    }
 
-	$query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = '4'";
-	$stmt = mysqli_prepare($dbConn, $query);
-	
-	// Bind the user_id parameter
-	mysqli_stmt_bind_param($stmt, "s", $user_id);
-	
-	// Execute the statement
-	mysqli_stmt_execute($stmt);
-	
-	// Get the result set
-	$result = mysqli_stmt_get_result($stmt);
+    // Query for redstone modules
+    $query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = '4'";
+    $stmt = mysqli_prepare($dbConn, $query);
+    mysqli_stmt_bind_param($stmt, "s", $user_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
 
-	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC )) {
-		$controlNode = $xmlDoc->createElement('redstone_modules');
-		$controlNode->setAttribute('name', $row['computer_name']);
-		$controlNode->setAttribute('token', $row['token']);
-		$recordDataNode->appendChild($controlNode);
-	}
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $response['redstone_modules'][] = [
+            'name' => $row['computer_name'],
+            'token' => $row['token']
+        ];
+    }
 
-	return $recordDataNode;
+    // Return the response as JSON
+    header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
-function getRedstoneSides($dbConn, $xmlDoc, $token) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function getRedstoneSides($dbConn, $token) {
+    // Initialize the response array
+    $response = [
+        'modules' => []
+    ];
 
-	$query = "SELECT * FROM redstone_controls WHERE token = ?";
-	$stmt = mysqli_prepare($dbConn, $query);
-	
-	// Bind the token parameter
-	mysqli_stmt_bind_param($stmt, "s", $token);
-	
-	// Execute the statement
-	mysqli_stmt_execute($stmt);
-	
-	// Get the result set
-	$result = mysqli_stmt_get_result($stmt);
+    $query = "SELECT * FROM redstone_controls WHERE token = ?";
+    $stmt = mysqli_prepare($dbConn, $query);
+    mysqli_stmt_bind_param($stmt, "s", $token);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
 
-	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC )) {
-		$controlNode = $xmlDoc->createElement('modules');
-		$controlNode->setAttribute('top_name', $row['top_name']);
-		$controlNode->setAttribute('bottom_name', $row['bottom_name']);
-		$controlNode->setAttribute('front_name', $row['front_name']);
-		$controlNode->setAttribute('back_name', $row['back_name']);
-		$controlNode->setAttribute('left_name', $row['left_name']);
-		$controlNode->setAttribute('right_name', $row['right_name']);
-		$recordDataNode->appendChild($controlNode);
-	}
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $response['modules'][] = [
+            'top_name' => $row['top_name'],
+            'bottom_name' => $row['bottom_name'],
+            'front_name' => $row['front_name'],
+            'back_name' => $row['back_name'],
+            'left_name' => $row['left_name'],
+            'right_name' => $row['right_name']
+        ];
+    }
 
-	return $recordDataNode;
+    // Return the response as JSON
+    header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
-function createRedstoneEvent($dbConn, $xmlDoc, $storageToken, $redstoneToken, $triggerValue, $side, $outputValue, $eventType, $user_id) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function createRedstoneEvent($dbConn, $storageToken, $redstoneToken, $triggerValue, $side, $outputValue, $eventType, $user_id) {
+    // Initialize the response array
+    $response = [];
 
-	$query = "INSERT INTO redstone_events (redstone_token, storage_token, event_type, trigger_value, side, output, user_id) VALUES " .
-				"('".dbEsc($dbConn, $redstoneToken)."', '".dbEsc($dbConn, $storageToken)."', ".dbEsc($dbConn, $eventType).", ".dbEsc($dbConn, $triggerValue).", '".dbEsc($dbConn, $side)."', ".dbEsc($dbConn, $outputValue).", '".dbEsc($dbConn, $user_id)."')";
-	$result = mysqli_query($dbConn, $query);
+    $query = "INSERT INTO redstone_events (redstone_token, storage_token, event_type, trigger_value, side, output, user_id) VALUES " .
+        "('".dbEsc($dbConn, $redstoneToken)."', '".dbEsc($dbConn, $storageToken)."', ".dbEsc($dbConn, $eventType).", ".dbEsc($dbConn, $triggerValue).", '".dbEsc($dbConn, $side)."', ".dbEsc($dbConn, $outputValue).", '".dbEsc($dbConn, $user_id)."')";
 
-	if (!($result)) {
-		$statusNode = $xmlDoc->createElement('status', $query);
+    $result = mysqli_query($dbConn, $query);
 
-		dbError($xmlDoc, $recordDataNode, mysqli_error());
-	} else {
-		$statusNode = $xmlDoc->createElement('status', 'success');
-	}
+    if (!$result) {
+        $response['status'] = 'error';
+        $response['message'] = mysqli_error($dbConn);
+    } else {
+        $response['status'] = 'success';
+    }
 
-	$recordDataNode->appendChild($statusNode);
-
-	return $recordDataNode;
+    // Return the response as JSON
+    header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
-function loadRedstoneEvents($dbConn, $xmlDoc, $user_id) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function loadRedstoneEvents($dbConn, $user_id) {
+    // Initialize the response array
+    $response = [
+        'events' => []
+    ];
 
-	$query = "SELECT * FROM redstone_events WHERE user_id = ?";
-	$stmt = mysqli_prepare($dbConn, $query);
-	
-	// Bind the user_id parameter
-	mysqli_stmt_bind_param($stmt, "s", $user_id);
-	
-	// Execute the statement
-	mysqli_stmt_execute($stmt);
-	
-	// Get the result set
-	$result = mysqli_stmt_get_result($stmt);
+    $query = "SELECT * FROM redstone_events WHERE user_id = ?";
+    $stmt = mysqli_prepare($dbConn, $query);
+    mysqli_stmt_bind_param($stmt, "s", $user_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
 
-	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC )) {
-		$controlNode = $xmlDoc->createElement('events');
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $eventData = [
+            'event_id' => $row['event_id'],
+            'event_type' => $row['event_type'],
+            'trigger_value' => $row['trigger_value'],
+            'side' => $row['side'],
+            'output' => $row['output'],
+            'redstone_module' => null,
+            'storage_module' => null,
+            'redstone_active' => false,
+            'storage_active' => false
+        ];
 
-		$query2 = "SELECT computer_name, last_seen FROM tokens WHERE token = '".dbEsc($dbConn, $row['redstone_token'])."'";
-		$result2 = mysqli_query($dbConn, $query2);
-		$row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC );
-		$controlNode->setAttribute('redstone_module', $row2['computer_name']);
-		$datetime1 = strtotime($row2['last_seen']);
-		$datetime2 = time();
-		$diff = $datetime2-$datetime1;
-		if ($diff > 200) {
-			$controlNode->setAttribute('redstone_active', false);
-		} else {
-			$controlNode->setAttribute('redstone_active', true);
-		}
+        // Get redstone module details
+        $query2 = "SELECT computer_name, last_seen FROM tokens WHERE token = '".dbEsc($dbConn, $row['redstone_token'])."'";
+        $result2 = mysqli_query($dbConn, $query2);
+        $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
+        $eventData['redstone_module'] = $row2['computer_name'];
+        $eventData['redstone_active'] = (time() - strtotime($row2['last_seen'])) <= 200;
 
-		$query3 = "SELECT computer_name, last_seen FROM tokens WHERE token = '".dbEsc($dbConn, $row['storage_token'])."'";
-		$result3 = mysqli_query($dbConn, $query3);
-		$row3 = mysqli_fetch_array($result3, MYSQLI_ASSOC );
-		$controlNode->setAttribute('storage_module', $row3['computer_name']);
-		$datetime1 = strtotime($row3['last_seen']);
-		$datetime2 = time();
-		$diff = $datetime2-$datetime1;
-		if ($diff > 200) {
-			$controlNode->setAttribute('storage_active', false);
-		} else {
-			$controlNode->setAttribute('storage_active', true);
-		}
+        // Get storage module details
+        $query3 = "SELECT computer_name, last_seen FROM tokens WHERE token = '".dbEsc($dbConn, $row['storage_token'])."'";
+        $result3 = mysqli_query($dbConn, $query3);
+        $row3 = mysqli_fetch_array($result3, MYSQLI_ASSOC);
+        $eventData['storage_module'] = $row3['computer_name'];
+        $eventData['storage_active'] = (time() - strtotime($row3['last_seen'])) <= 200;
 
-		$controlNode->setAttribute('event_type', $row['event_type']);
-		$controlNode->setAttribute('trigger_value', $row['trigger_value']);
-		$controlNode->setAttribute('side', $row['side']);
-		$controlNode->setAttribute('output', $row['output']);
-		$controlNode->setAttribute('event_id', $row['event_id']);
-		$recordDataNode->appendChild($controlNode);
-	}
+        $response['events'][] = $eventData;
+    }
 
-	return $recordDataNode;
+    // Return the response as JSON
+    header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
-function removeEvent($dbConn, $xmlDoc, $event_id) {
-	$recordDataNode = $xmlDoc->createElement('recorddata');
+function removeEvent($dbConn, $event_id) {
+    // Initialize the response array
+    $response = [];
 
-	$query2 = "DELETE FROM redstone_events WHERE event_id = ?";
-	$stmt = mysqli_prepare($dbConn, $query2);
-	
-	// Bind the event_id parameter
-	mysqli_stmt_bind_param($stmt, "s", $event_id);
-	
-	// Execute the statement
-	$result2 = mysqli_stmt_execute($stmt);
+    // Prepare and bind the SQL query to delete the event
+    $query2 = "DELETE FROM redstone_events WHERE event_id = ?";
+    $stmt = mysqli_prepare($dbConn, $query2);
 
-	if (!($result2)) {
-			$statusNode = $xmlDoc->createElement('status', $query);
+    // Bind the event_id parameter
+    mysqli_stmt_bind_param($stmt, "s", $event_id);
 
-			dbError($xmlDoc, $recordDataNode, mysqli_error());
-		} else {
-			$statusNode = $xmlDoc->createElement('status', 'success');
-		}
+    // Execute the statement
+    $result2 = mysqli_stmt_execute($stmt);
 
-	$recordDataNode->appendChild($statusNode);
+    // Check if the query was successful
+    if (!$result2) {
+        $response['status'] = 'error';
+        $response['message'] = mysqli_error($dbConn);
+    } else {
+        $response['status'] = 'success';
+    }
 
-	return $recordDataNode;
+    // Set the content type to JSON and output the response
+    header('Content-Type: application/json');
+    echo json_encode($response);
+}
+
+function jsonResponse($status, $data) {
+    // Set the response header to application/json
+    header('Content-Type: application/json');
+    
+    // Prepare the response structure
+    $response = [
+        "status" => $status,
+        "data" => $data
+    ];
+
+    // Return the JSON response
+    return json_encode($response);
 }
 
 

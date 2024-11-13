@@ -208,8 +208,8 @@
     <script>
       $(document).foundation();
     </script>
-    <script src="assets/js/login_check.js"></script>
-    <script src="assets/js/home.js"></script>
+      <script src="assets/js/login_check.js"></script>
+      <script src="assets/js/home.js"></script>
 	
   </body>
 </html>

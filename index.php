@@ -159,7 +159,7 @@
 // Function to check if user is already logged in based on the presence of a login cookie
 function checkLoggedIn() {
     // Retrieve the value of the login cookie
-    var loginCookie = getCookie("logger_token");
+    var loginCookie = getCookie("token");
 
     // Check if the login cookie exists and has a non-empty value
     return loginCookie && loginCookie.trim() !== "";

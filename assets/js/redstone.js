@@ -1,3 +1,4 @@
+/// <reference path="../typings/jquery/jquery.d.ts"/>
 var $blankModule;
 
 function initPage() {
@@ -44,7 +45,7 @@ function loadControls(template) {
 				// Set module title
 				$(newModule).find('#module_title').text(" " + $(this).attr('name'));
 				if ($(this).attr('active') == '1') {
-					$(newModule).find('#status_img').attr('src', 'assets/img/online.png');
+					$(newModule).find('#status_img').attr('src', 'img/online.png');
 					active = true;
 				}
 

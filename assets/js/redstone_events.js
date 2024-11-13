@@ -1,3 +1,4 @@
+/// <reference path="../typings/jquery/jquery.d.ts"/>
 var $blankEvent;
 
 function initPage() {
@@ -33,7 +34,7 @@ function initPage() {
 			async: false,
 			success: function(xml) {	
 				
-				//
+				//alert((new XMLSerializer()).serializeToString(xml));	
 	
 				$(xml).find('modules').each(function() {
 					$('#module_side').empty();
@@ -94,7 +95,7 @@ function initPage() {
 					dataType: 'xml', 
 					async: false,
 					success: function(xml) {		
-						//
+						//alert((new XMLSerializer()).serializeToString(xml));	
 						alert('Event Created.');
 	
 					},
@@ -128,7 +129,7 @@ function loadEvents(template) {
 		async: false,
 		success: function(xml) {	
 			
-			//
+			//alert((new XMLSerializer()).serializeToString(xml));	
 			
 			$(xml).find('events').each(function() {
 				var newModule = template.clone(true);
@@ -146,7 +147,7 @@ function loadEvents(template) {
 				}
 				
 				if ($(this).attr('redstone_active') == '1' && $(this).attr('storage_active') == '1') {
-					$(newModule).find('#status_img').attr('src', 'assets/img/online.png');
+					$(newModule).find('#status_img').attr('src', 'img/online.png');
 				}
 				
 				var event = $(this);
@@ -207,7 +208,7 @@ function populateDropdowns() {
 		async: false,
 		success: function(xml) {	
 			
-			//
+			//alert((new XMLSerializer()).serializeToString(xml));	
 			var counter = 0;
 			$(xml).find('storage_modules').each(function() {
 				counter = counter + 1;
@@ -263,7 +264,7 @@ function removeEvent(event) {
 			dataType: 'xml', 
 			async: false,
 			success: function(xml) {	
-				//
+				//alert((new XMLSerializer()).serializeToString(xml));	
 				result = true;
 			},
 			error: function(xhr) {

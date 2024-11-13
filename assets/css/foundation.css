@@ -58,7 +58,7 @@ body {
   font-size: 100%; }
 
 body {
-  background: #222831;
+  background: #222222;
   color: #222222;
   cursor: auto;
   font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
@@ -6266,7 +6266,6 @@ box-shadow: 10px 10px 5px -4px rgba(0,0,0,0.56);
 
 @import url(https://fonts.googleapis.com/css?family=Oxygen+Mono);
 /* Please Keep this font import at the very top of any CSS file */
-@charset "UTF-8";
 /* Starter CSS for Flyout Menu */
 #cssmenu {
   padding: 0;
