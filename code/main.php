@@ -47,36 +47,36 @@ foreach ($actionArray as $action) {
         case "getUser":
             $response['getUser'] = getUser($dbConn, $_REQUEST['user_id']);
             break;
-        case "load_redstone_controls":
-            $response['load_redstone_controls'] = loadRedstoneControls($dbConn, $_REQUEST['user_id']);
-            break;
-        case "setRedstoneOutput":
-            $response['setRedstoneOutput'] = setRedstoneOutput($dbConn, $_REQUEST['token'], $_REQUEST['side'], $_REQUEST['value'], $_REQUEST['val_type']);
-            break;
-        case "load_fluid_modules":
-            $response['load_fluid_modules'] = getFluidLevels($dbConn, $_REQUEST['user_id']);
-            break;
+        // case "load_redstone_controls":
+        //     $response['load_redstone_controls'] = loadRedstoneControls($dbConn, $_REQUEST['user_id']);
+        //     break;
+        // case "setRedstoneOutput":
+        //     $response['setRedstoneOutput'] = setRedstoneOutput($dbConn, $_REQUEST['token'], $_REQUEST['side'], $_REQUEST['value'], $_REQUEST['val_type']);
+        //     break;
+        // case "load_fluid_modules":
+        //     $response['load_fluid_modules'] = getFluidLevels($dbConn, $_REQUEST['user_id']);
+        //     break;
         case "load_energy_modules":
             $response['load_energy_modules'] = getEnergyLevels($dbConn, $_REQUEST['user_id']);
             break;
-        case "remove_module":
-            $response['remove_module'] = removeModule($dbConn, $_REQUEST['token']);
-            break;
-        case "redstone_event_dropdowns":
-            $response['redstone_event_dropdowns'] = redstoneEventDropdowns($dbConn, $_REQUEST['user_id']);
-            break;
-        case "get_redstone_sides":
-            $response['get_redstone_sides'] = getRedstoneSides($dbConn, $_REQUEST['token']);
-            break;
-        case "create_redstone_event":
-            $response['create_redstone_event'] = createRedstoneEvent($dbConn, $_REQUEST['storage_token'], $_REQUEST['redstone_token'], $_REQUEST['trigger_value'], $_REQUEST['side'], $_REQUEST['output_value'], $_REQUEST['event_type'], $_REQUEST['user_id']);
-            break;
-        case "load_redstone_events":
-            $response['load_redstone_events'] = loadRedstoneEvents($dbConn, $_REQUEST['user_id']);
-            break;
-        case "remove_event":
-            $response['remove_event'] = removeEvent($dbConn, $_REQUEST['event_id']);
-            break;
+        // case "remove_module":
+        //     $response['remove_module'] = removeModule($dbConn, $_REQUEST['token']);
+        //     break;
+        // case "redstone_event_dropdowns":
+        //     $response['redstone_event_dropdowns'] = redstoneEventDropdowns($dbConn, $_REQUEST['user_id']);
+        //     break;
+        // case "get_redstone_sides":
+        //     $response['get_redstone_sides'] = getRedstoneSides($dbConn, $_REQUEST['token']);
+        //     break;
+        // case "create_redstone_event":
+        //     $response['create_redstone_event'] = createRedstoneEvent($dbConn, $_REQUEST['storage_token'], $_REQUEST['redstone_token'], $_REQUEST['trigger_value'], $_REQUEST['side'], $_REQUEST['output_value'], $_REQUEST['event_type'], $_REQUEST['user_id']);
+        //     break;
+        // case "load_redstone_events":
+        //     $response['load_redstone_events'] = loadRedstoneEvents($dbConn, $_REQUEST['user_id']);
+        //     break;
+        // case "remove_event":
+        //     $response['remove_event'] = removeEvent($dbConn, $_REQUEST['event_id']);
+        //     break;
         default:
             // No action specified
             break;

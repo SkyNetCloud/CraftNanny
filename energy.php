@@ -49,7 +49,7 @@
           <div id='cssmenu'>
 
              <ul>
-               <li><a href='tracking.php'><span>Player Tracking</span></a></li>
+               <!--<li><a href='tracking.php'><span>Player Tracking</span></a></li>-->
                <li class='active'><a href='energy.php'><span>Energy Storage</span></a></li>
                <li><a href='fluid.php'><span>Fluid Storage</span></a></li>
                </ul>

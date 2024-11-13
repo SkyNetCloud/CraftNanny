@@ -34,10 +34,10 @@ function initPage() {
     $moduleTemplate = $(module_template);
 
     getUser();
-    getPlayerModules();
-    getRedstoneModules();
-    gerFluidModules($moduleTemplate);
-    getEnergyModules($moduleTemplate);
+    // getPlayerModules();
+    // getRedstoneModules();
+    // gerFluidModules($moduleTemplate);
+    // getEnergyModules($moduleTemplate);
 }
 
 function getUser() {
@@ -55,12 +55,11 @@ function getUser() {
         success: function (response) {
             console.log("User Response:", response);
 
-
                 $('#username').text(response.user.username);
                 $('#welcome').text("Welcome, " + response.user.username);
         },
         error: function (xhr) {
-            alert(xhr.responseText);
+            // alert("User Response:", xhr);
         }
     });
 }

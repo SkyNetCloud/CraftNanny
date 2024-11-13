@@ -49,28 +49,26 @@
             </ul>
 
             
-            <div id="Info" class="row">
-              <div class="large-6 columns" style="padding:45px;">
-                <form action="signup.php">
-                  <button type="submit" id="login_btn">Sign Up</button>
-                </form>
-              </div>
-              <div class="large-6 columns" style="padding:45px;">
-                <form action="signin.php">
-                  <button type="submit" id="login_btn">Login</button>
-                </form>
-              </div>
-            </div>
+            <div id="Info" class="row" style="display:none;">
+    <div class="large-6 columns" style="padding:45px;">
+        <form action="signup.php">
+            <button type="submit" id="login_btn">Sign Up</button>
+        </form>
+    </div>
+    <div class="large-6 columns" style="padding:45px;">
+        <form action="signin.php">
+            <button type="submit" id="login_btn">Login</button>
+        </form>
+    </div>
+</div>
 
-            <!-- <div id="Info" class="row">
-              <div class="large-6 columns" style="padding:45px;">
-                <form action="home.php">
-                  <button type="submit" id="login_btn">Login</button>
-                </form>
-              </div>
-            </div>
-             -->
-            
+<div id="Dashboard" class="row" style="display:none;">
+    <div class="large-12 columns" style="padding:45px;">
+        <form action="home.php">
+            <button type="submit" id="login_btn">Go to Dashboard</button>
+        </form>
+    </div>
+</div>            
           </div>
         </div>
 
@@ -157,9 +155,10 @@
 
 <script>
 // Function to check if user is already logged in based on the presence of a login cookie
+// Function to check if user is already logged in based on the presence of a login cookie
 function checkLoggedIn() {
     // Retrieve the value of the login cookie
-    var loginCookie = getCookie("token");
+    var loginCookie = getCookie("logger_token");
 
     // Check if the login cookie exists and has a non-empty value
     return loginCookie && loginCookie.trim() !== "";
@@ -184,8 +183,15 @@ function getCookie(cookieName) {
 
 // Check if user is already logged in
 if (checkLoggedIn()) {
-    // Show the login and sign-up forms if user is already logged in
+    // Hide the login and sign-up forms
+    document.getElementById("Info").style.display = "none";
+    // Show the Dashboard button
+    document.getElementById("Dashboard").style.display = "block";
+} else {
+    // Show the login and sign-up forms
     document.getElementById("Info").style.display = "block";
+    // Hide the Dashboard button
+    document.getElementById("Dashboard").style.display = "none";
 }
 </script>
   </body>

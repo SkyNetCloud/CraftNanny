@@ -103,7 +103,7 @@ function loginUser() {
 
 function signIn(token) {
 	document.cookie = 'logger_token' + "=" + token + "; path=/";
-	window.location.assign("https://www.craftnanny.org/home.php")
+	window.location.assign("https://craftnanny.org/home.php")
 }
 
 function signOut() {

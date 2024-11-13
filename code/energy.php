@@ -6,7 +6,7 @@ require_once('connection.php');
 
 $token = $_POST['token'];
 $id = $_POST['id'];
-$bat_name = $_POST['bat_name'];
+$bat_name = $_POST['name'];
 $energy_type = $_POST['energy_type'];
 $percent = $_POST['percent'];
 

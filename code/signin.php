@@ -1,101 +1,85 @@
 <?php
 
+// ini_set('display_errors', 1);
+// error_reporting(E_ALL);
+
 require_once('connection.php');
 
-// Sanitize input values from the form
-$username = htmlspecialchars($_POST['user']);
-$password = htmlspecialchars($_POST['pass']);
-$name = htmlspecialchars($_POST['name']);
-$id = htmlspecialchars($_POST['id']);
-$module_type = htmlspecialchars($_POST['module_type']);
+// Get and sanitize the input data
+$username = htmlspecialchars($_GET['user']);  // Change to $_GET instead of $_POST
+$password = htmlspecialchars($_GET['pass']);  // Change to $_GET instead of $_POST
+$name = htmlspecialchars($_GET['name']);
+$id = htmlspecialchars($_GET['id']);
+$module_type = htmlspecialchars($_GET['module_type']);
 
-// Call the sign-in function with sanitized inputs
+// Call the sign-in function
 signIn($username, $password, $name, $dbConn, $id, $module_type);
 
-/**
- * Function to handle user sign-in, check credentials, and perform actions based on module type.
- */
 function signIn($username, $password, $name, $dbConn, $id, $module_type) {
-    // Construct a query to check user credentials
-    $query = "SELECT user_id FROM users WHERE username = ? AND password = ?";
+    // Prepare the query to fetch the user by username
+    $query = "SELECT user_id, password, salt FROM users WHERE username = ?";
     $stmt = mysqli_prepare($dbConn, $query);
-    mysqli_stmt_bind_param($stmt, "ss", $username, $password);
+    mysqli_stmt_bind_param($stmt, "s", $username);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
 
-    if ($result && mysqli_num_rows($result) > 0) {
+    if ($result) {
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
 
-        // If user exists, generate a token and create relevant entries based on module type
-        $user_id = $row['user_id'];
-        $token = createToken($dbConn, $user_id, $name, $id, $module_type);
+        if ($row) {
+            // Retrieve the stored salt and hashed password
+            $storedSalt = $row['salt'];
+            $storedHashedPassword = $row['password'];
 
-        switch ($module_type) {
-            case '4':
-                createRedstoneEntry($dbConn, $token, $id);
-                break;
-            case '3':
-                createTankEntry($dbConn, $token);
-                break;
-            case '2':
-                createEnergyEntry($dbConn, $token, $id);
-                break;
+            // Hash the entered password with the stored salt
+            $hashedEnteredPassword = sha1($storedSalt . $password);
+
+            // Compare the hashed entered password with the stored hashed password
+            if ($hashedEnteredPassword === $storedHashedPassword) {
+                $user_id = $row['user_id'];
+
+                // Create token
+                $token = createToken($dbConn, $user_id, $name, $id, $module_type);
+
+                // Handle module_type logic
+                if ($module_type == '3') {
+                    createTankEntry($dbConn, $token, $id);
+                } elseif ($module_type == '2') {
+                    createEnergyEntry($dbConn, $token, $id);
+                }
+
+                echo $token; // Output the token if successful
+            } else {
+                echo 'error: Invalid password'; // Incorrect password entered by the user
+            }
+        } else {
+            echo 'error: User not found'; // User doesn't exist in the database
         }
-
-        echo $token; // Output the token
     } else {
-        echo 'error: User not found';
+        echo 'error: Query failed'; // Query failed to execute
     }
 }
 
-/**
- * Function to create a token entry in the database.
- */
 function createToken($dbConn, $user_id, $name, $id, $module_type) {
-    $token = generateRandomToken();
-
+    $token = rand().rand().rand().rand(); // Generate a random token
     $query = "INSERT INTO tokens (token, user_id, computer_name, computer_id, module_type) VALUES (?, ?, ?, ?, ?)";
     $stmt = mysqli_prepare($dbConn, $query);
     mysqli_stmt_bind_param($stmt, "sssss", $token, $user_id, $name, $id, $module_type);
     mysqli_stmt_execute($stmt);
-
     return $token;
 }
 
-/**
- * Generates a random token.
- */
-function generateRandomToken() {
-    return rand().rand().rand().rand();
-}
-
-/**
- * Function to create an entry in the redstone_controls table.
- */
-function createRedstoneEntry($dbConn, $token, $id) {
-    $query = "INSERT INTO redstone_controls (token, computer_id) VALUES (?, ?)";
-    $stmt = mysqli_prepare($dbConn, $query);
-    mysqli_stmt_bind_param($stmt, "ss", $token, $id);
-    mysqli_stmt_execute($stmt);
-}
-
-/**
- * Function to create an entry in the tanks table.
- */
-function createTankEntry($dbConn, $token) {
+function createTankEntry($dbConn, $token, $id) {
     $query = "INSERT INTO tanks (token) VALUES (?)";
     $stmt = mysqli_prepare($dbConn, $query);
     mysqli_stmt_bind_param($stmt, "s", $token);
     mysqli_stmt_execute($stmt);
 }
 
-/**
- * Function to create an entry in the energy_storage table.
- */
 function createEnergyEntry($dbConn, $token, $id) {
-    $query = "INSERT INTO energy_storage (token, computer_id) VALUES (?, ?)";
+    $query = "INSERT INTO energy_storage (token, computer_id) VALUES ($token, $id)";
     $stmt = mysqli_prepare($dbConn, $query);
-    mysqli_stmt_bind_param($stmt, "ss", $token, $id);
+   // mysqli_stmt_bind_param($stmt, "ss", $token, $id);
     mysqli_stmt_execute($stmt);
 }
 

@@ -17,6 +17,6 @@ function getCookie(cname) {
 $(document).ready(function() {
 	token = getCookie("logger_token");
 	if (!(token.length > 2)) {
-		window.location.assign("http://www.craftnanny.org/signin.php")
+		window.location.assign("https://craftnanny.org/signin.php")
 	} 
 });

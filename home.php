@@ -39,7 +39,7 @@
           <div id='cssmenu'>
                
              <ul>  
-               <li><a href='tracking.php'><span>Player Tracking</span></a></li>
+               <!--<li><a href='tracking.php'><span>Player Tracking</span></a></li>-->
                <li><a href='energy.php'><span>Energy Storage</span></a></li>
                <li><a href='fluid.php'><span>Fluid Storage</span></a></li>
                </ul>
@@ -104,14 +104,14 @@
         
         <p>
           
-  		  <div class="row">
+  		  <!-- <div class="row">
         <div class="large-4 columns modules" id="sensor_modules">
            <strong style="color:#0099FF">Player Modules:</strong>
            <div class="no_modules" id="no_player_modules">
             <span>No Player Modules Connected</span>
           </div>
         </div>
-        
+         -->
         <div class="large-4 columns modules" id="energy_modules">
           <strong style="color:#0099FF">Energy Modules:</strong>
           <div class="no_modules" id="no_energy_modules">
@@ -119,24 +119,24 @@
           </div>
         </div>
         
-        <div class="large-4 columns modules" id="fluid_modules">
+        <!-- <div class="large-4 columns modules" id="fluid_modules">
           <strong style="color:#0099FF">Fluid Modules:</strong>
           <div class="no_modules" id = "no_fluid_modules">
             <span>No Fluid Modules Connected</span>
           </div>
          </div>
       
-        </div>
+        </div> -->
         
         <p>
           
-       <div class="row">
+       <!-- <div class="row">
         <div class="large-4 columns modules" id="redstone_modules">
            <strong style="color:#0099FF">Redstone Modules:</strong>
            <div class="no_modules" id="no_redstone_modules">
             <span>No Redstone Modules Connected</span>
           </div>
-        </div>
+        </div> -->
         
         <!-- <div class="large-4 columns modules" id="energy_modules">
           <strong style="color:#0099FF">Rednet Modules</strong>
