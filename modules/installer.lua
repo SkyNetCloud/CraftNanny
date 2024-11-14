@@ -9,8 +9,6 @@ local githubRepo = "SkyNetCloud/CraftNanny"
 local branch = "master"
 local folder = "modules"
 local files = {
-    player_module = "player.lua",
-    redstone_module = "redstone.lua",
     fluid_module = "fluid.lua",
     energy_module = "energy.lua",
     hash_api = "sha1_api.lua",
@@ -101,13 +99,9 @@ function install_module()
 
     -- Determine the module file name based on the selected module type
     if type == '1' then
-        moduleFile = files.player_module
-    elseif type == '2' then
         moduleFile = files.energy_module
-    elseif type == '3' then
+    elseif type == '2' then
         moduleFile = files.fluid_module
-    elseif type == '4' then
-        moduleFile = files.redstone_module
     end
     
     -- Clear the terminal and display the installation progress
@@ -224,6 +218,9 @@ end
 function choose_module(input) 
     if input == '1' then
         type = '1'
+        name()
+    elseif input == '2' then
+        type = '2'
         name()
     end
     
