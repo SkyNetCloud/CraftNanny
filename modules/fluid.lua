@@ -81,12 +81,24 @@ end
 ------  Start module specific code ---------
 
 function ping_home()
-    local response = http.post("https://craftnanny.org/code/ping.php",
-        "token="..token.."&id="..os.getComputerID())
-    local current_version = response.readAll()
-    
-    if tonumber(current_version) > version then
-      run_installer()
+    local sr = fs.open("config.txt", "r")
+    token = sr.readLine()
+
+    local url = "https://craftnanny.org/code/ping.php?token=" .. token .. "&id=" .. os.getComputerID()
+
+    if http.checkURL(url) then
+        local response = http.get(url)
+        if response then
+            local responseBody = response.readAll()
+            if tonumber(responseBody) > version then
+            run_installer()
+            end
+            response.close()
+        else
+            print("Error: Failed to connect to server.")
+        end
+    else
+        print("Error: URL check failed.")
     end
 end
 
@@ -183,7 +195,7 @@ function start_loop()
     while true do
         terminal_screen()
         ping_home()
-        
+
         if #tanks > 2 then
             print("Only one device is supported")
             break

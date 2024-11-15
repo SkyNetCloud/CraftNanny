@@ -8,7 +8,7 @@ function initPage() {
 
     $.ajax({
         type: 'GET',
-        url: 'assets/template/energy_template.html',
+        url: 'assets/templates/energy_template.html',
         async: false,
         contentType: 'text/html',
         dataType: 'html',
@@ -27,11 +27,11 @@ function initPage() {
 }
 
 function loadModules(template) {
-    var modules = false;
+    let modulesFound = false;  // Make sure this starts as false.
 
     console.log("Loading energy modules...");
 
-    theParams = {
+    const theParams = {
         a: 'load_energy_modules',
         user_id: token
     };
@@ -40,50 +40,43 @@ function loadModules(template) {
         type: "POST",
         url: "code/main.php",
         data: theParams,
-        dataType: 'json', // Change from 'xml' to 'json'
+        dataType: 'json', // Expect JSON response
         async: false,
         success: function (response) {
-            console.log("Response received from the server:", response);
+            //console.log("Response received from the server:", response);
 
-            // Check if the response contains modules
-            if (response.modules && response.modules.length > 0) {
-                modules = true;
+            // Assuming `response.load_energy_modules` contains an array of module data
+            if (response.load_energy_modules && response.load_energy_modules.length > 0) {
+                modulesFound = true;  // Set this to true when modules are found
 
-                console.log("Modules found. Processing each module...");
-
-                response.modules.forEach(function (module) {
+                response.load_energy_modules.forEach(function (module) {
                     console.log("Processing module:", module);
-                    var newModule = template.clone(true),
-                        active = false;
+                    const newModule = template.clone(true);
 
                     // Set module title
                     $(newModule).find('#module_title').text(" " + module.name);
                     console.log("Module title set:", module.name);
 
-                    if (module.active == '1') {
-                        $(newModule).find('#status_img').attr('src', 'img/online.png');
-                        active = true;
-                    }
+                    // Set status image based on active state
+                    const statusImage = module.active ? 'img/online.png' : 'img/offline.png';
+                    $(newModule).find('#status_img').attr('src', statusImage);
 
+                    // Set level meter and energy type
                     $(newModule).find('#level_meter').attr('value', module.percent);
-                    console.log("Level meter set to:", module.percent);
+                    $(newModule).find('#percent').text(" " + module.percent + "%");
 
-                    if (module.energy_type == 'RF') {
-                        $(newModule).find('#energy_type').text("Redstone Flux (RF)");
-                    } else if (module.energy_type == 'EU') {
-                        $(newModule).find('#energy_type').text("Energy Unit (EU)");
-                    } else {
-                        $(newModule).find('#energy_type').text("Unknown energy type");
+                    if (module.energy_type) {
+                        const energyLabel = module.energy_type === 'FE' ? "Forge Energy (FE)" :
+                                            module.energy_type === 'RF' ? "Redstone Flux (RF)" : 
+                                            "Unknown energy type";
+                        $(newModule).find('#energy_type').text(energyLabel);
                     }
 
-                    $(newModule).find('#percent').text(" " + module.percent + "%");
-                    console.log("Energy type and percent set for module:", module.energy_type, module.percent);
-
-                    var node = module;
+                    // Remove link functionality
+                    const node = module;
                     $(newModule).find('#remove_link').click(function (e) {
                         console.log("Remove link clicked for module with token:", node.token);
                         if (removeModule(node.token)) {
-                            console.log("Module removed, hiding the module...");
                             $(newModule).hide(500);
                         }
                         e.preventDefault();
@@ -91,14 +84,13 @@ function loadModules(template) {
 
                     $('#connected_modules').append($(newModule));
 
-                    if (!active) {
-                        console.log("Module is not active, blocking it...");
+                    if (!module.active) {
+                        console.log("Module is not active, applying block overlay.");
                         $(newModule).find('div.energy_module_block').block({
-                            message: '<strong>module not loaded</strong>',
+                            message: '<strong>Module not loaded</strong>',
                             css: { border: '3px solid #a00' }
                         });
                     }
-
                 });
             } else {
                 console.log("No modules found in response.");
@@ -109,7 +101,8 @@ function loadModules(template) {
         }
     });
 
-    if (modules) {
+    // Now, use `modulesFound` to determine if we should hide the 'no connected modules' message
+    if (modulesFound) {
         console.log("Modules found, hiding 'no connected modules' message.");
         $('.no_connected_modules').hide();
     } else {
@@ -117,13 +110,12 @@ function loadModules(template) {
         $('.module_header').hide();
     }
 }
-
 function removeModule(token) {
-    var result = false;
+    let result = false;
     console.log("Attempting to remove module with token:", token);
 
     if (confirm('Are you sure you want to delete this module?')) {
-        theParams = {
+        const theParams = {
             a: 'remove_module',
             token: token
         };
@@ -132,7 +124,7 @@ function removeModule(token) {
             type: "POST",
             url: "code/main.php",
             data: theParams,
-            dataType: 'json', // Change from 'xml' to 'json'
+            dataType: 'json',
             async: false,
             success: function (response) {
                 console.log("Response received from remove module:", response);

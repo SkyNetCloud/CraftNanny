@@ -53,12 +53,12 @@ function terminal_screen()
     draw_text_term(8, 3, username, colors.white, colors.black)
     draw_text_term(1, 4 , string.rep("-", 51), colors.lime, colors.black)
     
-    draw_text_term(2, 6, 'Top: '..top, colors.white, colors.black)
-    draw_text_term(2, 7, 'Bottom: '..bottom, colors.white, colors.black)
-    draw_text_term(2, 8, 'Front: '..front, colors.white, colors.black)
-    draw_text_term(2, 9, 'Back: '..back, colors.white, colors.black)
-    draw_text_term(2, 10, 'Right: '..right, colors.white, colors.black)
-    draw_text_term(2, 11, 'Left: '..left, colors.white, colors.black)
+    draw_text_term(2, 6, 'Top: '.. faces.top, colors.white, colors.black)
+    draw_text_term(2, 7, 'Bottom: '..faces.bottom, colors.white, colors.black)
+    draw_text_term(2, 8, 'Front: '..faces.front, colors.white, colors.black)
+    draw_text_term(2, 9, 'Back: '..faces.back, colors.white, colors.black)
+    draw_text_term(2, 10, 'Right: '..faces.right, colors.white, colors.black)
+    draw_text_term(2, 11, 'Left: '..faces.left, colors.white, colors.black)
 end
  
 function downloadFromBackEnd(module_name, destination)
@@ -103,15 +103,26 @@ end
  
 ------  Start module specific code ---------
 function ping_home()
-    local response = http.post("https://craftnanny.org/code/ping.php",
-        "token="..token.."&id="..os.getComputerID())
-    local current_version = response.readAll()
-    
-    if tonumber(current_version) > version then
-      run_installer()
+    local sr = fs.open("config.txt", "r")
+    token = sr.readLine()
+
+    local url = "https://craftnanny.org/code/ping.php?token=" .. token .. "&id=" .. os.getComputerID()
+
+    if http.checkURL(url) then
+        local response = http.get(url)
+        if response then
+            local responseBody = response.readAll()
+            if tonumber(responseBody) > version then
+            run_installer()
+            end
+            response.close()
+        else
+            print("Error: Failed to connect to server.")
+        end
+    else
+        print("Error: URL check failed.")
     end
 end
- 
 function string:split(delimiter)
   local result = { }
   local from  = 1
@@ -221,7 +232,7 @@ function start_loop()
     while true do
         terminal_screen()
         ping_home()
-        
+
         -- main active status with server
         time = time + 1
         if time > 30 then

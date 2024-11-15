@@ -7,7 +7,7 @@ function initPage() {
     var module_template;
     $.ajax({
         type: 'GET',
-        url: 'assets/template/module_template.html',
+        url: 'assets/templates/module_template.html',
         async: false,
         contentType: 'text/html',
         dataType: 'html',
@@ -19,7 +19,7 @@ function initPage() {
     var event_template;
     $.ajax({
         type: 'GET',
-        url: 'assets/template/event_template.html',
+        url: 'assets/templates/event_template.html',
         async: false,
         contentType: 'text/html',
         dataType: 'html',
@@ -36,8 +36,8 @@ function initPage() {
     getUser();
     // getPlayerModules();
     // getRedstoneModules();
-    // gerFluidModules($moduleTemplate);
-    // getEnergyModules($moduleTemplate);
+    gerFluidModules($moduleTemplate);
+    getEnergyModules($moduleTemplate);
 }
 
 function getUser() {
@@ -53,7 +53,7 @@ function getUser() {
         dataType: 'json',  // Expect JSON response
         async: false,
         success: function (response) {
-            console.log("User Response:", response);
+           // console.log("User Response:", response);
 
                 $('#username').text(response.user.username);
                 $('#welcome').text("Welcome, " + response.user.username);
@@ -79,7 +79,7 @@ function loadEvents(template) {
         dataType: 'json',  // Expect JSON response
         async: false,
         success: function (response) {
-            console.log("Events Response:", response);
+            //console.log("Events Response:", response);
 
             if (response.status === "success" && response.events) {
                 $.each(response.data.events, function (index, event) {
@@ -252,11 +252,11 @@ function gerFluidModules(template) {
 }
 
 function getEnergyModules(template) {
-    theParams = {
+    const theParams = {
         a: 'getConnections',
         user_id: token,
         module_type: '2'
-    }
+    };
 
     $.ajax({
         type: "POST",
@@ -265,32 +265,39 @@ function getEnergyModules(template) {
         dataType: 'json',  // Expect JSON response
         async: true,
         success: function (response) {
-            console.log("Energy Modules Response:", response);
+            // console.log("Full Response:", response);
 
-            var counter = 0;
-            if (response.status === "success") {
-                $.each(response.connections, function (index, connections) {
-                    console.log(connections); // Log connections for debugging
-                    var newModule = template.clone(true);
+            // Adjusted to access the nested 'getConnections' structure
+            if (response.getConnections && response.getConnections.status === "success") {
+                const connections = response.getConnections.connections;
+                let counter = 0;
 
-                    if (connections.active === true) {  // Use boolean comparison if 'active' is a boolean
-                        $('#energy_modules').append("<li><img src='img/online.png' style='width:10px'>" + " " + connections.name + "</li>");
+                $.each(connections, function (index, connection) {
+                    // console.log("Connection:", connection);
+
+                    const newModule = template.clone(true);
+                    if (connection.active === true) {  // Use boolean comparison if 'active' is a boolean
+                        $('#energy_modules').append("<li><img src='img/online.png' style='width:10px'>" + " " + connection.name + "</li>");
                     } else {
-                        $('#energy_modules').append("<li><img src='img/offline.png' style='width:10px'>" + " " + connections.name + "</li>");
+                        $('#energy_modules').append("<li><img src='img/offline.png' style='width:10px'>" + " " + connection.name + "</li>");
                     }
                     counter++;
                 });
-            }
-            if (counter != 0) {
-                $('#no_energy_modules').hide();
+
+                if (counter > 0) {
+                    $('#no_energy_modules').hide();
+                }
+            } else {
+                console.log("No connections found or invalid response structure.");
             }
         },
         error: function (xhr) {
-            alert(xhr.responseText);
+            alert("Error: " + xhr.responseText);
         }
     });
 }
 
-$(document).ready(function () {
+
+$(document).ready(function () { 
     initPage();
 });

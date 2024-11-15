@@ -1,7 +1,4 @@
 <?php
-
-$version = 1;
-
 require_once('connection.php');
 
 $token = $_POST['token'];

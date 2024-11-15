@@ -160,38 +160,76 @@ function addNewUser($dbConn, $username, $password, $email) {
     echo json_encode($response);
 }
 
-// function getConnections($dbConn, $user_id, $type) {
-//     // Initialize the response array
-//     $response = [];
+function getConnections($dbConn, $user_id, $type) {
+    // Initialize the response array
+    $response = [];
 
-//     // Prepare the SQL query to fetch connections
-//     $query = "SELECT * FROM tokens WHERE user_id = '".dbEsc($dbConn, $user_id)."' AND module_type = '".dbEsc($dbConn, $type)."'";
-//     $result = mysqli_query($dbConn, $query);
+    // Prepare the SQL query to fetch connections using prepared statements
+    $query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = ?";
+    $stmt = mysqli_prepare($dbConn, $query);
+    mysqli_stmt_bind_param($stmt, 'ss', $user_id, $type);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
 
-//     // Check if the query was successful
-//     if (!$result) {
-//         $response['status'] = 'error';
-//         $response['message'] = mysqli_error($dbConn);
-//     } else {
-//         $response['status'] = 'success';
-//         $connections = [];
+    // Check if the query was successful and if there are results
+    if (!$result || mysqli_num_rows($result) == 0) {
+        $response['status'] = 'error';
+        $response['message'] = 'No connections found';
+    } else {
+        $response['status'] = 'success';
+        $connections = [];
 
-//         while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-//             $connection = [
-//                 'name' => $row['computer_name'],
-//                 'token' => $row['token'],
-//                 'active' => (time() - strtotime($row['last_seen']) > 200) ? false : true
-//             ];
-//             $connections[] = $connection;
-//         }
+        // Process each row
+        while ($row = mysqli_fetch_assoc($result)) {
+            $connection = [
+                'name' => $row['computer_name'],
+                'token' => $row['token'],
+                'active' => (time() - strtotime($row['last_seen']) > 200) ? false : true
+            ];
+            $connections[] = $connection;
+        }
 
-//         $response['connections'] = $connections;
-//     }
+        $response['connections'] = $connections;
+    }
 
-//     // Set the content type to JSON and output the response
-//     header('Content-Type: application/json');
-//     echo json_encode($response);
-// }
+    // Return the response for further processing (like sending to the client)
+    return $response;
+}
+
+function getEnergyLevels($dbConn, $user_id) {
+    $response = array();
+
+    // Query to get tokens and energy levels using a JOIN to optimize performance
+    $query = "
+        SELECT t.computer_name, t.token, t.last_seen, es.bat_name, es.energy_type, es.percent
+        FROM tokens t
+        LEFT JOIN energy_storage es ON t.token = es.token
+        WHERE t.user_id = ? AND t.module_type = '1'
+    ";
+
+    $stmt = mysqli_prepare($dbConn, $query);
+    mysqli_stmt_bind_param($stmt, "s", $user_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    $modules = array();
+    // Process each row in the result set
+    while ($row = mysqli_fetch_assoc($result)) {
+        $module = array(
+            'name' => $row['computer_name'],
+            'token' => $row['token'],
+            'active' => (time() - strtotime($row['last_seen']) <= 100) ? true : false,
+            'bat_name' => $row['bat_name'] ?? null,
+            'energy_type' => $row['energy_type'] ?? null,
+            'percent' => $row['percent'] ?? null
+        );
+
+        $modules[] = $module;
+    }
+
+    // Return the array of modules (with energy information)
+    return $modules;
+}
 
 // function getLogs($dbConn, $user_id) {
 //     // Initialize the response array
@@ -281,7 +319,6 @@ function addNewUser($dbConn, $username, $password, $email) {
 //     echo json_encode($response);
 // }
 
-
 // function loadRedstoneControls($dbConn, $user_id) {
 //     $response = array();
     
@@ -360,95 +397,60 @@ function addNewUser($dbConn, $username, $password, $email) {
 //     echo json_encode($response);
 // }
 
-// function getFluidLevels($dbConn, $user_id) {
-//     $response = array();
+function getFluidLevels($dbConn, $user_id) {
+    $response = array();
 
-//     $query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = '3'";
-//     $stmt = mysqli_prepare($dbConn, $query);
+    $query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = '2'";
+    $stmt = mysqli_prepare($dbConn, $query);
     
-//     if (!$stmt) {
-//         $response['status'] = 'error';
-//         $response['message'] = mysqli_error($dbConn);
-//         return json_encode($response);
-//     }
+    if (!$stmt) {
+        $response['status'] = 'error';
+        $response['message'] = mysqli_error($dbConn);
+        return json_encode($response);
+    }
 
-//     mysqli_stmt_bind_param($stmt, "s", $user_id);
-//     mysqli_stmt_execute($stmt);
-//     $result = mysqli_stmt_get_result($stmt);
+    mysqli_stmt_bind_param($stmt, "s", $user_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
 
-//     $modules = array();
-//     while ($row = mysqli_fetch_assoc($result)) {
-//         $module = array(
-//             'name' => $row['computer_name'],
-//             'token' => $row['token'],
-//             'active' => (time() - strtotime($row['last_seen']) <= 200) ? 'true' : 'false'
-//         );
+    $modules = array();
+    while ($row = mysqli_fetch_assoc($result)) {
+        $module = array(
+            'name' => $row['computer_name'],
+            'token' => $row['token'],
+            'active' => (time() - strtotime($row['last_seen']) <= 200) ? 'true' : 'false'
+        );
 
-//         $query2 = "SELECT * FROM tanks WHERE token = ?";
-//         $stmt2 = mysqli_prepare($dbConn, $query2);
+        $query2 = "SELECT * FROM tanks WHERE token = ?";
+        $stmt2 = mysqli_prepare($dbConn, $query2);
         
-//         if (!$stmt2) {
-//             $response['status'] = 'error';
-//             $response['message'] = mysqli_error($dbConn);
-//             return json_encode($response);
-//         }
+        if (!$stmt2) {
+            $response['status'] = 'error';
+            $response['message'] = mysqli_error($dbConn);
+            return json_encode($response);
+        }
 
-//         mysqli_stmt_bind_param($stmt2, "s", $row['token']);
-//         mysqli_stmt_execute($stmt2);
-//         $result2 = mysqli_stmt_get_result($stmt2);
+        mysqli_stmt_bind_param($stmt2, "s", $row['token']);
+        mysqli_stmt_execute($stmt2);
+        $result2 = mysqli_stmt_get_result($stmt2);
 
-//         $row2 = mysqli_fetch_assoc($result2);
-//         $module['tank_name'] = $row2['tank_name'];
-//         $module['fluid_type'] = $row2['fluid_type'];
-//         $module['percent'] = $row2['percent'];
+        $row2 = mysqli_fetch_assoc($result2);
+        $module['tank_name'] = $row2['tank_name'];
+        $module['fluid_type'] = $row2['fluid_type'];
+        $module['percent'] = $row2['percent'];
 
-//         $modules[] = $module;
-//     }
+        $modules[] = $module;
+    }
 
-//     $response['recorddata'] = $modules;
-//     $response['status'] = 'success';
-//     return json_encode($response);
+    $response['recorddata'] = $modules;
+    $response['status'] = 'success';
+    return json_encode($response);
 
-// 	header('Content-Type: application/json');
-//     echo json_encode($response);
-// }
+	header('Content-Type: application/json');
+    echo json_encode($response);
+}
 
-// function getEnergyLevels($dbConn, $user_id) {
-//     $response = array();
 
-//     // Query to get tokens for the user
-//     $query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = '2'";
-//     $stmt = mysqli_prepare($dbConn, $query);
-
-//     mysqli_stmt_bind_param($stmt, "s", $user_id);
-//     mysqli_stmt_execute($stmt);
-//     $result = mysqli_stmt_get_result($stmt);
-
-//     $modules = array();
-//     while ($row = mysqli_fetch_assoc($result)) {
-//         $module = array(
-//             'name' => $row['computer_name'],
-//             'token' => $row['token'],
-//             'active' => (time() - strtotime($row['last_seen']) <= 200) ? true : false
-//         );
-
-//         // Query to get energy storage for the module
-//         $query2 = "SELECT * FROM energy_storage WHERE token = ?";
-//         $stmt2 = mysqli_prepare($dbConn, $query2);
-
-//         mysqli_stmt_bind_param($stmt2, "s", $row['token']);
-//         mysqli_stmt_execute($stmt2);
-//         $result2 = mysqli_stmt_get_result($stmt2);
-
-//         if ($result2) {
-//             $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
-//             $module['bat_name'] = $row2['bat_name'];
-//             $module['energy_type'] = $row2['energy_type'];
-//             $module['percent'] = $row2['percent'];
-//         }
-
-//         $modules[] = $module;
-//     }
 
 //     // Constructing the response
 //     $response['recorddata'] = $modules;
@@ -460,184 +462,185 @@ function addNewUser($dbConn, $username, $password, $email) {
 // }
 
 
-// function removeModule($dbConn, $token) {
-//     $response = array();
+function removeModule($dbConn, $token) {
+    $response = array();
 
-//     $query2 = "DELETE FROM tokens WHERE token = '".dbEsc($dbConn, $token)."'";
-//     $result2 = mysqli_query($dbConn, $query2);
+    $query2 = "DELETE FROM tokens WHERE token = '".dbEsc($dbConn, $token)."'";
+    $result2 = mysqli_query($dbConn, $query2);
 
-//     if ($result2) {
-//         $response['status'] = 'success';
-//     } else {
-//         $response['status'] = 'error';
-//         $response['message'] = mysqli_error($dbConn);
-//     }
+    if ($result2) {
+        $response['status'] = 'success';
+    } else {
+        $response['status'] = 'error';
+        $response['message'] = mysqli_error($dbConn);
+    }
 
-//     return json_encode($response);
+    return json_encode($response);
+}
 
 // 	header('Content-Type: application/json');
 //     echo json_encode($response);
 // }
 
-// function redstoneEventDropdowns($dbConn, $user_id) {
-//     // Initialize the response array
-//     $response = [
-//         'storage_modules' => [],
-//         'redstone_modules' => []
-//     ];
+function redstoneEventDropdowns($dbConn, $user_id) {
+    // Initialize the response array
+    $response = [
+        'storage_modules' => [],
+        'redstone_modules' => []
+    ];
 
-//     // Query for storage modules
-//     $query = "SELECT * FROM tokens WHERE user_id = '".dbEsc($dbConn, $user_id)."' AND (module_type = '2' OR module_type = '3')";
-//     $result = mysqli_query($dbConn, $query);
+    // Query for storage modules
+    $query = "SELECT * FROM tokens WHERE user_id = '".dbEsc($dbConn, $user_id)."' AND (module_type = '1' OR module_type = '2')";
+    $result = mysqli_query($dbConn, $query);
 
-//     while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-//         $response['storage_modules'][] = [
-//             'name' => $row['computer_name'],
-//             'token' => $row['token']
-//         ];
-//     }
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $response['storage_modules'][] = [
+            'name' => $row['computer_name'],
+            'token' => $row['token']
+        ];
+    }
 
-//     // Query for redstone modules
-//     $query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = '4'";
-//     $stmt = mysqli_prepare($dbConn, $query);
-//     mysqli_stmt_bind_param($stmt, "s", $user_id);
-//     mysqli_stmt_execute($stmt);
-//     $result = mysqli_stmt_get_result($stmt);
+    // Query for redstone modules
+    $query = "SELECT * FROM tokens WHERE user_id = ? AND module_type = '3'";
+    $stmt = mysqli_prepare($dbConn, $query);
+    mysqli_stmt_bind_param($stmt, "s", $user_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
 
-//     while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-//         $response['redstone_modules'][] = [
-//             'name' => $row['computer_name'],
-//             'token' => $row['token']
-//         ];
-//     }
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $response['redstone_modules'][] = [
+            'name' => $row['computer_name'],
+            'token' => $row['token']
+        ];
+    }
 
-//     // Return the response as JSON
-//     header('Content-Type: application/json');
-//     echo json_encode($response);
-// }
+    // Return the response as JSON
+    header('Content-Type: application/json');
+    echo json_encode($response);
+}
 
-// function getRedstoneSides($dbConn, $token) {
-//     // Initialize the response array
-//     $response = [
-//         'modules' => []
-//     ];
+function getRedstoneSides($dbConn, $token) {
+    // Initialize the response array
+    $response = [
+        'modules' => []
+    ];
 
-//     $query = "SELECT * FROM redstone_controls WHERE token = ?";
-//     $stmt = mysqli_prepare($dbConn, $query);
-//     mysqli_stmt_bind_param($stmt, "s", $token);
-//     mysqli_stmt_execute($stmt);
-//     $result = mysqli_stmt_get_result($stmt);
+    $query = "SELECT * FROM redstone_controls WHERE token = ?";
+    $stmt = mysqli_prepare($dbConn, $query);
+    mysqli_stmt_bind_param($stmt, "s", $token);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
 
-//     while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-//         $response['modules'][] = [
-//             'top_name' => $row['top_name'],
-//             'bottom_name' => $row['bottom_name'],
-//             'front_name' => $row['front_name'],
-//             'back_name' => $row['back_name'],
-//             'left_name' => $row['left_name'],
-//             'right_name' => $row['right_name']
-//         ];
-//     }
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $response['modules'][] = [
+            'top_name' => $row['top_name'],
+            'bottom_name' => $row['bottom_name'],
+            'front_name' => $row['front_name'],
+            'back_name' => $row['back_name'],
+            'left_name' => $row['left_name'],
+            'right_name' => $row['right_name']
+        ];
+    }
 
-//     // Return the response as JSON
-//     header('Content-Type: application/json');
-//     echo json_encode($response);
-// }
+    // Return the response as JSON
+    header('Content-Type: application/json');
+    echo json_encode($response);
+}
 
-// function createRedstoneEvent($dbConn, $storageToken, $redstoneToken, $triggerValue, $side, $outputValue, $eventType, $user_id) {
-//     // Initialize the response array
-//     $response = [];
+function createRedstoneEvent($dbConn, $storageToken, $redstoneToken, $triggerValue, $side, $outputValue, $eventType, $user_id) {
+    // Initialize the response array
+    $response = [];
 
-//     $query = "INSERT INTO redstone_events (redstone_token, storage_token, event_type, trigger_value, side, output, user_id) VALUES " .
-//         "('".dbEsc($dbConn, $redstoneToken)."', '".dbEsc($dbConn, $storageToken)."', ".dbEsc($dbConn, $eventType).", ".dbEsc($dbConn, $triggerValue).", '".dbEsc($dbConn, $side)."', ".dbEsc($dbConn, $outputValue).", '".dbEsc($dbConn, $user_id)."')";
+    $query = "INSERT INTO redstone_events (redstone_token, storage_token, event_type, trigger_value, side, output, user_id) VALUES " .
+        "('".dbEsc($dbConn, $redstoneToken)."', '".dbEsc($dbConn, $storageToken)."', ".dbEsc($dbConn, $eventType).", ".dbEsc($dbConn, $triggerValue).", '".dbEsc($dbConn, $side)."', ".dbEsc($dbConn, $outputValue).", '".dbEsc($dbConn, $user_id)."')";
 
-//     $result = mysqli_query($dbConn, $query);
+    $result = mysqli_query($dbConn, $query);
 
-//     if (!$result) {
-//         $response['status'] = 'error';
-//         $response['message'] = mysqli_error($dbConn);
-//     } else {
-//         $response['status'] = 'success';
-//     }
+    if (!$result) {
+        $response['status'] = 'error';
+        $response['message'] = mysqli_error($dbConn);
+    } else {
+        $response['status'] = 'success';
+    }
 
-//     // Return the response as JSON
-//     header('Content-Type: application/json');
-//     echo json_encode($response);
-// }
+    // Return the response as JSON
+    header('Content-Type: application/json');
+    echo json_encode($response);
+}
 
-// function loadRedstoneEvents($dbConn, $user_id) {
-//     // Initialize the response array
-//     $response = [
-//         'events' => []
-//     ];
+function loadRedstoneEvents($dbConn, $user_id) {
+    // Initialize the response array
+    $response = [
+        'events' => []
+    ];
 
-//     $query = "SELECT * FROM redstone_events WHERE user_id = ?";
-//     $stmt = mysqli_prepare($dbConn, $query);
-//     mysqli_stmt_bind_param($stmt, "s", $user_id);
-//     mysqli_stmt_execute($stmt);
-//     $result = mysqli_stmt_get_result($stmt);
+    $query = "SELECT * FROM redstone_events WHERE user_id = ?";
+    $stmt = mysqli_prepare($dbConn, $query);
+    mysqli_stmt_bind_param($stmt, "s", $user_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
 
-//     while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-//         $eventData = [
-//             'event_id' => $row['event_id'],
-//             'event_type' => $row['event_type'],
-//             'trigger_value' => $row['trigger_value'],
-//             'side' => $row['side'],
-//             'output' => $row['output'],
-//             'redstone_module' => null,
-//             'storage_module' => null,
-//             'redstone_active' => false,
-//             'storage_active' => false
-//         ];
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $eventData = [
+            'event_id' => $row['event_id'],
+            'event_type' => $row['event_type'],
+            'trigger_value' => $row['trigger_value'],
+            'side' => $row['side'],
+            'output' => $row['output'],
+            'redstone_module' => null,
+            'storage_module' => null,
+            'redstone_active' => false,
+            'storage_active' => false
+        ];
 
-//         // Get redstone module details
-//         $query2 = "SELECT computer_name, last_seen FROM tokens WHERE token = '".dbEsc($dbConn, $row['redstone_token'])."'";
-//         $result2 = mysqli_query($dbConn, $query2);
-//         $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
-//         $eventData['redstone_module'] = $row2['computer_name'];
-//         $eventData['redstone_active'] = (time() - strtotime($row2['last_seen'])) <= 200;
+        // Get redstone module details
+        $query2 = "SELECT computer_name, last_seen FROM tokens WHERE token = '".dbEsc($dbConn, $row['redstone_token'])."'";
+        $result2 = mysqli_query($dbConn, $query2);
+        $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
+        $eventData['redstone_module'] = $row2['computer_name'];
+        $eventData['redstone_active'] = (time() - strtotime($row2['last_seen'])) <= 200;
 
-//         // Get storage module details
-//         $query3 = "SELECT computer_name, last_seen FROM tokens WHERE token = '".dbEsc($dbConn, $row['storage_token'])."'";
-//         $result3 = mysqli_query($dbConn, $query3);
-//         $row3 = mysqli_fetch_array($result3, MYSQLI_ASSOC);
-//         $eventData['storage_module'] = $row3['computer_name'];
-//         $eventData['storage_active'] = (time() - strtotime($row3['last_seen'])) <= 200;
+        // Get storage module details
+        $query3 = "SELECT computer_name, last_seen FROM tokens WHERE token = '".dbEsc($dbConn, $row['storage_token'])."'";
+        $result3 = mysqli_query($dbConn, $query3);
+        $row3 = mysqli_fetch_array($result3, MYSQLI_ASSOC);
+        $eventData['storage_module'] = $row3['computer_name'];
+        $eventData['storage_active'] = (time() - strtotime($row3['last_seen'])) <= 200;
 
-//         $response['events'][] = $eventData;
-//     }
+        $response['events'][] = $eventData;
+    }
 
-//     // Return the response as JSON
-//     header('Content-Type: application/json');
-//     echo json_encode($response);
-// }
+    // Return the response as JSON
+    header('Content-Type: application/json');
+    echo json_encode($response);
+}
 
-// function removeEvent($dbConn, $event_id) {
-//     // Initialize the response array
-//     $response = [];
+function removeEvent($dbConn, $event_id) {
+    // Initialize the response array
+    $response = [];
 
-//     // Prepare and bind the SQL query to delete the event
-//     $query2 = "DELETE FROM redstone_events WHERE event_id = ?";
-//     $stmt = mysqli_prepare($dbConn, $query2);
+    // Prepare and bind the SQL query to delete the event
+    $query2 = "DELETE FROM redstone_events WHERE event_id = ?";
+    $stmt = mysqli_prepare($dbConn, $query2);
 
-//     // Bind the event_id parameter
-//     mysqli_stmt_bind_param($stmt, "s", $event_id);
+    // Bind the event_id parameter
+    mysqli_stmt_bind_param($stmt, "s", $event_id);
 
-//     // Execute the statement
-//     $result2 = mysqli_stmt_execute($stmt);
+    // Execute the statement
+    $result2 = mysqli_stmt_execute($stmt);
 
-//     // Check if the query was successful
-//     if (!$result2) {
-//         $response['status'] = 'error';
-//         $response['message'] = mysqli_error($dbConn);
-//     } else {
-//         $response['status'] = 'success';
-//     }
+    // Check if the query was successful
+    if (!$result2) {
+        $response['status'] = 'error';
+        $response['message'] = mysqli_error($dbConn);
+    } else {
+        $response['status'] = 'success';
+    }
 
-//     // Set the content type to JSON and output the response
-//     header('Content-Type: application/json');
-//     echo json_encode($response);
-// }
+    // Set the content type to JSON and output the response
+    header('Content-Type: application/json');
+    echo json_encode($response);
+}
 
 function jsonResponse($status, $data) {
     // Set the response header to application/json

@@ -199,7 +199,7 @@ function install_select()
     
     draw_text_term(2, 8, '1. Energy Monitor', colors.white, colors.black)
     draw_text_term(2, 9, '2. Fluid Monitor', colors.white, colors.black)
-    draw_text_term(2, 10,'3  Redstone Controller', colors.white, colors.black)
+    draw_text_term(2, 10,'3. Redstone Controller', colors.white, colors.black)
     draw_text_term(1, 13, 'Enter number:', colors.white, colors.black)
     term.setCursorPos(1,14)
     term.setTextColor(colors.white)

@@ -1,16 +1,17 @@
 <?php
 
-$version = 6;
+$version = 1;
 
 require_once('connection.php');
 
-$token = $_POST['token']; // No need for htmlspecialchars
-$id = $_POST['id']; // No need for htmlspecialchars
+// Use $_GET for URL parameters
+$token = $_GET['token']; 
+$id = $_GET['id']; 
 
 logPing($token, $id, $version, $dbConn);
 
 function logPing($token, $id, $version, $dbConn) {
-    // Check if POST data is set
+    // Check if GET data is set
     if (!isset($token) || !isset($id)) {
         echo "Error: Token or ID not provided.";
         return;
@@ -27,15 +28,11 @@ function logPing($token, $id, $version, $dbConn) {
 
     mysqli_stmt_bind_param($stmt, "ss", $token, $id);
 
-    //echo "Token: $token\n";
-    //echo "ID: $id\n";
-
     // Execute the prepared statement
     $success = mysqli_stmt_execute($stmt);
 
     if ($success) {
         $affected_rows = mysqli_stmt_affected_rows($stmt);
-        // echo "Affected rows: $affected_rows\n";
         if ($affected_rows > 0) {
             echo $version;
         } else {

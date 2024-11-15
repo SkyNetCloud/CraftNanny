@@ -2,5 +2,9 @@
     "Lua.diagnostics.disable": [
         "undefined-global",
         "undefined-field"
-    ]
+    ],
+    "git.smartCommitChanges": "off",
+    "git.suggestSmartCommit": false,
+    "git.enableSmartCommit": false,
+    "git.autoStaging": false
 }
