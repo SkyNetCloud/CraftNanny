@@ -1,11 +1,8 @@
 local bat={}
-local version = 5
+local version = 1
 
+local config = { token = "0", module_name = "", username = "", type = "" }
 local installer = "installer.lua"
-local token = '0'
-local module_name = ''
-local username = ''
-local type = ''
 
 -- write text to the terminal screen
 function draw_text_term(x, y, text, text_color, bg_color)
@@ -39,21 +36,22 @@ function terminal_screen()
 	draw_text_term(1, 4 , string.rep("-", 51), colors.lime, colors.black)
 end
 
-function downloadFromGitHub(file)
-	local url = "https://raw.githubusercontent.com/SkyNetCloud/CraftNanny/master/modules/".. installer
-	local localPath = fs.combine(shell.dir(), installer)
-	local response = http.get(url)
-	if response then
-		local content = response.readAll()
-		response.close()
-		local file = fs.open(localPath, "w")
-		file.write(content)
-		file.close()
-		return true
-	else
-		print("Failed to download file: " .. file)
-		return false
-	end
+local function downloadFromBackEnd(module_name, destination)
+    local url = string.format("https://craftnanny.org/modules/%s", module_name)
+    local site, err = http.get(url)
+    if not site then
+        error("Failed to contact Site: " .. (err or "Unknown error"))
+    end
+    local content = site.readAll()
+    site.close()
+    if not content or content == "" then
+        error("Failed to download content from " .. url)
+    end
+    local file = fs.open(destination, "w")
+    file.write(content)
+    file.close()
+
+    print("Downloaded " .. module_name .. " from Site successfully.")
 end
 
 -- retrieves token from local text file
@@ -70,7 +68,7 @@ function run_installer()
     if fs.exists("installer.lua") then
         fs.delete("installer.lua")
     end
-    downloadFromGitHub(installer)
+    downloadFromBackEnd(installer,installer)
     sleep(1)
     shell.run("installer.lua")
 end

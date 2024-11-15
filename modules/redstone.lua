@@ -1,6 +1,6 @@
 -- CraftNanny
 -- Redstone module
-local version = 3
+local version = 1
  
 -- pastebin for installer
 local installer = "installer.lua"
@@ -12,12 +12,7 @@ local module_name = ''
 local username = ''
 local type = ''
  
-local top = ''
-local bottom = ''
-local front = ''
-local back = ''
-local left = ''
-local right = ''
+local faces = {top = "", bottom = "", front= "", back = "", left = "", right = ""}
  
 local top_input = 0
 local bottom_input = 0
@@ -66,22 +61,23 @@ function terminal_screen()
     draw_text_term(2, 11, 'Left: '..left, colors.white, colors.black)
 end
  
-function downloadFromGitHub(file)
-	local url = "https://raw.githubusercontent.com/SkyNetCloud/CraftNanny/master/modules".. file
-	local localPath = fs.combine(shell.dir(), file)
-	local response = http.get(url)
-	if response then
-		local content = response.readAll()
-		response.close()
-		local file = fs.open(localPath, "w")
-		file.write(content)
-		file.close()
-		return true
-	else
-		print("Failed to download file: " .. file)
-		return false
-	end
-  end
+function downloadFromBackEnd(module_name, destination)
+    local url = string.format("https://craftnanny.org/modules/%s", module_name)
+    local site, err = http.get(url)
+    if not site then
+        error("Failed to contact Site: " .. (err or "Unknown error"))
+    end
+    local content = site.readAll()
+    site.close()
+    if not content or content == "" then
+        error("Failed to download content from " .. url)
+    end
+    local file = fs.open(destination, "w")
+    file.write(content)
+    file.close()
+
+    print("Downloaded " .. module_name .. " from Site successfully.")
+end
 
 -- retrieves token from local text file
 -- called at startup if config.txt exists
@@ -99,14 +95,22 @@ function run_installer()
     if fs.exists("installer.lua") then
         fs.delete("installer.lua")
     end
-    downloadFromGitHub(installer)
+    downloadFromBackEnd(installer,installer)
     sleep(1)
     shell.run("installer.lua")
 end
  
  
 ------  Start module specific code ---------
- 
+function ping_home()
+    local response = http.post("https://craftnanny.org/code/ping.php",
+        "token="..token.."&id="..os.getComputerID())
+    local current_version = response.readAll()
+    
+    if tonumber(current_version) > version then
+      run_installer()
+    end
+end
  
 function string:split(delimiter)
   local result = { }
@@ -129,53 +133,49 @@ function phone_home()
     return_string = response.readAll()
     
     result_array = string.split(return_string,",")
-    current_version = result_array[1]
+
     
     if tonumber(result_array[2]) == 1 then
         rs.setOutput('top', true)
-        top = 'true'
+        faces.top = 'true'
     else
         rs.setOutput('top', false)
-        top = 'false'
+        faces.top = 'false'
     end
     if tonumber(result_array[3]) == 1 then
         rs.setOutput('bottom', true)
-        bottom = 'true'
+        faces.bottom = 'true'
     else
         rs.setOutput('bottom', false)
-        bottom = 'false'
+        faces.bottom = 'false'
     end
     if tonumber(result_array[4]) == 1 then
         rs.setOutput('back', true)
-        back = 'true'
+        faces.back = 'true'
     else
         rs.setOutput('back', false)
-        back = 'false'
+        faces.back = 'false'
     end
     if tonumber(result_array[5]) == 1 then
         rs.setOutput('front', true)
-        front = 'true'
+        faces.front = 'true'
     else
         rs.setOutput('front', false)
-        front = 'false'
+        faces.front = 'false'
     end
     if tonumber(result_array[6]) == 1 then
         rs.setOutput('left', true)
-        left = 'true'
+        faces.left = 'true'
     else
         rs.setOutput('left', false)
-        left = 'false'
+        faces.left = 'false'
     end
     if tonumber(result_array[7]) == 1 then
         rs.setOutput('right', true)
-        right = 'true'
+        faces.right = 'true'
     else
         rs.setOutput('right', false)
-        right = 'false'
-    end
- 
-    if tonumber(current_version) > version then
-            run_installer()
+        faces.right = 'false'
     end
 end
  
@@ -220,6 +220,7 @@ function start_loop()
     phone_home()
     while true do
         terminal_screen()
+        ping_home()
         
         -- main active status with server
         time = time + 1

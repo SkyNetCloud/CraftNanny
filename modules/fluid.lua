@@ -1,24 +1,9 @@
----------------------------------------------
---	Tank module for caftNanny
---	by demethan
---	www.breakfastcraft.com
---  craftnanny.org
---  2015 08 12  demethan: 
---		-fixed modem support
---		-did some error magement
--- 		-added visual bar	
----------------------------------------------
-
--- variables
-
 local containers={}
-local version = 5
+local version = 1
 
+local config = { token = "0", module_name = "", username = "", type = "" }
 local installer = ""
-local token = '0'
-local module_name = ''
-local username = ''
-local type = ''
+
 
 -- write text to the terminal screen
 function draw_text_term(x, y, text, text_color, bg_color)
@@ -78,9 +63,9 @@ function downloadFromGitHub(file)
 -- token is used to authorize the scanner to post to users log
 function load_config()
     sr = fs.open("config.txt", "r")
-    token = sr.readLine()
-    module_name = sr.readLine()
-	username = sr.readLine()
+    config.token = sr.readLine()
+    config.module_name = sr.readLine()
+	config.username = sr.readLine()
     sr.close()
 end
 -- called for new installations and when the scanner needs to be updated
@@ -88,38 +73,43 @@ function run_installer()
     if fs.exists("installer.lua") then
         fs.delete("installer.lua")
     end
-    downloadFromGitHub(installer)
+    downloadFromGitHub(installer,installer)
     sleep(1)
     shell.run("installer.lua")
 end
 
 ------  Start module specific code ---------
 
+function ping_home()
+    local response = http.post("https://craftnanny.org/code/ping.php",
+        "token="..token.."&id="..os.getComputerID())
+    local current_version = response.readAll()
+    
+    if tonumber(current_version) > version then
+      run_installer()
+    end
+end
 
 function phone_home(tank_name, fluid_type, percent)
     response = http.post("https://craftnanny.org/code/fluid.php",
-    			"token="..token.."&id="..os.getComputerID().."&tank_name="..tank_name.."&fluid_type="..fluid_type.."&percent="..percent)		
+    			"token="..config.token.."&id="..os.getComputerID().."&tank_name="..tank_name.."&fluid_type="..fluid_type.."&percent="..percent)		
 	return_string = response.readAll()
-	
-	if tonumber(return_string) > version then
-			run_installer()
-	end
 end
 
 
--- function findPeripheralSide()
---     -- Define the list of faces to check
---     local faces = {"left", "right", "bottom", "top", "back"}
+function findPeripheralSide()
+    -- Define the list of faces to check
+    local faces = {"left", "right", "bottom", "top", "back"}
 
---     -- Iterate through each face
---     for _, face in ipairs(faces) do
---         if peripheral.isPresent(face) then
---             return true, face  -- Return if a peripheral is found on this face
---         end
---     end
+    -- Iterate through each face
+    for _, face in ipairs(faces) do
+        if peripheral.isPresent(face) then
+            return true, face  -- Return if a peripheral is found on this face
+        end
+    end
 
---     return false, ""  -- Return false if no peripheral is found
--- end
+    return false, ""  -- Return false if no peripheral is found
+end
 
 function round(num, decimals)
     local mult = 10^(decimals or 0)
@@ -137,8 +127,9 @@ end
 
 
 function getTankInformation(t, tankName)
-    local tnk = peripheral.wrap(t)
-    local okLiquid, msg = pcall(tnk.getInfo)
+    local tnk = peripheral.wrap("top")
+
+    local okLiquid, msg = pcall(tnk)
 
     if okLiquid then 
         local amount = msg.amount
@@ -191,7 +182,8 @@ function start_loop()
 
     while true do
         terminal_screen()
-
+        ping_home()
+        
         if #tanks > 2 then
             print("Only one device is supported")
             break
