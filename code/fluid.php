@@ -33,4 +33,13 @@ if (mysqli_stmt_affected_rows($stmt) > 0 ){
 	echo "error: token update query failed.";
 }
 
+
+// Close prepared statements
+mysqli_stmt_close($stmt);
+mysqli_stmt_close($stmt2);
+
+// Close database connection
+mysqli_close($dbConn);
+
+
 ?>
