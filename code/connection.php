@@ -3,7 +3,7 @@
 // Database configuration
 $servername = "localhost";
 $username = "prod";
-$password = "ShadowCaw6f22%";
+$password = "Removed";
 $database = "craftnanny_prod_db";
 
 // Create connection
