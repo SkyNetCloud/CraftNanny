@@ -41,7 +41,7 @@
 
     </div>
 
-    <form method="POST" action="login.js" id="login_form">
+    <form method="POST" id="login_form">
       <div class="large-9 columns">
         <h1>Login</h1>
         <input type="text" class="create_user_input" name="username_login" id="username_login" placeholder="Username" style="background-color:#444444;color:#ffffff;width:300px;" />

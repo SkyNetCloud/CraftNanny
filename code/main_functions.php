@@ -136,7 +136,7 @@ function signIn($dbconn, $username, $password) {
         "logger_token" => $row2['user_id']
     ];
 
-    return jsonResponse("success", $response);
+    return $response;
 
 }
 
