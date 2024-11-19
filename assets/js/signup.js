@@ -1,44 +1,42 @@
 // User System //
 function createUser() {
-    var usernameInput = $('#username').val(),
-        passwordInput = $('#password').val(),
-        passwordInput2 = $('#password2').val(),
-        email = $('#email').val();
+    var username = document.getElementById("username").value;
+    var email = document.getElementById("email").value;
+    var password = document.getElementById("password").value;
+    var password2 = document.getElementById("password2").value;
 
-    //console.log("Creating user with username:", usernameInput, "and email:", email);
-    
-    if (confirmEmail(email)) {
-        //console.log("Email confirmed");
-
-        if (usernameInput.length > 3) {
-            //console.log("Username length is valid");
-            if (passwordInput.length > 2 && passwordInput2.length > 2) {
-                //console.log("Password length is valid");
-
-                if (passwordInput == passwordInput2) {
-                    //console.log("Passwords match");
-                    if (checkForUser(usernameInput)) {
-                        alert('User already exists');
-                        //console.log("User already exists");
-                    } else {
-                        //console.log("User does not exist, creating new user");
-                        addNewUser(usernameInput, passwordInput, email);
-                    }
-                } else {
-                    alert('Passwords did not match!');
-                    //console.log("Passwords did not match");
-                }
-            } else {
-                alert('Password is too short.');
-                //console.log("Password is too short");
-            }
-        } else {
-            alert('Username is too short');
-            //console.log("Username is too short");
-        }
-    } else {
-        //console.log("Email confirmation failed");
+    // Check email validity
+    if (!confirmEmail(email)) {
+        alert("Please enter a valid email address.");
+        return;  // Stop further execution if email is invalid
     }
+
+    // Check if username is valid
+    if (username.length <= 3) {
+        alert('Username must be at least 4 characters long.');
+        return;
+    }
+
+    // Check if passwords are valid
+    if (password.length <= 5 || password2.length <= 5) {
+        alert('Password must be at least 6 characters long.');
+        return;
+    }
+
+    if (password !== password2) {
+        alert('Passwords do not match.');
+        return;
+    }
+
+    // Check if the username already exists (asynchronous call)
+    checkForUser(username, function(userExists) {
+        if (userExists) {
+            alert('User already exists.');
+            return;
+        }
+        // Proceed to create the new user if validation passes
+        addNewUser(username, password, email);
+    });
 }
 
 function confirmEmail(email) {
@@ -75,9 +73,9 @@ function addNewUser(name, pwd, email) {
         async: true,
         success: function(response) {
             ////console.log("Server Response: ", response);
-            
+
             $('#sidebar_create').hide();
-            
+
             // Log the token or response properties
             if (response.addNewUser && response.addNewUser.token) {
                 //console.log("Received Token: ", response.addNewUser.token);
@@ -99,10 +97,10 @@ function loginUser() {
         password_input = $('#password_login').val();
 
     //console.log("Attempting to login with username:", username_input);
-    
+
     $('#username_login').val('');
     $('#password_login').val('');
-    
+
     const theParams = {
         a: 'signIn',
         username: username_input,
@@ -158,7 +156,7 @@ function signOut() {
 
 function checkForUser(username) {
     //console.log("Checking if user exists:", username);
-    
+
     var result = false;
 
     const theParams = {
