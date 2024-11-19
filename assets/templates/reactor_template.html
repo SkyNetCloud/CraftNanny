@@ -1,0 +1,59 @@
+<html>
+<body>
+<div class="large-12 columns">
+    <div class="row">
+        <div class="large-12 columns">
+            <img id="status_img" src="assets/img/offline.png" style="width:15px;display:inline;">
+            <span id="module_title" style="font-weight:bold;font-size:20px;"></span> 
+            <a href="" id="remove_link">remove reactor</a>
+            
+            <div class="row reactor_module_block">
+                <div class="large-12 columns vist_record">
+                    <div class="large-2 columns">
+                        <img id="reactor_img" src="https://placehold.co/75x75/png" style="width:75px;">
+                    </div>
+                    <div class="large-10 columns">
+                        <span id="reactor_name" style="font-weight:bold;font-size:20px;">Reactor Module</span><br>
+                        
+                        <!-- <meter id="reactor_meter" max="100" title="Reactor Fuel Level" value="0"></meter><br> -->
+                        
+                        <!-- Reactor Percentage Display -->
+                        <!-- <span id="reactor_percent" style="font-weight:bold;font-size:18px;">Fuel: 0%</span><br> -->
+
+                        <!-- Reactor Status -->
+                        <span id="reactor_status" style="font-size:18px;color:#ff0000;">Offline</span><br>
+                        
+                        <!-- Reactor Temperature -->
+                        <span id="reactor_temperature" style="font-weight:bold;font-size:18px;">Temperature: --°C</span><br>
+                        
+                        <!-- Reactor Burn Rate -->
+                     
+                        <div class="row">
+                            <div class="large-4 columns">
+                                <span id="burn_rate" style="font-weight:bold;font-size:18px;">Burn Rate: --</span><br>
+                                <!-- <label style="font-weight:bold;font-size:20px;" id="bottom_name">Burn Rate</label>  -->
+                                <a href="#" id="edit_burn_rate">change rate</a>
+                                <div class="burn_rate_mouseover" id="burn_rate_mouseover" style="display:none;">
+                                    <input type="number" id="newBurnRate" placeholder="Enter Burn Rate" />
+                                    <a href="#" id="save_burn_rate">Save</a>
+                                    <a href="#" id="cancel_burn_rate_change">Cancel</a>
+                                </div>
+                            </div>
+                        </div>
+                      
+                        
+                        <!-- Reactor Levels -->
+                        <span id="fuel_percentage" style="font-weight:bold;font-size:18px;">Fuel Level: --%</span><br>
+                        <span id="coolant_percentage" style="font-weight:bold;font-size:18px;">Coolant Level: --%</span><br>
+                    
+                        <!-- Reactor Waste Disposal -->
+                        <span id="waste_percentage" style="font-weight:bold;font-size:18px;">Waste Level: --%</span><br>
+                        <span id="waste_disp_percent" style="font-weight:bold;font-size:18px;">Waste Disposal: --</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
