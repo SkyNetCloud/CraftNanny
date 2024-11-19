@@ -29,6 +29,9 @@ foreach ($actionArray as $action) {
         case "doesUserExist":
             $response['doesUserExist'] = doesUserExist($dbConn, $_REQUEST['id'], $_REQUEST['user_type']);
             break;
+        case "deleteUser":
+            $response['deleteUser'] = deleteUser($dbConn, $_REQUEST['user_id']);
+            break;
         case "addNewUser":
             $response['addNewUser'] = addNewUser($dbConn, $_REQUEST['username'], $_REQUEST['password'], $_REQUEST['email']);
             break;

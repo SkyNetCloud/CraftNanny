@@ -90,7 +90,61 @@ function addNewUser($dbConn, $username, $password, $email) {
     return $response;
 }
 
+function deleteUser($dbConn, $token) {
+    // Initialize the response array
+    $response = [];
 
+    // Sanitize the token
+    $token = htmlspecialchars($token);
+
+    // Query to find the user based on the token (logger_token)
+    $query = "SELECT user_id FROM users WHERE user_id = ?";
+    
+    if ($stmt = mysqli_prepare($dbConn, $query)) {
+        // Bind the parameter to the statement
+        mysqli_stmt_bind_param($stmt, "s", $token);
+        
+        // Execute the query
+        if (mysqli_stmt_execute($stmt)) {
+            // Store the result to check if user exists
+            mysqli_stmt_store_result($stmt);
+            
+            // If no rows are returned, the user doesn't exist
+            if (mysqli_stmt_num_rows($stmt) === 0) {
+                $response['status'] = 'error';
+                $response['message'] = 'User not found.';
+            } else {
+                // Proceed to delete the user
+                $deleteQuery = "DELETE FROM users WHERE user_id = ?";
+                
+                if ($deleteStmt = mysqli_prepare($dbConn, $deleteQuery)) {
+                    // Bind the parameter and execute the delete query
+                    mysqli_stmt_bind_param($deleteStmt, "s", $token);
+                    if (mysqli_stmt_execute($deleteStmt)) {
+                        $response['status'] = 'success';
+                        $response['message'] = 'User deleted successfully.';
+                    } else {
+                        $response['status'] = 'error';
+                        $response['message'] = 'Failed to delete user.';
+                    }
+                    mysqli_stmt_close($deleteStmt);
+                } else {
+                    $response['status'] = 'error';
+                    $response['message'] = 'Failed to prepare delete query.';
+                }
+            }
+            mysqli_stmt_close($stmt);
+        } else {
+            $response['status'] = 'error';
+            $response['message'] = 'Query execution failed: ' . mysqli_stmt_error($stmt);
+        }
+    } else {
+        $response['status'] = 'error';
+        $response['message'] = 'Query preparation failed: ' . mysqli_error($dbConn);
+    }
+
+    return $response;
+}
 
 function signIn($dbconn, $username, $password) {
     // Sanitize inputs to avoid XSS attacks
@@ -375,19 +429,6 @@ function setRedstoneOutput($dbConn, $token, $side, $value, $type) {
     echo json_encode($response);
 }
 
-
-
-
-//     // Constructing the response
-//     $response['recorddata'] = $modules;
-//     $response['status'] = 'success';
-
-//     // Output the response as JSON
-//     header('Content-Type: application/json');
-//     echo json_encode($response);
-// }
-
-
 function removeModule($dbConn, $token) {
     $response = array();
 
@@ -425,10 +466,6 @@ function removeModule($dbConn, $token) {
 
     return json_encode($response);
 }
-
-// 	header('Content-Type: application/json');
-//     echo json_encode($response);
-// }
 
 function redstoneEventDropdowns($dbConn, $user_id) {
     // Initialize the response array
