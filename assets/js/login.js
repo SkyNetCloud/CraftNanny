@@ -48,7 +48,7 @@ function loginUser() {
 function signIn(token) {
     // Store the token in cookies for session management
     document.cookie = 'logger_token=' + token + "; path=/";
-    window.location.assign("https://dev.craftnanny.org/home.php");
+    window.location.assign("https://craftnanny.org/home.php");
 }
 
 $(document).ready(function() {
