@@ -52,7 +52,7 @@
           <input type="password" class="create_user_input" name="password" id="password" placeholder="Password" style="background-color:#444444;color:#ffffff;width:300px;" />
           <input type="password" class="create_user_input" name="password2" id="password2" placeholder="Verify Password" style="background-color:#444444;color:#ffffff;width:300px;" />
 
-          <button type="button" class="radius button sidebar_btn_form" id="create_btn">Create</button>
+          <button type="button" class="radius button sidebar_btn_form" id="login_btn">Create</button>
         </p>
       </div>
     </form>
