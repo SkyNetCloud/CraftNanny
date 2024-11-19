@@ -55,22 +55,28 @@
           <h4>1. <a href="signup.php">Create an account</a></h4>
           <h4>2. Choose what module you want to setup <a href="modules.php">from this list</a></h4>
           <h4>3. On an in-game advanced computer run:</h4>
-          <div style="padding:15px;width:225px;margin-left:30px;">
-            pastebin run P324jv87
+          <div style="padding:5px;width:400px;margin-left:30px;">
+            wget https://craftnanny.org/modules/installer.lua
           </div>
-          <h4>4. Select a module from the on-screen list</h4>
+          <h4>4. Select version you want to use for CraftNanny</h4>
+          <img src="assets/img/setup/select_version.png" />
+          <p>
+          <h4>5. Select a module from the on-screen list</h4>
           <img src="assets/img/setup/select_module.png" />
           <p>
-          <h4>5. Name the module. This will identify it on the website</h4>
+          <h4>6. Name the module. This will identify it on the website</h4>
           <img src="assets/img/setup/name_module.png" />
           <p>
-          <h4>6. Login to your CraftNanny Account</h4>
+          <h4>7. Login to your CraftNanny Account</h4>
           <img src="assets/img/setup/register_module.png" />
           <p>
-          <h4>7. Your module will be installed. After that, it will appear on the website.</h4>
+          <h4>8. Your module will be installed. After that, it will appear on the website.</h4>
           <img src="assets/img/setup/complete.png" />
         </div>
       </div>
+
+
+
 
     </div>
   </div>
@@ -123,7 +129,6 @@
   <script>
     $(document).foundation();
   </script>
-
 
 </body>
 
