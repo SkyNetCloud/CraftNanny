@@ -1,0 +1,7 @@
+phpmyadmin/
+Log/
+
+.settings/
+.vscode/
+
+code/connection.php
