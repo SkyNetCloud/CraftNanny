@@ -41,10 +41,10 @@
             <h2 style="color:#0099FF;font-weight:bold;">Your Minecraft Base. <br>Online.</h2>
             Use ComputerCraft to:
             <ul>
-              <li>Track players</li>
+              <!-- <li>Track players</li> -->
               <li>Monitor energy and fluid storage.</li>
               <li>Control redstone outputs</li>
-              <li>Create rule-based events (redstone triggers, emails)</li>
+              <!-- <li>Create rule-based events (redstone triggers, emails)</li> -->
               <li>More modules in development</li>
             </ul>
 
@@ -88,8 +88,9 @@
           <div class="large-4 columns">
             <h3 style="color:#0099FF">Mod Requirements:</h3>
             <ul>
-              <li>ComputerCraft 1.6 +</li>
-              <li>OpenPeripherals (for some modules)</li>
+              <li>Newer Verison of Computercraft</li>
+              <li>Mekanism (For Tanks/Energy)</li>
+              <li>Create (For Tanks) </li>
             </ul>
           </div>
            <div class="large-4 columns">
@@ -120,6 +121,7 @@
               <p><h2 style="font-weight:bold;color:#cccccc;">CraftNanny.org</h2>
               <p style="color:#cccccc;font-size:18px;">Contribute to this open-source project on GitHub!</p>
               <a href="https://github.com/SkyNetCloud/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
+              <a href="https://discord.gg/5CfvE3nA6N"><img src="assets/img/discord.png" style="width:100px; padding:15px;"></a>
             </div>
             <div class="large-6 columns">
 

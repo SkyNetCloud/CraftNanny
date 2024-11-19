@@ -89,6 +89,10 @@
   </div>
 
   </div>
+
+
+
+
   <footer>
     <div class="large-12 columns footer_top">
       <div class="row">
@@ -107,7 +111,7 @@
           <h2 style="font-weight:bold;color:#cccccc;">CraftNanny.org</h2>
           <p style="color:#cccccc;font-size:18px;">Contribute to this open-source project on GitHub!</p>
           <a href="https://github.com/SkyNetCloud/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
-          <a href="https://discord.gg/5CfvE3nA6N"><img src="assets/img/discord.png?v=2.1" style="width:100px";></a>
+          <a href="https://discord.gg/5CfvE3nA6N"><img src="assets/img/discord.png" style="width:100px;"></a>
         </div>
         <div class="large-6 columns">
         </div>
@@ -136,6 +140,7 @@
   <script src="assets/js/login_check.js"></script>
   <script src="assets/js/home.js"></script>
   <script src="assets/js/menu.js"></script>
+
 </body>
 
 </html>
