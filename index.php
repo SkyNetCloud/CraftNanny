@@ -46,7 +46,6 @@
       <h2 style="color:#0099FF;font-weight:bold;">Your Minecraft Base. <br>Online.</h2>
       Use ComputerCraft to:
       <ul>
-        <li>Track players</li>
         <li>Monitor energy and fluid storage.</li>
         <li>Control redstone outputs</li>
         <li>Create rule-based events (redstone triggers, emails)</li>
