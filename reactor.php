@@ -69,7 +69,7 @@
                 <div class="large-4 columns" style="height: 200px;">
                     <h2 style="font-weight: bold; color: #cccccc;">CraftNanny.org</h2>
                     <p style="color: #cccccc; font-size: 18px;">Contribute to this open-source project on GitHub!</p>
-                    <a href="https://github.com/jaranvil/CraftNanny">
+                    <a href="https://github.com/SkyNetCloud/CraftNanny">
                         <img src="assets/img/git.png" style="width: 100px;" alt="GitHub">
                     </a>
                 </div>

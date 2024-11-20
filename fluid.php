@@ -86,20 +86,22 @@
         </div>
         <div class="large-6 columns">
 
-            </div>
-          </div>
         </div>
-        <div class="large-12 columns footer_middle">
-          <div class="row">
-            <div class="large-2 columns">
-              <img src="https://mc-heads.net/body/SkyNetCloud" style="height:200px;">
-            </div>
-            <div class="large-4 columns" style="height:200px">
-              <p><h2 style="font-weight:bold;color:#cccccc;">CraftNanny.org</h2>
-              <p style="color:#cccccc;font-size:18px;">Contribute to this open-source project on GitHub!</p>
-              <a href="https://github.com/jaranvil/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
-            </div>
-            <div class="large-6 columns">
+      </div>
+    </div>
+    <div class="large-12 columns footer_middle">
+      <div class="row">
+        <div class="large-2 columns">
+          <img src="https://mc-heads.net/body/SkyNetCloud" style="height:200px;">
+        </div>
+        <div class="large-4 columns" style="height:200px">
+          <p>
+          <h2 style="font-weight:bold;color:#cccccc;">CraftNanny.org</h2>
+          <p style="color:#cccccc;font-size:18px;">Contribute to this open-source project on GitHub!</p>
+          <a href="https://github.com/SkyNetCloud/CraftNanny"><img src="assets/img/git.png" style="width:100px;"></a>
+          <a href="https://discord.gg/5CfvE3nA6N"><img src="assets/img/discord.png" style="width:100px;"></a>
+        </div>
+        <div class="large-6 columns">
 
         </div>
       </div>
