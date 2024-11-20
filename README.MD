@@ -1,4 +1,4 @@
-# Dev CraftNanny - ComputerCraft Program
+#CraftNanny - ComputerCraft Program
 
 [![](https://dcbadge.limes.pink/api/server/https://discord.gg/4PwNv8FKDF)](https://discord.gg/4PwNv8FKDF)
 
