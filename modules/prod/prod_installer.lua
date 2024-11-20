@@ -1,5 +1,8 @@
 term.clear()
-local config = { token = "", module_name = "", username = "", type = "" }
+local token = ''
+local module_name = ''
+local username = ''
+local type = ''
 local updating = false
 local user = ''
 
@@ -161,9 +164,9 @@ function login()
     user, urlencode(pass), os.getComputerID(), module_name, type)
 
     local login_response, err = http.get("https://craftnanny.org/code/signin.php?" .. queryData)
+    
 
     if not login_response then
-        -- Log if the HTTP request failed
         logger("Login HTTP request failed: " .. (err or "Unknown error"))
         draw_text_term(1, 8, 'Login failed: HTTP error', colors.red, colors.black)
         sleep(2)
@@ -171,21 +174,20 @@ function login()
         return
     end
 
-    local token = login_response.readAll()
+    token = login_response.readAll()
 
     if not token or token == 'error: User not found' then
-        -- Log if token is nil or user not found
         logger("Login failed for user '" .. user .. "'. Response: " .. (token or "nil"))
         draw_text_term(1, 8, 'Login failed: User not found', colors.red, colors.black)
         sleep(2)
         login()  -- Retry login
     else
-        -- Successful login
         username = user
         save_config()  -- Save configuration
         install_module()  -- Proceed with module installation
     end
 end
+
 
 function name()
     term.clear()
