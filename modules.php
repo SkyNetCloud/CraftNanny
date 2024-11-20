@@ -24,18 +24,18 @@
         <div class="large-12 columns thin_bar">
         </div>
 
-        <div class="row">
-          <div class="large-3 columns">
-            <p>
-            <div id='cssmenu'>
+  <div class="row">
+    <div class="large-3 columns">
+      <p>
+      <div id='cssmenu'>
 
-             <ul>
-               <li><a href='index.php'><span>Homepage</span></a></li>
-               <li><a href='home.php'><span>My Dashboard</span></a></li>
-               <li><a href='setup.php'><span>Setup Instructions</span></a></li>
-               <li class='active'><a href='modules.php'><span>In-game Modules</span></a></li>
-               </ul>
-          </div>
+        <ul>
+          <li><a href='index.php'><span>Homepage</span></a></li>
+          <li><a href='home.php'><span>My Dashboard</span></a></li>
+          <li><a href='setup.php'><span>Setup Instructions</span></a></li>
+          <li class='active'><a href='modules.php'><span>In-game Modules</span></a></li>
+        </ul>
+      </div>
 
           </div>
           <div class="large-9 columns">
@@ -87,7 +87,7 @@
           </div>
         </div> -->
 
-      <hr> -->
+  <hr> -->
 
        <div class="row">
          <h3 style="color:#1b9bff;font-weight:bold;" id="energy">2. Energy Storage</h3>
@@ -112,11 +112,11 @@
               <img src="assets/img/mods/energy.png" class="module_img">
               <img src="assets/img/screenshots/energy.PNG" class="module_img">
 
-            </div>
-          </div>
-        </div>
+    </div>
+  </div>
+  </div>
 
-           <hr>
+  <hr>
 
          <div class="row">
          <h3 style="color:#1b9bff;font-weight:bold;" id="fluid">3. Fluid Storage</h3>
@@ -140,11 +140,11 @@
               <img src="assets/img/mods/fluid.png" class="module_img">
               <img src="assets/img/screenshots/fluid.PNG" class="module_img">
 
-            </div>
-          </div>
-        </div>
+    </div>
+  </div>
+  </div>
 
-           <hr>
+  <hr>
 
             <div class="row">
          <h3 style="color:#1b9bff;font-weight:bold;" id="redstone">4. Redstone Controls</h3>
@@ -160,29 +160,29 @@
               <ul>
                 <li>Place advanced computer and run module installer</li>
 
-              </ul>
-          
-            </div>
-            <div class="large-6 columns">
-              <img src="assets/img/screenshots/redstone.PNG" class="module_img">
+      </ul>
 
-            </div>
-          </div>
+    </div>
+    <div class="large-6 columns">
+      <img src="assets/img/screenshots/redstone.PNG" class="module_img">
+
+    </div>
+  </div>
+  </div>
+
+
+
+
+  </div>
+
+
+  <footer>
+    <div class="large-12 columns footer_top">
+      <div class="row">
+        <div class="large-6 columns">
+
         </div>
-
-
-
-
-        </div>
-
-
-      <footer>
-        <div class="large-12 columns footer_top">
-          <div class="row">
-            <div class="large-6 columns">
-
-            </div>
-            <div class="large-6 columns">
+        <div class="large-6 columns">
 
             </div>
           </div>
@@ -199,36 +199,37 @@
             </div>
             <div class="large-6 columns">
 
-            </div>
-            </div>
         </div>
-        <div class="large-12 columns footer_bottom">
-          <div class="row">
-            <div class="large-3 columns">
+      </div>
+    </div>
+    <div class="large-12 columns footer_bottom">
+      <div class="row">
+        <div class="large-3 columns">
 
-            </div>
-            <div class="large-9 columns" style="color:#cccccc">
-              <ul class="inline-list right" style="margin-top:40px;">
-                <li><a href="home.php" style="color:#cccccc">My Dashboard</a>  </li>
-                <li><a href="setup.php" style="color:#cccccc">Setup Instructions</a>  </li>
-                <li><a href="modules.php" style="color:#cccccc">Modules</a> </li>
-                <li><a href="https://github.com/skynetcloud/CraftNanny/issues" style="color:#cccccc">Report Issues </a></li>
-              </ul>
-            </div>
-          </div>
         </div>
-      </footer>
+        <div class="large-9 columns" style="color:#cccccc">
+          <ul class="inline-list right" style="margin-top:40px;">
+            <li><a href="home.php" style="color:#cccccc">My Dashboard</a> </li>
+            <li><a href="setup.php" style="color:#cccccc">Setup Instructions</a> </li>
+            <li><a href="modules.php" style="color:#cccccc">Modules</a> </li>
+            <li><a href="https://github.com/skynetcloud/CraftNanny/issues" style="color:#cccccc">Report Issues </a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </footer>
 
 
 
 
-    <script src="assets/js/vendor/jquery.js"></script>
-    <script src="assets/js/foundation.min.js"></script>
-    <script src="assets/js/foundation/foundation.orbit.js"></script>
-    <script>
-      $(document).foundation();
-    </script>
+  <script src="assets/js/vendor/jquery.js"></script>
+  <script src="assets/js/foundation.min.js"></script>
+  <script src="assets/js/foundation/foundation.orbit.js"></script>
+  <script>
+    $(document).foundation();
+  </script>
 
 
-  </body>
+</body>
+
 </html>

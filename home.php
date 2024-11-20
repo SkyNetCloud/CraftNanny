@@ -71,6 +71,7 @@
           </div>
         </div>
       </div>
+      <p>
       <div class="row">
         <div class="large-4 columns modules" id="reactor_modules">
           <strong style="color:#0099FF">Reactor Modules:</strong>

@@ -9,7 +9,7 @@
 </head>
 <body>
 
-    <!-- Top Bar -->
+    
     <div class="large-12 columns top_bar">
         <div class="row">
             <span style="font-weight: bold; font-size: 36px; color: #1b9bff;">CraftNanny</span>
@@ -19,16 +19,16 @@
         </div>
     </div>
 
-    <!-- Thin Bar -->
+    
     <div class="large-12 columns thin_bar"></div>
 
-    <!-- Main Content Row -->
+   
     <div class="row">
         
-        <!-- Account Menu Placeholder -->
+       
         <div id="account-menu-placeholder"></div>
 
-        <!-- Connected Modules Section -->
+        
         <div class="large-9 columns">
             <div class="module_header">
                 <h3 style="color: #0099FF;">Connected redstone modules:</h3>
@@ -47,9 +47,9 @@
         </div>
     </div>
 
-    <!-- Footer Section -->
+    
     <footer>
-        <!-- Footer Top -->
+        
         <div class="large-12 columns footer_top">
             <div class="row">
                 <div class="large-6 columns"></div>
@@ -57,10 +57,10 @@
             </div>
         </div>
 
-        <!-- Footer Middle -->
+        
         <div class="large-12 columns footer_middle">
             <div class="row">
-                <!-- Image and GitHub Link -->
+                
                 <div class="large-2 columns">
                     <img src="https://mc-heads.net/body/SkyNetCloud" style="height: 200px;" alt="SkyNetCloud">
                 </div>
@@ -75,7 +75,7 @@
             </div>
         </div>
 
-        <!-- Footer Bottom -->
+        
         <div class="large-12 columns footer_bottom">
             <div class="row">
                 <div class="large-3 columns"></div>

@@ -225,33 +225,47 @@ function updateOutput(redstone_token, side, value, val_type) {
 
 
 function removeModule(token) {
-	var result = false;
-	if (confirm('Are you sure you want to delete this module?')) {
-		theParams = {
-			a: 'remove_module',
-			token: token
-		}
+    var result = false;
 
-		$.ajax({
-			type: "POST",
-			url: "code/main.php",
-			data: theParams,
-			dataType: 'json',
-			async: false,
-			success: function(json) {
-				//alert((new XMLSerializer()).serializeToString(xml));
-				result = true;
-                // $('.no_connected_modules').show();
-                // $('.module_header').hide();
-			},
-			error: function(xhr) {
-			 // alert(xhr.responseText);
+    // Confirm the deletion with the user
+    if (confirm('Are you sure you want to delete this module?')) {
+        var theParams = {
+            a: 'remove_module',
+            token: token
+        };
 
-			}
-		});
-	}
-	return result;
+        // Make the AJAX request
+        $.ajax({
+            type: "POST",
+            url: "code/main.php",
+            data: theParams,
+            dataType: 'json',
+            async: false,
+            success: function(json) {
+                // Handle successful removal
+                result = true;
+
+                // Check if there are no more modules connected
+                if ($('.connected_module').length === 0) {
+                    // Show 'no connected modules' message
+                    $('.no_connected_modules').show();
+                    $('.module_header').hide();
+                } else {
+                    // Hide 'no connected modules' message
+                    $('.no_connected_modules').hide();
+                    $('.module_header').show();
+                }
+            },
+            error: function(xhr) {
+                // Handle errors
+                console.error("Error removing module:", xhr.responseText);
+            }
+        });
+    }
+
+    return result;
 }
+
 
 
 
