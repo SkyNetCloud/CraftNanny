@@ -21,7 +21,7 @@ function loginUser() {
     // Send the request
     $.ajax({
         type: "POST",
-        url: "code/main.php",  // Make sure this is the correct URL for your backend
+        url: "api/main.php",  // Make sure this is the correct URL for your backend
         data: theParams,
         dataType: 'json',
         async: true,  // Default is true, no need to specify 'false'

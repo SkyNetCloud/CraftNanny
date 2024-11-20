@@ -88,7 +88,7 @@ end
 
 -- Ping the server to check for updates
 local function pingServer()
-    local url = "https://craftnanny.org/code/ping.php?token=" .. token .. "&id=" .. os.getComputerID()
+    local url = "https://craftnanny.org/api/ping.php?token=" .. token .. "&id=" .. os.getComputerID()
     
     local response = http.get(url)
 
@@ -116,7 +116,7 @@ end
 
 -- Communicate with the server and update outputs
 local function phoneHome()
-    local url = "https://craftnanny.org/code/redstone.php"
+    local url = "https://craftnanny.org/api/redstone.php"
     local postData = "token=" .. token .. "&id=" .. os.getComputerID()
 
     for face, value in pairs(inputs) do

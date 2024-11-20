@@ -42,7 +42,7 @@ function loadControls(template) {
 
     $.ajax({
         type: "POST",
-        url: "code/main.php",
+        url: "api/main.php",
         data: theParams,
         dataType: 'json',
         async: false,
@@ -212,7 +212,7 @@ function updateOutput(redstone_token, side, value, val_type) {
     };
     $.ajax({
         type: 'POST',
-        url: 'code/main.php',
+        url: 'api/main.php',
         data: params,
         success: function(xhr) {
             
@@ -237,7 +237,7 @@ function removeModule(token) {
         // Make the AJAX request
         $.ajax({
             type: "POST",
-            url: "code/main.php",
+            url: "api/main.php",
             data: theParams,
             dataType: 'json',
             async: false,

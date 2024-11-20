@@ -163,7 +163,7 @@ function login()
     local queryData = string.format("user=%s&pass=%s&id=%s&name=%s&module_type=%s",
     user, urlencode(pass), os.getComputerID(), module_name, type)
 
-    local login_response, err = http.get("https://craftnanny.org/code/signin.php?" .. queryData)
+    local login_response, err = http.get("https://craftnanny.org/api/signin.php?" .. queryData)
     
 
     if not login_response then

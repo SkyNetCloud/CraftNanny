@@ -29,7 +29,7 @@ function loadModules(template) {
 
     $.ajax({
         type: "POST",
-        url: "code/main.php",
+        url: "api/main.php",
         data: theParams,
         dataType: 'json', // Expect JSON response
         success: function(response) {
@@ -125,7 +125,7 @@ function removeModule(token) {
 
 		$.ajax({
 			type: "POST",
-			url: "code/main.php",
+			url: "api/main.php",
 			data: theParams,
 			dataType: 'json',
 			async: false,

@@ -33,7 +33,7 @@ function deleteAccount() {
 
     $.ajax({
         type: "POST",
-        url: "code/main.php", // Adjust the URL accordingly
+        url: "api/main.php", // Adjust the URL accordingly
         data: theParams,
         dataType: 'json', // Expect a JSON response
         async: true,

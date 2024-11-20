@@ -100,7 +100,7 @@ function addNewUser(name, pwd, email) {
 
     $.ajax({
         type: "POST",
-        url: "code/main.php?v=1.2",
+        url: "api/main.php?v=1.2",
         data: theParams,
         dataType: 'json', // Changed to JSON
         async: true,
@@ -142,7 +142,7 @@ function checkForUser(username, callback) {
 
     $.ajax({
         type: "POST",
-        url: "code/main.php",
+        url: "api/main.php",
         data: theParams,
         dataType: 'json', // Changed to JSON
         async: true,

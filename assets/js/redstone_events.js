@@ -28,7 +28,7 @@ function initPage() {
 	
 		$.ajax({
 			type: "POST",
-			url: "code/main.php",
+			url: "api/main.php",
 			data: theParams,
 			dataType: 'json', // Changed to JSON
 			async: false,
@@ -76,7 +76,7 @@ function initPage() {
 			
 				$.ajax({
 					type: "POST",
-					url: "code/main.php",
+					url: "api/main.php",
 					data: theParams,
 					dataType: 'json', // Changed to JSON
 					async: false,
@@ -107,7 +107,7 @@ function loadEvents(template) {
 
 	$.ajax({
 		type: "POST",
-		url: "code/main.php",
+		url: "api/main.php",
 		data: theParams,
 		dataType: 'json', // Changed to JSON
 		async: false,
@@ -167,7 +167,7 @@ function populateDropdowns() {
 
 	$.ajax({
 		type: "POST",
-		url: "code/main.php",
+		url: "api/main.php",
 		data: theParams,
 		dataType: 'json', // Changed to JSON
 		async: false,
@@ -218,7 +218,7 @@ function removeEvent(event) {
 	
 		$.ajax({
 			type: "POST",
-			url: "code/main.php",
+			url: "api/main.php",
 			data: theParams,
 			dataType: 'json', // Changed to JSON
 			async: false,

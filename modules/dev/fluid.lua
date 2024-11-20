@@ -83,7 +83,7 @@ function ping_home()
     local sr = fs.open("config.txt", "r")
     token = sr.readLine()
 
-    local url = "https://craftnanny.org/code/ping.php?token=" .. token .. "&id=" .. os.getComputerID()
+    local url = "https://craftnanny.org/api/ping.php?token=" .. token .. "&id=" .. os.getComputerID()
 
     if http.checkURL(url) then
         local response = http.get(url)
@@ -102,7 +102,7 @@ function ping_home()
 end
 
 function phone_home(tank_name, fluid_type, percent)
-    response = http.post("https://craftnanny.org/code/fluid.php",
+    response = http.post("https://craftnanny.org/api/fluid.php",
     			"token="..config.token.."&id="..os.getComputerID().."&tank_name="..tank_name.."&fluid_type="..fluid_type.."&percent="..percent)		
 	return_string = response.readAll()
 end

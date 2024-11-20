@@ -58,7 +58,7 @@ local function download_from_backend(module_name, destination)
 end
 
 local function phone_home(bat_name, energy_type, percent)
-    http.post("https://craftnanny.org/code/energy.php",
+    http.post("https://craftnanny.org/api/energy.php",
         "token=" .. config.token ..
         "&id=" .. os.getComputerID() ..
         "&bat_name=" .. bat_name ..
@@ -67,7 +67,7 @@ local function phone_home(bat_name, energy_type, percent)
 end
 
 local function ping_home()
-    local url = "https://craftnanny.org/code/ping.php?token=" .. config.token .. "&id=" .. os.getComputerID()
+    local url = "https://craftnanny.org/api/ping.php?token=" .. config.token .. "&id=" .. os.getComputerID()
     if http.checkURL(url) then
         local response = http.get(url)
         if response then

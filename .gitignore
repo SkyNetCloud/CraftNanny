@@ -2,6 +2,6 @@ phpmyadmin/
 Log/
 
 .settings/
-.vscode/
+.vsapi/
 
-code/connection.php
+api/connection.php

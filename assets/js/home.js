@@ -49,7 +49,7 @@ function getUser() {
 
     $.ajax({
         type: "POST",
-        url: "code/main.php",
+        url: "api/main.php",
         data: theParams,
         dataType: 'json',  // Expect JSON response
         async: false,
@@ -75,7 +75,7 @@ function loadEvents(template) {
 
     $.ajax({
         type: "POST",
-        url: "code/main.php",
+        url: "api/main.php",
         data: theParams,
         dataType: 'json',  // Expect JSON response
         async: false,
@@ -124,7 +124,7 @@ function removeEvent(event) {
 
         $.ajax({
             type: "POST",
-            url: "code/main.php",
+            url: "api/main.php",
             data: theParams,
             dataType: 'json',  // Expect JSON response
             async: false,
@@ -151,7 +151,7 @@ function getReactorModules(template) {
 
     $.ajax({
         type: "POST",
-        url: "code/main.php",
+        url: "api/main.php",
         data: theParams,
         dataType: 'json',  // Expect JSON response
         async: true,
@@ -197,7 +197,7 @@ function getRedstoneModules(template) {
 
     $.ajax({
         type: "POST",
-        url: "code/main.php",
+        url: "api/main.php",
         data: theParams,
         dataType: 'json',  // Expect JSON response
         async: true,
@@ -244,7 +244,7 @@ function getFluidModules(template) {
 
     $.ajax({
         type: "POST",
-        url: "code/main.php",
+        url: "api/main.php",
         data: theParams,
         dataType: 'json',  // Expect JSON response
         async: false,
@@ -283,7 +283,7 @@ function getEnergyModules(template) {
 
     $.ajax({
         type: "POST",
-        url: "code/main.php",
+        url: "api/main.php",
         data: theParams,
         dataType: 'json',  // Expect JSON response
         async: true,

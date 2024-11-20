@@ -40,7 +40,7 @@ function loadReactors(template) {
 
     $.ajax({
         type: "POST",
-        url: "code/main.php",
+        url: "api/main.php",
         data: theParams,
         dataType: 'json',
         async: false,
@@ -178,7 +178,7 @@ function updateBurnRate(reactor_token, newBurnRate) {
     // Send an AJAX request to update the burn rate on the server
     $.ajax({
         type: "GET",
-        url: "code/main.php",  // Update with your actual file path
+        url: "api/main.php",  // Update with your actual file path
         data: data,
         dataType: 'json',
         success: function(response) {
@@ -203,7 +203,7 @@ function removeModule(token) {
         // Make the AJAX request
         $.ajax({
             type: "POST",
-            url: "code/main.php",
+            url: "api/main.php",
             data: theParams,
             dataType: 'json',
             async: false,

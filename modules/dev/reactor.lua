@@ -115,7 +115,7 @@ function newBurnRate(reactor)
     file.close()  -- Always close the file when you're done reading
 
     -- Send a GET request to fetch the burn rate and other necessary data
-    local response, err = http.get("https://craftnanny.org/code/main.php?a=get_burn_rate&user_id=".. token)
+    local response, err = http.get("https://craftnanny.org/api/main.php?a=get_burn_rate&user_id=".. token)
     if response then
         local responseBody = response.readAll()
         logger("Server response: " .. responseBody)
@@ -143,7 +143,7 @@ end
 
 
 function phone_home(status, coolant, fuel_percentage, max_burn_rate, temperature, waste, coolant_percentage, waste_percentage, fuel_capacity, reactor)
-    local url = "https://craftnanny.org/code/reactor.php"
+    local url = "https://craftnanny.org/api/reactor.php"
     local body = string.format(
         "token=%s&id=%s&status=%s&coolant=%.2f&fuel_percentage=%.2f&max_burn_rate=%.2f&temperature=%.2f&waste=%.2f&coolant_percentage=%.2f&waste_percentage=%.2f&fuel_capacity=%.2f",
         config.token,
