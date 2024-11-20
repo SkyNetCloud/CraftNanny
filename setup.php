@@ -74,10 +74,6 @@
           <img src="assets/img/setup/complete.png" />
         </div>
       </div>
-
-
-
-
     </div>
   </div>
   <footer>
