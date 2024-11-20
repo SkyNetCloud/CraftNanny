@@ -1,9 +1,13 @@
+
+
+
 -- Define the module files
+
 local modules = {
-    "player.lua",
     "energy.lua",
     "fluid.lua",
-    "redstone.lua"
+    "redstone.lua",
+    "reactor.lua"
 }
 
 -- Function to check if any module file exists
@@ -30,6 +34,8 @@ local function runModule(module)
     elseif module == "redstone.lua" then
         -- Run redstone module code
         shell.run("redstone.lua")
+    elseif module == "reactor.lua" then
+        shell.run("reactor.lua")
     end
 end
 

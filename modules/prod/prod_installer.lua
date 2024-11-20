@@ -85,6 +85,8 @@ function install_module()
         pastebin = "fluid.lua"
     elseif type == '3' then
         pastebin = 'redstone.lua'
+    elseif type == '4' then
+        pastebin = 'reactor.lua'
     end
 
     term.clear()
@@ -130,6 +132,11 @@ function install_module()
 
 end
 
+function logger(message)
+    local file = fs.open("login.log", "a")
+    file.writeLine(os.date("%Y-%m-%d %H:%M:%S") .. " - " .. message)
+    file.close()
+end
 
 function urlencode(str)
     return (str:gsub("([^%w])", function(c)
@@ -153,18 +160,30 @@ function login()
     local queryData = string.format("user=%s&pass=%s&id=%s&name=%s&module_type=%s",
     user, urlencode(pass), os.getComputerID(), module_name, type)
 
-    login_response = http.get("https://craftnanny.org/code/signin.php?" .. queryData)
+    local login_response, err = http.get("https://craftnanny.org/code/signin.php?" .. queryData)
 
-    token = login_response.readAll()
-
-    if token == 'error' then
-        draw_text_term(1, 8, 'login failed', colors.red, colors.black)
+    if not login_response then
+        -- Log if the HTTP request failed
+        logger("Login HTTP request failed: " .. (err or "Unknown error"))
+        draw_text_term(1, 8, 'Login failed: HTTP error', colors.red, colors.black)
         sleep(2)
-        login()
-    else 
+        login()  -- Retry login
+        return
+    end
+
+    local token = login_response.readAll()
+
+    if not token or token == 'error: User not found' then
+        -- Log if token is nil or user not found
+        logger("Login failed for user '" .. user .. "'. Response: " .. (token or "nil"))
+        draw_text_term(1, 8, 'Login failed: User not found', colors.red, colors.black)
+        sleep(2)
+        login()  -- Retry login
+    else
+        -- Successful login
         username = user
-        save_config()
-        install_module()
+        save_config()  -- Save configuration
+        install_module()  -- Proceed with module installation
     end
 end
 
@@ -179,12 +198,6 @@ function name()
     login()
 end
 
-function player_tracker()
-    -- code to check that openperipheral sensor is present. give relevant error
-    type = '1'
-    name()
-end
-
 function choose_module(input) 
     if input == '1' then
         type = '1'
@@ -194,6 +207,9 @@ function choose_module(input)
         name()
     elseif input == '3' then
         type = '3'
+        name()
+    elseif input == '4' then
+        type = '4'
         name()
     end
 end
@@ -207,6 +223,7 @@ function install_select()
     draw_text_term(2, 8, '1. Energy Monitor', colors.white, colors.black)
     draw_text_term(2, 9, '2. Fluid Monitor', colors.white, colors.black)
     draw_text_term(2, 10,'3. Redstone Controller', colors.white, colors.black)
+    draw_text_term(2, 11,'4. Reactor Controller', colors.white, colors.black)
     draw_text_term(1, 13, 'Enter number:', colors.white, colors.black)
     term.setCursorPos(1,14)
     term.setTextColor(colors.white)
