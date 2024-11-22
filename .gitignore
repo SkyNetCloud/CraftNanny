@@ -1,10 +1,7 @@
 phpmyadmin/
 Log/
 
-.idea/*
-log/*
-tmp/*
-vendor/*
+vendor/
 
 .settings/
 .vsapi/
