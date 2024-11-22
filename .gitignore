@@ -5,8 +5,6 @@ Log/
 log/*
 tmp/*
 vendor/*
-vendor/cache/*
-vendor/plugins/*
 
 .settings/
 .vsapi/
