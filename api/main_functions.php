@@ -255,8 +255,6 @@ function getReactorStatus($dbConn, $user_id)
     return $reactors;
 }
 
-// Assuming you have included the database connection and other necessary setup
-
 function getBurnRate($dbConn, $user_id)
 {
     $response = array();
