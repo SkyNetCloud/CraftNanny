@@ -6,6 +6,13 @@ local type = ''
 local updating = false
 local user = ''
 
+
+function logger(message)
+    local file = fs.open("login.log", "a")
+    file.writeLine(os.date("%Y-%m-%d %H:%M:%S") .. " - " .. message)
+    file.close()
+end
+
 local function downloadFromBackEnd(module_name, destination)
     local url = string.format("https://craftnanny.org/modules/prod/%s", module_name)
     
@@ -78,9 +85,6 @@ function launch_module()
     shell.run("startup.lua")
 end
 
--- Function to download a file from the website using wget
-
-
 function install_module()
     if type == '1' then
         pastebin = "energy.lua"
@@ -94,25 +98,25 @@ function install_module()
 
     term.clear()
 	bars()
-	draw_text_term(1, 3, 'successfully logged in', colors.lime, colors.black)
+	draw_text_term(1, 3, 'Successfully logged in', colors.lime, colors.black)
 	sleep(0.5)
-	draw_text_term(1, 4, 'installing...', colors.white, colors.black)
+	draw_text_term(1, 4, 'Installing...', colors.white, colors.black)
 	sleep(0.5)
 	
-	draw_text_term(1, 5, 'removing old versions', colors.white, colors.black)
+	draw_text_term(1, 5, 'Removing old versions', colors.white, colors.black)
 	if fs.exists(pastebin) then
 	    fs.delete(pastebin)
 	end
 	sleep(0.5)
 	
-	draw_text_term(1, 6, 'fetching from CraftNanny website', colors.white, colors.black)
+	draw_text_term(1, 6, 'Fetching from CraftNanny website', colors.white, colors.black)
 	term.setCursorPos(1,7)
 	term.setTextColor(colors.white)
     downloadFromBackEnd(pastebin, pastebin)
     
     sleep(0.5)
   
-    draw_text_term(1, 9, 'create startup file', colors.white, colors.black)
+    draw_text_term(1, 9, 'Create startup file', colors.white, colors.black)
 	term.setCursorPos(1,10)
 	term.setTextColor(colors.white)
     if fs.exists("startup") then
@@ -123,7 +127,7 @@ function install_module()
   
     draw_text_term(1, 13, 'Setup Complete', colors.lime, colors.black)
 
-    draw_text_term(1, 14, 'press enter to continue', colors.lightGray, colors.black)
+    draw_text_term(1, 14, 'Press Enter to Continue', colors.lightGray, colors.black)
 
     if updating then
 
@@ -135,11 +139,7 @@ function install_module()
 
 end
 
-function logger(message)
-    local file = fs.open("login.log", "a")
-    file.writeLine(os.date("%Y-%m-%d %H:%M:%S") .. " - " .. message)
-    file.close()
-end
+
 
 function urlencode(str)
     return (str:gsub("([^%w])", function(c)
