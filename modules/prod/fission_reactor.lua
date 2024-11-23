@@ -142,21 +142,37 @@ function newBurnRate(reactor)
 end
 
 
-function phone_home(status, coolant, fuel_percentage, max_burn_rate, temperature, waste, coolant_percentage, waste_percentage, fuel_capacity, reactor)
-    local url = "https://craftnanny.org/api/reactor.php"
+function phone_home(status,coolant,coolant_percentage,coolant_capacity,coolant_needed,coolant_heated,coolant_heated_capacity,coolant_heated_needed,fuel,fuel_capacity,fuel_needed,fuel_percentage,waste,waste_capacity,waste_needed,waste_percentage,status,max_burn_rate,reactor_damage_precentage,heat_rate,environmental_loss,temperature,heat_capacity,fuel_assmblies,fuel_surface_area, reactor)
+    local url = "https://craftnanny.org/api/fission_reactor.php"
     local body = string.format(
-        "token=%s&id=%s&status=%s&coolant=%.2f&fuel_percentage=%.2f&max_burn_rate=%.2f&temperature=%.2f&waste=%.2f&coolant_percentage=%.2f&waste_percentage=%.2f&fuel_capacity=%.2f",
+        "token=%s&id=%s&status=%s&coolant=%s&coolant_percentage=%s&coolant_capacity=%s&coolant_needed=%s&coolant_heated=%s&coolant_heated_percentage=%s&coolant_heated_capacity=%s&coolant_heated_needed=%s&fuel=%s&fuel_capacity=%s&fuel_needed=%s&fuel_percentage=%s&waste=%s&waste_capacity=%s&waste_needed=%s&waste_percentage=%s&status=%s&max_burn_rate=%s&reactor_damage_precentage=%s&heat_rate=%s&environmental_loss=%s&temperature=%s&heat_capacity=%s&fuel_assmblies=%s&fuel_surface_area=%s",
         config.token,
         os.getComputerID(),
-        status,
         coolant,
-        fuel_percentage,
-        max_burn_rate,
-        temperature,
-        waste,
         coolant_percentage,
+        coolant_capacity,
+        coolant_needed,
+        coolant_heated,
+        coolant_heated_percentage,
+        coolant_heated_capacity,
+        coolant_heated_needed,
+        fuel,
+        fuel_capacity,
+        fuel_needed,
+        fuel_percentage,
+        waste,
+        waste_capacity,
+        waste_needed,
         waste_percentage,
-        fuel_capacity
+        status,
+        max_burn_rate,
+        reactor_damage_precentage,
+        heat_rate,
+        environmental_loss,
+        temperature,
+        heat_capacity,
+        fuel_assmblies,
+        fuel_surface_area
     )
 
     local response, err = http.post(url, body)
@@ -177,47 +193,55 @@ function find_side()
     return nil
 end
 
-function getReactorData(side)
-    local reactor = peripheral.wrap(side)
-    if not reactor then
-        print("No reactor found on side " .. side)
-        return nil, nil
+-- function getReactorData(side)
+--     local reactor = peripheral.wrap(side)
+--     if not reactor then
+--         print("No reactor found on side " .. side)
+--         return nil, nil
+--     end
+
+--     local success, result
+--     local data = {}
+
+--     success, result = pcall(reactor.getStatus)
+--     data.StatusDisplay = result and "Active" or "Deactive"
+
+--     success, result = pcall(reactor.getBurnRate)
+--     data["Burn Rate"] = success and result or 0
+
+--     success, result = pcall(reactor.getCoolant)
+--     data["Coolant"] = success and result.amount or 0
+
+--     success, result = pcall(reactor.getFuelFilledPercentage)
+--     data["Fuel Percentage"] = success and result or 0
+
+--     success, result = pcall(reactor.getMaxBurnRate)
+--     data["Max Burn Rate"] = success and result or 0
+
+--     success, result = pcall(reactor.getTemperature)
+--     data["Temperature"] = success and result or 0
+
+--     success, result = pcall(reactor.getWaste)
+--     data["Waste"] = success and result and result.amount or 0
+
+--     success, result = pcall(reactor.getCoolantFilledPercentage)
+--     data["Coolant Percentage"] = success and result or 0
+
+--     success, result = pcall(reactor.getWasteFilledPercentage)
+--     data["Waste Percentage"] = success and result or 0
+
+--     success, result = pcall(reactor.getFuelCapacity)
+--     data["Fuel Capacity"] = success and result or 0
+
+--     return data, reactor
+-- end
+
+function safeCall(method, default, transform)
+    local success, result = pcall(method)
+    if success then
+        return transform and transform(result) or result
     end
-
-    local success, result
-    local data = {}
-
-    success, result = pcall(reactor.getStatus)
-    data.StatusDisplay = result and "Active" or "Deactive"
-
-    success, result = pcall(reactor.getBurnRate)
-    data["Burn Rate"] = success and result or 0
-
-    success, result = pcall(reactor.getCoolant)
-    data["Coolant"] = success and result.amount or 0
-
-    success, result = pcall(reactor.getFuelFilledPercentage)
-    data["Fuel Percentage"] = success and result or 0
-
-    success, result = pcall(reactor.getMaxBurnRate)
-    data["Max Burn Rate"] = success and result or 0
-
-    success, result = pcall(reactor.getTemperature)
-    data["Temperature"] = success and result or 0
-
-    success, result = pcall(reactor.getWaste)
-    data["Waste"] = success and result and result.amount or 0
-
-    success, result = pcall(reactor.getCoolantFilledPercentage)
-    data["Coolant Percentage"] = success and result or 0
-
-    success, result = pcall(reactor.getWasteFilledPercentage)
-    data["Waste Percentage"] = success and result or 0
-
-    success, result = pcall(reactor.getFuelCapacity)
-    data["Fuel Capacity"] = success and result or 0
-
-    return data, reactor
+    return default
 end
 
 function checkFailsafe(data, reactor)
@@ -264,15 +288,31 @@ function start_loop()
 
         -- Send data to the backend
         phone_home(
-            data.StatusDisplay,
-            data["Coolant"],
-            data["Fuel Percentage"],
-            data["Max Burn Rate"],
-            data["Temperature"],
-            data["Waste"],
-            data["Coolant Percentage"],
-            data["Waste Percentage"],
-            data["Fuel Capacity"]
+            data["StatusDisplay"] or "",
+            data["Coolant"] or 0,
+            data["Coolant Percentage"] or 0,
+            data["Coolant Capacity"] or 0,
+            data["Coolant Needed"] or 0,
+            data["Coolant Heated"] or 0,
+            data["Coolant Heated Percentage"] or 0,
+            data["Coolant Heated Capacity"] or 0,
+            data["Coolant Heated Needed"] or 0,
+            data["Fuel"] or 0,
+            data["Fuel Capacity"] or 0,
+            data["Fuel Needed"] or 0,
+            data["Fuel Percentage"] or 0,
+            data["Waste"] or 0,
+            data["Waste Capacity"] or 0,
+            data["Waste Needed"] or 0,
+            data["Waste Percentage"] or 0,
+            data["Max Burn Rate"] or 0,
+            data["Reactor Damage Percentage"] or 0,
+            data["Heat Rate"] or 0,
+            data["Environmental Loss"] or 0,
+            data["Temperature"] or 0,
+            data["Heat Capacity"] or 0,
+            data["Fuel Assemblies"] or 0,
+            data["Fuel Surface Area"] or 0
         )
         newBurnRate(reactor)
 

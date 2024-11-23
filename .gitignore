@@ -3,6 +3,8 @@ Log/
 
 vendor/
 
+modules/old_prod
+
 .settings/
 .vsapi/
 

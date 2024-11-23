@@ -14,7 +14,7 @@ function logger(message)
 end
 
 local function downloadFromBackEnd(module_name, destination)
-    local url = string.format("https://craftnanny.org/modules/prod/%s", module_name)
+    local url = string.format("https://craftnanny.org/modules/dev/%s", module_name)
     
     -- Make the request to GitHub
     local site, err = http.get(url)
@@ -85,6 +85,9 @@ function launch_module()
     shell.run("startup.lua")
 end
 
+-- Function to download a file from the website using wget
+
+
 function install_module()
     if type == '1' then
         pastebin = "energy.lua"
@@ -93,7 +96,7 @@ function install_module()
     elseif type == '3' then
         pastebin = 'redstone.lua'
     elseif type == '4' then
-        pastebin = 'reactor.lua'
+        pastebin = 'fission_reactor.lua'
     end
 
     term.clear()
@@ -139,8 +142,6 @@ function install_module()
 
 end
 
-
-
 function urlencode(str)
     return (str:gsub("([^%w])", function(c)
         return string.format("%%%02X", string.byte(c))
@@ -164,9 +165,9 @@ function login()
     user, urlencode(pass), os.getComputerID(), module_name, type)
 
     local login_response, err = http.get("https://craftnanny.org/api/signin.php?" .. queryData)
-    
 
     if not login_response then
+        -- Log if the HTTP request failed
         logger("Login HTTP request failed: " .. (err or "Unknown error"))
         draw_text_term(1, 8, 'Login failed: HTTP error', colors.red, colors.black)
         sleep(2)
@@ -174,20 +175,21 @@ function login()
         return
     end
 
-    token = login_response.readAll()
+    local token = login_response.readAll()
 
     if not token or token == 'error: User not found' then
+        -- Log if token is nil or user not found
         logger("Login failed for user '" .. user .. "'. Response: " .. (token or "nil"))
         draw_text_term(1, 8, 'Login failed: User not found', colors.red, colors.black)
         sleep(2)
         login()  -- Retry login
     else
+        -- Successful login
         username = user
         save_config()  -- Save configuration
         install_module()  -- Proceed with module installation
     end
 end
-
 
 function name()
     term.clear()
