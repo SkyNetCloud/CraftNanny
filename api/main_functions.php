@@ -213,13 +213,17 @@ function getReactorStatus($dbConn, $user_id)
 
     // Query to get reactor status data using a JOIN to optimize performance
     $query = "
-        SELECT t.computer_name, t.token, t.last_seen, rd.burn_rate, rd.coolant, rd.fuel_percentage, 
-               rd.reactor_status, rd.max_burn_rate, rd.temperature, rd.waste, rd.coolant_percentage, 
-               rd.waste_percentage, rd.fuel_capacity
-        FROM tokens t
-        LEFT JOIN reactor_controls rd ON t.token = rd.token
-        WHERE t.user_id = ? AND t.module_type = '4'
-    ";
+    SELECT t.computer_name, t.token, t.last_seen, rd.burn_rate, rd.coolant, rd.coolant_percentage, 
+           rd.coolant_capacity, rd.coolant_needed, rd.coolant_heated, rd.coolant_heated_percentage, 
+           rd.coolant_heated_capacity, rd.coolant_heated_needed, rd.fuel, rd.fuel_percentage, 
+           rd.fuel_capacity, rd.fuel_needed, rd.waste, rd.waste_percentage, rd.waste_capacity, 
+           rd.waste_needed, rd.status, rd.max_burn_rate, rd.reactor_damage_percentage, 
+           rd.heat_rate, rd.environmental_loss, rd.temperature, rd.heat_capacity, rd.fuel_assemblies, 
+           rd.fuel_surface_area
+    FROM tokens t
+    LEFT JOIN reactor_controls rd ON t.token = rd.token
+    WHERE t.user_id = ? AND t.module_type = '4'
+";
 
     $stmt = mysqli_prepare($dbConn, $query);
     mysqli_stmt_bind_param($stmt, "s", $user_id);
@@ -235,14 +239,30 @@ function getReactorStatus($dbConn, $user_id)
             'active' => (time() - strtotime($row['last_seen']) <= 100) ? true : false,
             'burn_rate' => $row['burn_rate'] ?? null,
             'coolant' => $row['coolant'] ?? null,
+            'coolant_percentage' => $row['coolant_percentage'] ?? null,
+            'coolant_capacity' => $row['coolant_capacity'] ?? null,
+            'coolant_needed' => $row['coolant_needed'] ?? null,
+            'coolant_heated' => $row['coolant_heated'] ?? null,
+            'coolant_heated_percentage' => $row['coolant_heated_percentage'] ?? null,
+            'coolant_heated_capacity' => $row['coolant_heated_capacity'] ?? null,
+            'coolant_heated_needed' => $row['coolant_heated_needed'] ?? null,
+            'fuel' => $row['fuel'] ?? null,
             'fuel_percentage' => $row['fuel_percentage'] ?? null,
+            'fuel_capacity' => $row['fuel_capacity'] ?? null,
+            'fuel_needed' => $row['fuel_needed'] ?? null,
+            'waste' => $row['waste'] ?? null,
+            'waste_percentage' => $row['waste_percentage'] ?? null,
+            'waste_capacity' => $row['waste_capacity'] ?? null,
+            'waste_needed' => $row['waste_needed'] ?? null,
             'status' => $row['status'] ?? null,
             'max_burn_rate' => $row['max_burn_rate'] ?? null,
+            'reactor_damage_percentage' => $row['reactor_damage_percentage'] ?? null,
+            'heat_rate' => $row['heat_rate'] ?? null,
+            'environmental_loss' => $row['environmental_loss'] ?? null,
             'temperature' => $row['temperature'] ?? null,
-            'waste' => $row['waste'] ?? null,
-            'coolant_percentage' => $row['coolant_percentage'] ?? null,
-            'waste_percentage' => $row['waste_percentage'] ?? null,
-            'fuel_capacity' => $row['fuel_capacity'] ?? null
+            'heat_capacity' => $row['heat_capacity'] ?? null,
+            'fuel_assemblies' => $row['fuel_assemblies'] ?? null,
+            'fuel_surface_area' => $row['fuel_surface_area'] ?? null
         );
 
         $reactors[] = $reactor;

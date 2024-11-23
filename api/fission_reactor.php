@@ -23,9 +23,9 @@ $coolant_heated_capacity = isset($_POST['coolant_heated_capacity']);
 $coolant_heated_needed = isset($_POST['coolant_heated_needed']);
 
 
-$fuel = isset($_POST['fuel']) ? floatval($_POST['fuel']) : 0.0;
-$fuel_capacity = isset($_POST['fuel_capacity']) ? floatval($_POST['fuel_capacity']) : 0.0;
-$fuel_needed = isset($_POST['fuel_needed']) ? floatval($_POST['fuel_needed']) : 0.0;
+$fuel = isset($_POST['fuel']);
+$fuel_capacity = isset($_POST['fuel_capacity']);
+$fuel_needed = isset($_POST['fuel_needed']);
 $fuel_percentage = isset($_POST['fuel_percentage']) ? floatval($_POST['fuel_percentage']) : 0.0;
 
 $waste = isset($_POST['waste']) ? floatval($_POST['waste']) : 0.0;
@@ -73,7 +73,7 @@ if (!mysqli_stmt_execute($stmt)) {
 if (mysqli_stmt_affected_rows($stmt) > 0) {
     // Update reactor data if token update is successful
     $query2 = "
-        UPDATE reactor_controls
+        UPDATE fission_reactor_controls
         SET coolant = ?,
             coolant_percentage = ?,
             coolant_capacity = ?,
